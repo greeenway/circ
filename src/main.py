@@ -3,13 +3,26 @@
 
 import wx
  
-class TestFrame(wx.Frame):
+class MainWindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title)
-        text = wx.StaticText(self, label="Hello, World!")
+        self.CreateStatusBar()
+        
+        filemenu = wx.Menu()
+        
+        filemenu.Append(wx.ID_ABOUT, "&About", "Some Information.")
+        filemenu.AppendSeparator()
+        filemenu.Append(wx.ID_EXIT, "E&xit", "Terminate the program")
+        
+        menubar = wx.MenuBar()
+        menubar.Append(filemenu, "&File")
+        self.SetMenuBar(menubar)
+        self.Show(True)
+        
+        
  
-app = wx.App(redirect=False)
-frame = TestFrame(None, "Hello, world!")
+app = wx.App(False)
+frame = MainWindow(None, "circ")
 frame.Show()
 app.MainLoop()
 
