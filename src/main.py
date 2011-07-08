@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-# a hello world example from wikipedia.org
+# circ - a gui for generating LaTeX code 
+# main.py - executable file of the project
+# 
 
 import wx
 
@@ -61,7 +63,7 @@ class DrawPanel(wx.Window):
         
         
 
-class MainWindow(wx.Frame):
+class Mainwindow(wx.Frame):
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(600,400))
         self.CreateStatusBar()
@@ -98,7 +100,7 @@ class MainWindow(wx.Frame):
         
  
 app = wx.App(False)
-frame = MainWindow(None, "CIRC")
+frame = Mainwindow(None, "CIRC")
 frame.Show()
 app.MainLoop()
 
