@@ -1,0 +1,2167 @@
+% circdia.sty
+% from http://www.jokr.de/stefan/
+% File created by Stefan Krause -- version 3.2.
+% Draws circuit diagrams.
+% Package options:
+%  normalinduc
+%  curlyinduc
+%  filledinduc
+%  lineddiode
+%  emptydiode
+%  filleddiode
+%  nocircledtrans
+%  circledtrans
+%  autoref
+%  ics
+% You may access
+%  \begin{circuitdiagram}[]{}{}
+%   \wire[]{}{}{}{}
+%   \junct{}{}
+%   \pin[]{}{}{}{}
+%   \ground[]{}{}
+%   \power[]{}{}{}{}
+%   \currarrow[]{}{}{}{}
+%   \Voltarrow[]{}{}{}{}{}{}
+%   \voltsrc[]{}{}{}{}{}
+%   \currsrc[]{}{}{}{}{}
+%   \resis[]{}{}{}{}{}
+%   \capac[]{}{}{}{}{}
+%   \induc[]{}{}{}{}{}
+%   \Ironcore{}{}{}{}
+%   \diode[]{}{}{}{}{}
+%   \trans[]{}{}{}{}{}{}
+%   \opamp[]{}{}{}{}{}
+%   \gate[]{}{}{}{}{}{}
+%   \flipflop[]{}{}{}{}{}{}
+%   \wireL{}
+%   \wireR{}
+%   \wireLR{}
+%   \wireU{}
+%   \wireD{}
+%   \wireUD{}
+%   \modify{}
+%   \trim{}
+%   \emit{}
+%   \photo{}
+%   \zener{}
+%   \tunnel
+%   \capdio
+%   \elko{}
+%   \ironcore
+%   \windings{}
+%   \supply{}
+%   \inputs{}
+%   \schmitt
+%   \putrefer{}{}{}
+%   \putvalue{}{}{}
+%   \putrefervalue{}{}{}
+%   \moverefer{}{}
+%   \movevalue{}{}
+%   \moverefervalue{}{}
+%   \voltarrow{}{}
+%  \end{circuitdiagram}
+%  \normalinduc
+%  \curlyinduc
+%  \filledinduc
+%  \lineddiode
+%  \emptydiode
+%  \filleddiode
+%  \circledtrans
+%  \nocircledtrans
+%  \negbar
+% and redefine
+%  \cdrefervaluesep
+%  cdnormalcolor
+%  cdfillcolor
+%  cdgridcolor
+% from this document.
+% You may access
+%  \cdlabel{}
+% and redefine
+%  \autorefsymbol
+%  \cdresisname
+%  \cdcapacname
+%  \cdinducname
+%  \cddiodename
+%  \cdtransname
+%  \cdicname
+% from cd-autoref.sty.
+% You may access
+%  \ttlic[]{}{}{}{}{}{}
+% from cd-ics.sty.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{circdia}[2011/02/05]
+\RequirePackage{amsmath,color,curves,ifthen,rotating}
+\RequirePackage[nomessages]{fp}
+% Options
+\newif\ifcurlyinduc
+\newif\iffilledinduc
+\newif\ifemptydiode
+\newif\iffilleddiode
+\newif\ifcircledtrans
+\newcommand{\normalinduc}{\curlyinducfalse\filledinducfalse}
+\newcommand{\curlyinduc}{\curlyinductrue\filledinducfalse}
+\newcommand{\filledinduc}{\curlyinducfalse\filledinductrue}
+\newcommand{\lineddiode}{\emptydiodefalse\filleddiodefalse}
+\newcommand{\emptydiode}{\emptydiodetrue\filleddiodefalse}
+\newcommand{\filleddiode}{\emptydiodefalse\filleddiodetrue}
+\newcommand{\nocircledtrans}{\circledtransfalse}
+\newcommand{\circledtrans}{\circledtranstrue}
+\DeclareOption{normalinduc}{\normalinduc}
+\DeclareOption{curlyinduc}{\curlyinduc}
+\DeclareOption{filledinduc}{\filledinduc}
+\DeclareOption{lineddiode}{\lineddiode}
+\DeclareOption{emptydiode}{\emptydiode}
+\DeclareOption{filleddiode}{\filleddiode}
+\DeclareOption{nocircledtrans}{\nocircledtrans}
+\DeclareOption{circledtrans}{\circledtrans}
+\newif\ifautoref
+\newif\ifics
+\DeclareOption{autoref}{\autoreftrue}
+\DeclareOption{ics}{\icstrue}
+\ExecuteOptions{normalinduc,lineddiode,nocircledtrans}
+\ProcessOptions
+% Additional packages
+\newcommand{\formatautoref}[1]{#1}
+\ifautoref\usepackage{cd-autoref}\fi
+\ifics\usepackage{cd-ics}\fi
+% Global commands, etc.
+\newcommand{\negbar}[1]{\hspace*{0.06em}%
+ $\overline{\text{\vphantom{\raisebox{-0.15ex}{#1}}\smash{\hspace*{-0.06em}#1\hspace*{-0.06em}}}}$%
+ \hspace*{0.06em}}
+\newcommand{\cdrefervaluesep}{~~}
+\definecolor{cdnormalcolor}{gray}{0}
+\definecolor{cdfillcolor}{gray}{0.05}
+\definecolor{cdgridcolor}{gray}{0.667}
+\newcounter{cdcounter}
+% Main environment
+\newenvironment{circuitdiagram}[3][]{%
+ % Low-level commands
+ \newcommand{\cdpart}{}\newcommand{\cdsubpart}{}%
+ \newcommand{\cdorient}{}\newcommand{\cdsuborient}{}%
+ \newcommand{\cdcommand}{}%
+ \providecommand{\clap}[1]{\makebox[0mm][c]{##1}}%
+ \newcommand{\puttext}[4]{\put(##1,##2){\put(0,-0.49){%
+  \ifthenelse{\equal{##3}{r}}{\llap{##4}}{}%
+  \ifthenelse{\equal{##3}{c}}{\clap{##4}}{}%
+  \ifthenelse{\equal{##3}{l}}{##4}{}%
+ }}}%
+ \newcommand{\cdthinlines}{\linethickness{0.5pt}}%
+ \newcommand{\cdmedlines}{\linethickness{0.7pt}}%
+ \newcommand{\cdthicklines}{\linethickness{2pt}}%
+ \newcommand{\rectangle}[4]{%
+  \curve(##1,##2, ##3,##2)\curve(##3,##2, ##3,##4)%
+  \curve(##1,##2, ##1,##4)\curve(##1,##4, ##3,##4)%
+ }%
+ \newcommand{\fillrectangle}[4]{%
+  \textcolor{cdfillcolor}{\polygon*(##1,##2)(##3,##2)(##3,##4)(##1,##4)}%
+  \rectangle{##1}{##2}{##3}{##4}%
+ }%
+ % Initialization
+ \setlength{\unitlength}{1.26768ex}%
+ \begin{picture}(#2,#3)%
+ \color{cdnormalcolor}%
+ \cdthinlines%
+ % Usable wire commands
+ \newcommand{\wire}[5][]{%
+  \ifthenelse{\equal{##1}{}}{\curve(##2,##3, ##4,##5)}{}%
+  \ifthenelse{\equal{##1}{H}}{\curve(##2,##3, ##4,##3)\curve(##4,##3, ##4,##5)}{}%
+  \ifthenelse{\equal{##1}{V}}{\curve(##2,##3, ##2,##5)\curve(##2,##5, ##4,##5)}{}%
+ }%
+ \newcommand{\junct}[2]{%
+  \cdthicklines\put(##1,##2){\bigcircle{0.25}}\cdthinlines%
+ }%
+ \newcommand{\pin}[5][]{%
+  \renewcommand{\cdpart}{P}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{##5}{}%
+   \ifthenelse{\equal{\cdorient}{L}\or\equal{\cdorient}{R}\or\equal{\cdorient}{LR}}{\pinH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{U}\or\equal{\cdorient}{D}\or\equal{\cdorient}{UD}}{\pinV{##1}}{}%
+  }%
+ }%
+ \newcommand{\ground}[4][]{%
+  \renewcommand{\cdpart}{P}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{}{}%
+   \ifthenelse{\equal{\cdorient}{L}\or\equal{\cdorient}{R}}{\groundH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{U}\or\equal{\cdorient}{D}}{\groundV{##1}}{}%
+  }%
+ }%
+ \newcommand{\power}[5][]{%
+  \renewcommand{\cdpart}{P}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{}{##5}%
+   \ifthenelse{\equal{\cdorient}{L}\or\equal{\cdorient}{R}}{\powerH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{U}\or\equal{\cdorient}{D}}{\powerV{##1}}{}%
+  }%
+ }%
+ \newcommand{\currarrow}[5][]{%
+  \renewcommand{\cdpart}{CA}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{}{##5}%
+   \ifthenelse{\equal{\cdorient}{L}\or\equal{\cdorient}{R}}{\currarrowH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{U}\or\equal{\cdorient}{D}}{\currarrowV{##1}}{}%
+  }%
+ }%
+ \newcommand{\Voltarrow}[7][]{%
+  \renewcommand{\cdpart}{VA}\renewcommand{\cdsubpart}{}%
+  \FPadd\cdfloat{##4}{##2}\FPdiv\cdfloat\cdfloat2\edef\cdreferx{\FPprint\cdfloat}%
+  \FPadd\cdfloat{##5}{##3}\FPdiv\cdfloat\cdfloat2\edef\cdrefery{\FPprint\cdfloat}%
+  \put(\cdreferx,\cdrefery){%
+   \FPsub\cdfloat{##4}{##2}\FPdiv\cdfloat\cdfloat2\FPmul\cdfloat\cdfloat\cdfloat\edef\cdreferx{\FPprint\cdfloat}%
+   \FPsub\cdfloat{##5}{##3}\FPdiv\cdfloat\cdfloat2\FPmul\cdfloat\cdfloat\cdfloat\FPadd\cdfloat\cdfloat\cdreferx%
+   \FProot\cdfloat\cdfloat2\FPdiv\cdfloat{0.9}\cdfloat\FPsub\cdfloat1\cdfloat\edef\cdrefery{\FPprint\cdfloat}%
+   \FPsub\cdfloat{##4}{##2}\FPdiv\cdfloat\cdfloat2\FPmul\cdfloat\cdfloat\cdrefery\edef\cdreferx{\FPprint\cdfloat}%
+   \FPsub\cdfloat{##5}{##3}\FPdiv\cdfloat\cdfloat2\FPmul\cdfloat\cdfloat\cdrefery\edef\cdrefery{\FPprint\cdfloat}%
+   \curve(-\cdreferx,-\cdrefery, \cdreferx,\cdrefery)%
+   \FPround\cdfloat\cdreferx6\FPifeq\cdfloat0%
+    \FPabs\cdfloat\cdrefery\FPdiv\cdfloat\cdfloat\cdrefery\FPmul\cdfloat\cdfloat{90}%
+   \else%
+    \FPdiv\cdfloat\cdrefery\cdreferx\FParctan\cdfloat\cdfloat\FPmul\cdfloat\cdfloat{180}\FPdiv\cdfloat\cdfloat\FPpi%
+   \fi%
+   \edef\cdorient{\FPprint\cdfloat}%
+   \FPround\cdfloat\cdreferx6\FPiflt\cdfloat0\FPadd\cdfloat\cdorient{180}\edef\cdorient{\FPprint\cdfloat}\else\fi%
+   \cdbigarrow{\cdreferx}{\cdrefery}{\cdorient}%
+   \ifthenelse{\equal{##6}{l}\or\equal{##6}{r}}{%
+    \setorientrefervalue{V##6}{}{##7}%
+    \posrefervalueV{-0.75}{0}{0.75}{0}{0}{0}%
+   }{%
+    \setorientrefervalue{H##6}{}{##7}%
+    \posrefervalueH{0}{0}{0}{-1.5}{0}{1.5}%
+   }%
+   ##1%
+   \drawrefervalue%
+  }%
+ }%
+ % Usable part commands
+ \newcommand{\voltsrc}[6][]{%
+  \renewcommand{\cdpart}{UI}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{##5}{##6}%
+   \ifthenelse{\equal{\cdorient}{H}}{\voltsrcH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{V}}{\voltsrcV{##1}}{}%
+  }%
+ }%
+ \newcommand{\currsrc}[6][]{%
+  \renewcommand{\cdpart}{UI}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{##5}{##6}%
+   \ifthenelse{\equal{\cdorient}{H}}{\currsrcH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{V}}{\currsrcV{##1}}{}%
+  }%
+ }%
+ \newcommand{\resis}[6][]{%
+  \renewcommand{\cdpart}{R}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{##5}{##6}%
+   \ifthenelse{\equal{\cdorient}{H}}{\resisH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{V}}{\resisV{##1}}{}%
+  }%
+ }%
+ \newcommand{\capac}[6][]{%
+  \renewcommand{\cdpart}{C}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{##5}{##6}%
+   \ifthenelse{\equal{\cdorient}{H}}{\capacH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{V}}{\capacV{##1}}{}%
+  }%
+ }%
+ \newcommand{\induc}[6][]{%
+  \renewcommand{\cdpart}{L}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{##5}{##6}%
+   \ifthenelse{\equal{\cdorient}{H}}{\inducH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{V}}{\inducV{##1}}{}%
+  }%
+ }%
+ \newcommand{\Ironcore}[4]{%
+  \FPmul\cdfloat{0.75}{##4}%
+  \put(##1,##2){%
+   \ifthenelse{\equal{##3}{H}}{%
+    \curve(-\FPprint\cdfloat,-0.22, \FPprint\cdfloat,-0.22)%
+    \curve(-\FPprint\cdfloat,0.22, \FPprint\cdfloat,0.22)%
+   }{%
+    \curve(-0.22,-\FPprint\cdfloat, -0.22,\FPprint\cdfloat)%
+    \curve(0.22,-\FPprint\cdfloat, 0.22,\FPprint\cdfloat)%
+   }%
+  }%
+ }%
+ \newcommand{\diode}[6][]{%
+  \renewcommand{\cdpart}{D}\renewcommand{\cdsubpart}{}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{##5}{##6}%
+   \ifthenelse{\equal{\cdorient}{L}\or\equal{\cdorient}{R}}{\diodeH{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{U}\or\equal{\cdorient}{D}}{\diodeV{##1}}{}%
+  }%
+ }%
+ \newcommand{\trans}[7][]{%
+  \renewcommand{\cdpart}{T}\renewcommand{\cdsubpart}{##2}%
+  \put(##3,##4){%
+   \setorientrefervalue{##5}{##6}{##7}%
+   \ifthenelse{\equal{\cdorient}{L}}{\transL{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{R}}{\transR{##1}}{}%
+  }%
+ }%
+ \newcommand{\opamp}[6][]{%
+  \renewcommand{\cdpart}{IC}\renewcommand{\cdsubpart}{op}%
+  \put(##2,##3){%
+   \setorientrefervalue{##4}{##5}{##6}%
+   \ifthenelse{\equal{\cdorient}{L}}{\opampL{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{R}}{\opampR{##1}}{}%
+  }%
+ }%
+ \newcommand{\gate}[7][]{%
+  \renewcommand{\cdpart}{IC}\renewcommand{\cdsubpart}{##2}%
+  \put(##3,##4){%
+   \setorientrefervalue{##5}{##6}{##7}%
+   \ifthenelse{\equal{\cdorient}{L}}{\gateL{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{R}}{\gateR{##1}}{}%
+  }%
+ }%
+ \newcommand{\flipflop}[7][]{%
+  \renewcommand{\cdpart}{IC}\renewcommand{\cdsubpart}{##2}%
+  \put(##3,##4){%
+   \setorientrefervalue{##5}{##6}{##7}%
+   \ifthenelse{\equal{\cdorient}{L}}{\flipflopL{##1}}{}%
+   \ifthenelse{\equal{\cdorient}{R}}{\flipflopR{##1}}{}%
+  }%
+ }%
+ % Optional argument
+ \ifthenelse{\equal{#1}{draft}}{%
+  \color{cdgridcolor}%
+  \setcounter{cdcounter}{0}%
+  \whiledo{\value{cdcounter}<#2}{%
+   \curve(\value{cdcounter},0, \value{cdcounter},#3)%
+   \puttext{\value{cdcounter}}{-1}{c}{\thecdcounter}%
+   \addtocounter{cdcounter}{5}%
+  }%
+  \curve(#2,0, #2,#3)%
+  \puttext{#2}{-1}{c}{#2}%
+  \setcounter{cdcounter}{0}%
+  \whiledo{\value{cdcounter}<#3}{%
+   \curve(0,\value{cdcounter}, #2,\value{cdcounter})%
+   \puttext{-0.2}{\value{cdcounter}}{r}{\thecdcounter}%
+   \addtocounter{cdcounter}{5}%
+  }%
+  \curve(0,#3, #2,#3)%
+  \puttext{-0.2}{#3}{r}{#3}%
+  \color{cdnormalcolor}%
+ }{}%
+ \ifthenelse{\equal{#1}{draft*}}{%
+  \color{cdgridcolor}%
+  \setcounter{cdcounter}{0}%
+  \whiledo{\value{cdcounter}<#2}{%
+   \curve(\value{cdcounter},0, \value{cdcounter},#3)%
+   \stepcounter{cdcounter}%
+  }%
+  \curve(#2,0, #2,#3)%
+  \setcounter{cdcounter}{0}%
+  \whiledo{\value{cdcounter}<#3}{%
+   \curve(0,\value{cdcounter}, #2,\value{cdcounter})%
+   \stepcounter{cdcounter}%
+  }%
+  \curve(0,#3, #2,#3)%
+  \color{cdnormalcolor}%
+ }{}%
+ % Reference and value placement
+ \newcommand{\cdrefervalueformat}{}\newcommand{\cdrefervalueone}{}%
+ \newcommand{\cdrefer}{}\newcommand{\cdreferalign}{}%
+ \newcommand{\cdreferx}{}\newcommand{\cdrefery}{}%
+ \newcommand{\cdvalue}{}\newcommand{\cdvaluealign}{}%
+ \newcommand{\cdvaluex}{}\newcommand{\cdvaluey}{}%
+ \newcommand{\cdrefervalue}{}\newcommand{\cdrefervaluealign}{}%
+ \newcommand{\cdrefervaluex}{}\newcommand{\cdrefervaluey}{}%
+ \newcommand{\setorientrefervalue}[3]{%
+  \renewcommand{\cdcommand}{}\renewcommand{\cdrefer}{##2}\renewcommand{\cdvalue}{##3}%
+  \ifthenelse{\equal{\cdrefer}{}}{%
+   \ifthenelse{\equal{\cdvalue}{}}{\renewcommand{\cdrefervalue}{}}{\renewcommand{\cdrefervalue}{\cdvalue}}%
+  }{%
+   \ifthenelse{\equal{\cdvalue}{}}{%
+    \renewcommand{\cdrefervalue}{\formatautoref{\cdrefer}}%
+   }{%
+    \renewcommand{\cdrefervalue}{\formatautoref{\cdrefer}\cdrefervaluesep\cdvalue}%
+   }%
+  }%
+  \renewcommand{\cdorient}{}\renewcommand{\cdsuborient}{}\renewcommand{\cdrefervalueformat}{}%
+  \ifthenelse{\equal{##1}{H}}{\renewcommand{\cdorient}{H}}{}%
+  \ifthenelse{\equal{##1}{Huu}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{uu}}{}%
+  \ifthenelse{\equal{##1}{Hu}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{u}}{}%
+  \ifthenelse{\equal{##1}{Hhu}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{hu}}{}%
+  \ifthenelse{\equal{##1}{Huc}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{uc}}{}%
+  \ifthenelse{\equal{##1}{Hud}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{ud}}{}%
+  \ifthenelse{\equal{##1}{Hc}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{c}}{}%
+  \ifthenelse{\equal{##1}{Hcd}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{cd}}{}%
+  \ifthenelse{\equal{##1}{Hhd}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{hd}}{}%
+  \ifthenelse{\equal{##1}{Hd}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{d}}{}%
+  \ifthenelse{\equal{##1}{Hdd}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{dd}}{}%
+  \ifthenelse{\equal{##1}{Hlc}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{lc}}{}%
+  \ifthenelse{\equal{##1}{Hrc}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{rc}}{}%
+  \ifthenelse{\equal{##1}{Hl}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{l}}{}%
+  \ifthenelse{\equal{##1}{Hr}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{r}}{}%
+  \ifthenelse{\equal{##1}{Hcl}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{cl}}{}%
+  \ifthenelse{\equal{##1}{Hcr}}{\renewcommand{\cdorient}{H}\renewcommand{\cdrefervalueformat}{cr}}{}%
+  \ifthenelse{\equal{##1}{HU}}{\renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}}{}%
+  \ifthenelse{\equal{##1}{HUuu}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{uu}%
+  }{}%
+  \ifthenelse{\equal{##1}{HUu}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{u}%
+  }{}%
+  \ifthenelse{\equal{##1}{HUhu}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{hu}%
+  }{}%
+  \ifthenelse{\equal{##1}{HUud}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{ud}%
+  }{}%
+  \ifthenelse{\equal{##1}{HUhd}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{hd}%
+  }{}%
+  \ifthenelse{\equal{##1}{HUd}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{d}%
+  }{}%
+  \ifthenelse{\equal{##1}{HUdd}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{dd}%
+  }{}%
+  \ifthenelse{\equal{##1}{HUl}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{l}%
+  }{}%
+  \ifthenelse{\equal{##1}{HUr}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{r}%
+  }{}%
+  \ifthenelse{\equal{##1}{HD}}{\renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}}{}%
+  \ifthenelse{\equal{##1}{HDuu}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{uu}%
+  }{}%
+  \ifthenelse{\equal{##1}{HDu}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{u}%
+  }{}%
+  \ifthenelse{\equal{##1}{HDhu}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{hu}%
+  }{}%
+  \ifthenelse{\equal{##1}{HDud}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{ud}%
+  }{}%
+  \ifthenelse{\equal{##1}{HDhd}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{hd}%
+  }{}%
+  \ifthenelse{\equal{##1}{HDd}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{d}%
+  }{}%
+  \ifthenelse{\equal{##1}{HDdd}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{dd}%
+  }{}%
+  \ifthenelse{\equal{##1}{HDl}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{l}%
+  }{}%
+  \ifthenelse{\equal{##1}{HDr}}{%
+   \renewcommand{\cdorient}{H}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{r}%
+  }{}%
+  \ifthenelse{\equal{##1}{L}}{\renewcommand{\cdorient}{L}}{}%
+  \ifthenelse{\equal{##1}{Luu}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{uu}}{}%
+  \ifthenelse{\equal{##1}{Lu}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{u}}{}%
+  \ifthenelse{\equal{##1}{Lhu}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{hu}}{}%
+  \ifthenelse{\equal{##1}{Luc}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{uc}}{}%
+  \ifthenelse{\equal{##1}{Lud}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{ud}}{}%
+  \ifthenelse{\equal{##1}{Lc}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{c}}{}%
+  \ifthenelse{\equal{##1}{Lcc}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{cc}}{}%
+  \ifthenelse{\equal{##1}{Lcd}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{cd}}{}%
+  \ifthenelse{\equal{##1}{Lhd}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{hd}}{}%
+  \ifthenelse{\equal{##1}{Ld}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{d}}{}%
+  \ifthenelse{\equal{##1}{Ldd}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{dd}}{}%
+  \ifthenelse{\equal{##1}{Ll}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{l}}{}%
+  \ifthenelse{\equal{##1}{Lhl}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{hl}}{}%
+  \ifthenelse{\equal{##1}{Lhr}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{hr}}{}%
+  \ifthenelse{\equal{##1}{Lr}}{\renewcommand{\cdorient}{L}\renewcommand{\cdrefervalueformat}{r}}{}%
+  \ifthenelse{\equal{##1}{R}}{\renewcommand{\cdorient}{R}}{}%
+  \ifthenelse{\equal{##1}{Ruu}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{uu}}{}%
+  \ifthenelse{\equal{##1}{Ru}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{u}}{}%
+  \ifthenelse{\equal{##1}{Rhu}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{hu}}{}%
+  \ifthenelse{\equal{##1}{Ruc}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{uc}}{}%
+  \ifthenelse{\equal{##1}{Rud}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{ud}}{}%
+  \ifthenelse{\equal{##1}{Rc}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{c}}{}%
+  \ifthenelse{\equal{##1}{Rcc}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{cc}}{}%
+  \ifthenelse{\equal{##1}{Rcd}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{cd}}{}%
+  \ifthenelse{\equal{##1}{Rhd}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{hd}}{}%
+  \ifthenelse{\equal{##1}{Rd}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{d}}{}%
+  \ifthenelse{\equal{##1}{Rdd}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{dd}}{}%
+  \ifthenelse{\equal{##1}{Rl}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{l}}{}%
+  \ifthenelse{\equal{##1}{Rhl}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{hl}}{}%
+  \ifthenelse{\equal{##1}{Rhr}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{hr}}{}%
+  \ifthenelse{\equal{##1}{Rr}}{\renewcommand{\cdorient}{R}\renewcommand{\cdrefervalueformat}{r}}{}%
+  \ifthenelse{\equal{##1}{LR}}{\renewcommand{\cdorient}{LR}}{}%
+  \ifthenelse{\equal{##1}{LRu}}{\renewcommand{\cdorient}{LR}\renewcommand{\cdrefervalueformat}{u}}{}%
+  \ifthenelse{\equal{##1}{LRd}}{\renewcommand{\cdorient}{LR}\renewcommand{\cdrefervalueformat}{d}}{}%
+  \ifthenelse{\equal{##1}{LU}}{\renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{U}}{}%
+  \ifthenelse{\equal{##1}{LUl}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{l}%
+  }{}%
+  \ifthenelse{\equal{##1}{LUhl}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{hl}%
+  }{}%
+  \ifthenelse{\equal{##1}{LUud}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{ud}%
+  }{}%
+  \ifthenelse{\equal{##1}{LUhr}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{hr}%
+  }{}%
+  \ifthenelse{\equal{##1}{LUr}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{r}%
+  }{}%
+  \ifthenelse{\equal{##1}{LD}}{\renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{D}}{}%
+  \ifthenelse{\equal{##1}{LDl}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{l}%
+  }{}%
+  \ifthenelse{\equal{##1}{LDhl}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{hl}%
+  }{}%
+  \ifthenelse{\equal{##1}{LDud}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{ud}%
+  }{}%
+  \ifthenelse{\equal{##1}{LDhr}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{hr}%
+  }{}%
+  \ifthenelse{\equal{##1}{LDr}}{%
+   \renewcommand{\cdorient}{L}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{r}%
+  }{}%
+  \ifthenelse{\equal{##1}{RU}}{\renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{U}}{}%
+  \ifthenelse{\equal{##1}{RUl}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{l}%
+  }{}%
+  \ifthenelse{\equal{##1}{RUhl}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{hl}%
+  }{}%
+  \ifthenelse{\equal{##1}{RUud}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{ud}%
+  }{}%
+  \ifthenelse{\equal{##1}{RUhr}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{hr}%
+  }{}%
+  \ifthenelse{\equal{##1}{RUr}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{U}\renewcommand{\cdrefervalueformat}{r}%
+  }{}%
+  \ifthenelse{\equal{##1}{RD}}{\renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{D}}{}%
+  \ifthenelse{\equal{##1}{RDl}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{l}%
+  }{}%
+  \ifthenelse{\equal{##1}{RDhl}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{hl}%
+  }{}%
+  \ifthenelse{\equal{##1}{RDud}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{ud}%
+  }{}%
+  \ifthenelse{\equal{##1}{RDhr}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{hr}%
+  }{}%
+  \ifthenelse{\equal{##1}{RDr}}{%
+   \renewcommand{\cdorient}{R}\renewcommand{\cdsuborient}{D}\renewcommand{\cdrefervalueformat}{r}%
+  }{}%
+  \ifthenelse{\equal{##1}{V}}{\renewcommand{\cdorient}{V}}{}%
+  \ifthenelse{\equal{##1}{Vl}}{\renewcommand{\cdorient}{V}\renewcommand{\cdrefervalueformat}{l}}{}%
+  \ifthenelse{\equal{##1}{Vhl}}{\renewcommand{\cdorient}{V}\renewcommand{\cdrefervalueformat}{hl}}{}%
+  \ifthenelse{\equal{##1}{Vlr}}{\renewcommand{\cdorient}{V}\renewcommand{\cdrefervalueformat}{lr}}{}%
+  \ifthenelse{\equal{##1}{Vhr}}{\renewcommand{\cdorient}{V}\renewcommand{\cdrefervalueformat}{hr}}{}%
+  \ifthenelse{\equal{##1}{Vr}}{\renewcommand{\cdorient}{V}\renewcommand{\cdrefervalueformat}{r}}{}%
+  \ifthenelse{\equal{##1}{Vu}}{\renewcommand{\cdorient}{V}\renewcommand{\cdrefervalueformat}{u}}{}%
+  \ifthenelse{\equal{##1}{Vd}}{\renewcommand{\cdorient}{V}\renewcommand{\cdrefervalueformat}{d}}{}%
+  \ifthenelse{\equal{##1}{VL}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{L}}{}%
+  \ifthenelse{\equal{##1}{VLl}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{L}%
+   \renewcommand{\cdrefervalueformat}{l}%
+  }{}%
+  \ifthenelse{\equal{##1}{VLhl}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{L}%
+   \renewcommand{\cdrefervalueformat}{hl}%
+  }{}%
+  \ifthenelse{\equal{##1}{VLlr}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{L}%
+   \renewcommand{\cdrefervalueformat}{lr}%
+  }{}%
+  \ifthenelse{\equal{##1}{VLhr}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{L}%
+   \renewcommand{\cdrefervalueformat}{hr}%
+  }{}%
+  \ifthenelse{\equal{##1}{VLr}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{L}%
+   \renewcommand{\cdrefervalueformat}{r}%
+  }{}%
+  \ifthenelse{\equal{##1}{VLu}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{L}%
+   \renewcommand{\cdrefervalueformat}{u}%
+  }{}%
+  \ifthenelse{\equal{##1}{VLd}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{L}%
+   \renewcommand{\cdrefervalueformat}{d}%
+  }{}%
+  \ifthenelse{\equal{##1}{VR}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{R}}{}%
+  \ifthenelse{\equal{##1}{VRl}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{R}%
+   \renewcommand{\cdrefervalueformat}{l}%
+  }{}%
+  \ifthenelse{\equal{##1}{VRhl}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{R}%
+   \renewcommand{\cdrefervalueformat}{hl}%
+  }{}%
+  \ifthenelse{\equal{##1}{VRlr}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{R}%
+   \renewcommand{\cdrefervalueformat}{lr}%
+  }{}%
+  \ifthenelse{\equal{##1}{VRhr}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{R}%
+   \renewcommand{\cdrefervalueformat}{hr}%
+  }{}%
+  \ifthenelse{\equal{##1}{VRr}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{R}%
+   \renewcommand{\cdrefervalueformat}{r}%
+  }{}%
+  \ifthenelse{\equal{##1}{VRu}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{R}%
+   \renewcommand{\cdrefervalueformat}{u}%
+  }{}%
+  \ifthenelse{\equal{##1}{VRd}}{\renewcommand{\cdorient}{V}\renewcommand{\cdsuborient}{R}%
+   \renewcommand{\cdrefervalueformat}{d}%
+  }{}%
+  \ifthenelse{\equal{##1}{U}}{\renewcommand{\cdorient}{U}}{}%
+  \ifthenelse{\equal{##1}{Ul}}{\renewcommand{\cdorient}{U}\renewcommand{\cdrefervalueformat}{l}}{}%
+  \ifthenelse{\equal{##1}{Uhl}}{\renewcommand{\cdorient}{U}\renewcommand{\cdrefervalueformat}{hl}}{}%
+  \ifthenelse{\equal{##1}{Ulr}}{\renewcommand{\cdorient}{U}\renewcommand{\cdrefervalueformat}{lr}}{}%
+  \ifthenelse{\equal{##1}{Uhr}}{\renewcommand{\cdorient}{U}\renewcommand{\cdrefervalueformat}{hr}}{}%
+  \ifthenelse{\equal{##1}{Ur}}{\renewcommand{\cdorient}{U}\renewcommand{\cdrefervalueformat}{r}}{}%
+  \ifthenelse{\equal{##1}{Uu}}{\renewcommand{\cdorient}{U}\renewcommand{\cdrefervalueformat}{u}}{}%
+  \ifthenelse{\equal{##1}{Ud}}{\renewcommand{\cdorient}{U}\renewcommand{\cdrefervalueformat}{d}}{}%
+  \ifthenelse{\equal{##1}{D}}{\renewcommand{\cdorient}{D}}{}%
+  \ifthenelse{\equal{##1}{Dl}}{\renewcommand{\cdorient}{D}\renewcommand{\cdrefervalueformat}{l}}{}%
+  \ifthenelse{\equal{##1}{Dhl}}{\renewcommand{\cdorient}{D}\renewcommand{\cdrefervalueformat}{hl}}{}%
+  \ifthenelse{\equal{##1}{Dlr}}{\renewcommand{\cdorient}{D}\renewcommand{\cdrefervalueformat}{lr}}{}%
+  \ifthenelse{\equal{##1}{Dhr}}{\renewcommand{\cdorient}{D}\renewcommand{\cdrefervalueformat}{hr}}{}%
+  \ifthenelse{\equal{##1}{Dr}}{\renewcommand{\cdorient}{D}\renewcommand{\cdrefervalueformat}{r}}{}%
+  \ifthenelse{\equal{##1}{Du}}{\renewcommand{\cdorient}{D}\renewcommand{\cdrefervalueformat}{u}}{}%
+  \ifthenelse{\equal{##1}{Dd}}{\renewcommand{\cdorient}{D}\renewcommand{\cdrefervalueformat}{d}}{}%
+  \ifthenelse{\equal{##1}{UD}}{\renewcommand{\cdorient}{UD}}{}%
+  \ifthenelse{\equal{##1}{UDl}}{\renewcommand{\cdorient}{UD}\renewcommand{\cdrefervalueformat}{l}}{}%
+  \ifthenelse{\equal{##1}{UDr}}{\renewcommand{\cdorient}{UD}\renewcommand{\cdrefervalueformat}{r}}{}%
+  \ifthenelse{\equal{\cdsuborient}{}}{%
+   \ifthenelse{\equal{\cdpart}{L}}{%
+    \ifthenelse{\equal{\cdorient}{H}}{\renewcommand{\cdsuborient}{U}}{}%
+    \ifthenelse{\equal{\cdorient}{V}}{\renewcommand{\cdsuborient}{L}}{}%
+   }{}%
+   \ifthenelse{\equal{\cdpart}{T}}{%
+    \ifthenelse{\equal{\cdsubpart}{npn}}{\renewcommand{\cdsuborient}{D}}{}%
+    \ifthenelse{\equal{\cdsubpart}{pnp}}{\renewcommand{\cdsuborient}{U}}{}%
+    \ifthenelse{\equal{\cdsubpart}{nenh}\or\equal{\cdsubpart}{nenh*}}{\renewcommand{\cdsuborient}{D}}{}%
+    \ifthenelse{\equal{\cdsubpart}{penh}\or\equal{\cdsubpart}{penh*}}{\renewcommand{\cdsuborient}{U}}{}%
+    \ifthenelse{\equal{\cdsubpart}{ndep}\or\equal{\cdsubpart}{ndep*}}{\renewcommand{\cdsuborient}{D}}{}%
+    \ifthenelse{\equal{\cdsubpart}{pdep}\or\equal{\cdsubpart}{pdep*}}{\renewcommand{\cdsuborient}{U}}{}%
+    \ifthenelse{\equal{\cdsubpart}{nj}}{\renewcommand{\cdsuborient}{D}}{}%
+    \ifthenelse{\equal{\cdsubpart}{pj}}{\renewcommand{\cdsuborient}{U}}{}%
+   }{}%
+   \ifthenelse{\equal{\cdpart}{IC}}{%
+    \ifthenelse{\equal{\cdorient}{L}\or\equal{\cdorient}{R}}{\renewcommand{\cdsuborient}{D}}{}%
+   }{}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{}}{%
+   \ifthenelse{\equal{\cdpart}{P}}{%
+    \ifthenelse{\equal{\cdorient}{L}}{\renewcommand{\cdrefervalueformat}{l}}{}%
+    \ifthenelse{\equal{\cdorient}{R}}{\renewcommand{\cdrefervalueformat}{r}}{}%
+    \ifthenelse{\equal{\cdorient}{LR}}{\renewcommand{\cdrefervalueformat}{u}}{}%
+    \ifthenelse{\equal{\cdorient}{U}}{\renewcommand{\cdrefervalueformat}{u}}{}%
+    \ifthenelse{\equal{\cdorient}{D}}{\renewcommand{\cdrefervalueformat}{d}}{}%
+    \ifthenelse{\equal{\cdorient}{UD}}{\renewcommand{\cdrefervalueformat}{r}}{}%
+   }{}%
+   \ifthenelse{\equal{\cdpart}{CA}}{%
+    \ifthenelse{\equal{\cdorient}{L}}{\renewcommand{\cdrefervalueformat}{u}}{}%
+    \ifthenelse{\equal{\cdorient}{R}}{\renewcommand{\cdrefervalueformat}{u}}{}%
+    \ifthenelse{\equal{\cdorient}{U}}{\renewcommand{\cdrefervalueformat}{r}}{}%
+    \ifthenelse{\equal{\cdorient}{D}}{\renewcommand{\cdrefervalueformat}{r}}{}%
+   }{}%
+   \ifthenelse{\equal{\cdpart}{UI}\or\equal{\cdpart}{R}\or\equal{\cdpart}{L}}{%
+    \ifthenelse{\equal{\cdorient}{H}}{\renewcommand{\cdrefervalueformat}{ud}}{}%
+    \ifthenelse{\equal{\cdorient}{V}}{\renewcommand{\cdrefervalueformat}{r}}{}%
+   }{}%
+   \ifthenelse{\equal{\cdpart}{C}}{%
+    \ifthenelse{\equal{\cdorient}{H}}{\renewcommand{\cdrefervalueformat}{r}}{}%
+    \ifthenelse{\equal{\cdorient}{V}}{\renewcommand{\cdrefervalueformat}{hr}}{}%
+   }{}%
+   \ifthenelse{\equal{\cdpart}{D}}{%
+    \ifthenelse{\equal{\cdorient}{L}\or\equal{\cdorient}{R}}{\renewcommand{\cdrefervalueformat}{ud}}{}%
+    \ifthenelse{\equal{\cdorient}{U}\or\equal{\cdorient}{D}}{\renewcommand{\cdrefervalueformat}{r}}{}%
+   }{}%
+   \ifthenelse{\equal{\cdpart}{T}}{%
+    \ifthenelse{\equal{\cdorient}{L}}{\renewcommand{\cdrefervalueformat}{l}}{}%
+    \ifthenelse{\equal{\cdorient}{R}}{\renewcommand{\cdrefervalueformat}{r}}{}%
+   }{}%
+   \ifthenelse{\equal{\cdpart}{IC}}{%
+    \ifthenelse{\equal{\cdsubpart}{op}}{%
+     \ifthenelse{\equal{\cdorient}{L}}{\renewcommand{\cdrefervalueformat}{hl}}{}%
+     \ifthenelse{\equal{\cdorient}{R}}{\renewcommand{\cdrefervalueformat}{hr}}{}%
+    }{%
+     \renewcommand{\cdrefervalueformat}{ud}%
+    }%
+   }{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{}}{\puttext{0}{0}{c}{?##1?}}{}%
+ }%
+ \newcommand{\posrefervaluetwoline}[4]{%
+  \renewcommand{\cdreferx}{##1}\renewcommand{\cdvaluex}{##1}%
+  \ifthenelse{\equal{\cdrefer}{}\or\equal{\cdvalue}{}}{%
+   \renewcommand{\cdrefery}{##2}\renewcommand{\cdvaluey}{##2}%
+  }{%
+   \ifthenelse{\equal{##4}{u}}{%
+    \FPadd\cdfloat{##2}2\edef\cdrefery{\FPprint\cdfloat}%
+    \renewcommand{\cdvaluey}{##2}%
+   }{}%
+   \ifthenelse{\equal{##4}{c}}{%
+    \FPadd\cdfloat{##2}1\edef\cdrefery{\FPprint\cdfloat}%
+    \FPsub\cdfloat{##2}1\edef\cdvaluey{\FPprint\cdfloat}%
+   }{}%
+   \ifthenelse{\equal{##4}{d}}{%
+    \renewcommand{\cdrefery}{##2}%
+    \FPsub\cdfloat{##2}2\edef\cdvaluey{\FPprint\cdfloat}%
+   }{}%
+  }%
+  \renewcommand{\cdreferalign}{##3}\renewcommand{\cdvaluealign}{##3}%
+ }%
+ \newcommand{\posrefervalueH}[6]{%
+  \ifthenelse{\equal{\cdrefervalueformat}{uu}}{\posrefervaluetwoline{##2}{##6}{c}{u}}{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{u}}{%
+   \renewcommand{\cdrefervalueone}{1}%
+   \renewcommand{\cdrefervaluex}{##2}\renewcommand{\cdrefervaluey}{##6}\renewcommand{\cdrefervaluealign}{c}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{hu}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##1}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{r}%
+   \renewcommand{\cdvaluex}{##3}\renewcommand{\cdvaluey}{1.5}\renewcommand{\cdvaluealign}{l}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{uc}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##2}\renewcommand{\cdrefery}{##6}\renewcommand{\cdreferalign}{c}%
+   \renewcommand{\cdvaluex}{##2}\renewcommand{\cdvaluey}{##5}\renewcommand{\cdvaluealign}{c}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{ud}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##2}\renewcommand{\cdrefery}{##6}\renewcommand{\cdreferalign}{c}%
+   \renewcommand{\cdvaluex}{##2}\renewcommand{\cdvaluey}{##4}\renewcommand{\cdvaluealign}{c}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{c}}{%
+   \renewcommand{\cdrefervalueone}{1}%
+   \renewcommand{\cdrefervaluex}{##2}\renewcommand{\cdrefervaluey}{##5}\renewcommand{\cdrefervaluealign}{c}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{cc}}{\posrefervaluetwoline{##2}{##5}{c}{c}}{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{cd}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##2}\renewcommand{\cdrefery}{##5}\renewcommand{\cdreferalign}{c}%
+   \renewcommand{\cdvaluex}{##2}\renewcommand{\cdvaluey}{##4}\renewcommand{\cdvaluealign}{c}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{hd}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##1}\renewcommand{\cdrefery}{-1.5}\renewcommand{\cdreferalign}{r}%
+   \renewcommand{\cdvaluex}{##3}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{l}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{d}}{%
+   \renewcommand{\cdrefervalueone}{1}%
+   \renewcommand{\cdrefervaluex}{##2}\renewcommand{\cdrefervaluey}{##4}\renewcommand{\cdrefervaluealign}{c}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{dd}}{\posrefervaluetwoline{##2}{##4}{c}{d}}{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{l}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \ifthenelse{\equal{\cdpart}{P}}{%
+    \renewcommand{\cdreferx}{##1}\renewcommand{\cdrefery}{0}\renewcommand{\cdreferalign}{r}%
+    \renewcommand{\cdvaluex}{##1}\renewcommand{\cdvaluey}{0}\renewcommand{\cdvaluealign}{r}%
+   }{%
+    \renewcommand{\cdreferx}{##1}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{r}%
+    \renewcommand{\cdvaluex}{##1}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{r}%
+   }%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{hl}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \FPsub\cdfloat{##2}{0.75}%
+   \edef\cdreferx{\FPprint\cdfloat}\renewcommand{\cdrefery}{##6}\renewcommand{\cdreferalign}{r}%
+   \edef\cdvaluex{\FPprint\cdfloat}\renewcommand{\cdvaluey}{##4}\renewcommand{\cdvaluealign}{r}%
+   \ifthenelse{\equal{\cdpart}{IC}\and\equal{\cdsubpart}{op}}{%
+    \ifthenelse{\equal{\cdorient}{L}}{%
+     \FPsub\cdfloat{##6}{2}\edef\cdrefery{\FPprint\cdfloat}\FPadd\cdfloat{##4}{2}\edef\cdvaluey{\FPprint\cdfloat}%
+    }{}%
+    \ifthenelse{\equal{\cdorient}{R}}{%
+     \FPadd\cdfloat{##6}{0.25}\edef\cdrefery{\FPprint\cdfloat}\FPsub\cdfloat{##4}{0.25}\edef\cdvaluey{\FPprint\cdfloat}%
+    }{}%
+   }{}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{lc}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##1}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{r}%
+   \renewcommand{\cdvaluex}{##2}\renewcommand{\cdvaluey}{##5}\renewcommand{\cdvaluealign}{c}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{cl}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##2}\renewcommand{\cdrefery}{##5}\renewcommand{\cdreferalign}{c}%
+   \renewcommand{\cdvaluex}{##1}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{r}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{rc}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##3}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{l}%
+   \renewcommand{\cdvaluex}{##2}\renewcommand{\cdvaluey}{##5}\renewcommand{\cdvaluealign}{c}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{cr}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##2}\renewcommand{\cdrefery}{##5}\renewcommand{\cdreferalign}{c}%
+   \renewcommand{\cdvaluex}{##3}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{l}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{hr}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \FPadd\cdfloat{##2}{0.75}%
+   \edef\cdreferx{\FPprint\cdfloat}\renewcommand{\cdrefery}{##6}\renewcommand{\cdreferalign}{l}%
+   \edef\cdvaluex{\FPprint\cdfloat}\renewcommand{\cdvaluey}{##4}\renewcommand{\cdvaluealign}{l}%
+   \ifthenelse{\equal{\cdpart}{IC}\and\equal{\cdsubpart}{op}}{%
+    \ifthenelse{\equal{\cdorient}{L}}{%
+     \FPadd\cdfloat{##6}{0.25}\edef\cdrefery{\FPprint\cdfloat}\FPsub\cdfloat{##4}{0.25}\edef\cdvaluey{\FPprint\cdfloat}%
+    }{}%
+    \ifthenelse{\equal{\cdorient}{R}}{%
+     \FPsub\cdfloat{##6}{2}\edef\cdrefery{\FPprint\cdfloat}\FPadd\cdfloat{##4}{2}\edef\cdvaluey{\FPprint\cdfloat}%
+    }{}%
+   }{}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{r}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \ifthenelse{\equal{\cdpart}{P}}{%
+    \renewcommand{\cdreferx}{##3}\renewcommand{\cdrefery}{0}\renewcommand{\cdreferalign}{l}%
+    \renewcommand{\cdvaluex}{##3}\renewcommand{\cdvaluey}{0}\renewcommand{\cdvaluealign}{l}%
+   }{%
+    \renewcommand{\cdreferx}{##3}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{l}%
+    \renewcommand{\cdvaluex}{##3}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{l}%
+   }%
+  }{}%
+ }%
+ \newcommand{\posrefervalueV}[6]{%
+  \ifthenelse{\equal{\cdrefervalueformat}{l}}{\posrefervaluetwoline{##1}{##5}{r}{c}}{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{hl}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{-0.5}\renewcommand{\cdrefery}{##6}\renewcommand{\cdreferalign}{r}%
+   \renewcommand{\cdvaluex}{-0.5}\renewcommand{\cdvaluey}{##4}\renewcommand{\cdvaluealign}{r}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{lr}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{##1}\renewcommand{\cdrefery}{##5}\renewcommand{\cdreferalign}{r}%
+   \renewcommand{\cdvaluex}{##3}\renewcommand{\cdvaluey}{##5}\renewcommand{\cdvaluealign}{l}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{hr}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \renewcommand{\cdreferx}{0.5}\renewcommand{\cdrefery}{##6}\renewcommand{\cdreferalign}{l}%
+   \renewcommand{\cdvaluex}{0.5}\renewcommand{\cdvaluey}{##4}\renewcommand{\cdvaluealign}{l}%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{r}}{\posrefervaluetwoline{##3}{##5}{l}{c}}{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{u}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \ifthenelse{\equal{\cdpart}{P}}{%
+    \renewcommand{\cdreferx}{0}\renewcommand{\cdrefery}{##6}\renewcommand{\cdreferalign}{c}%
+    \renewcommand{\cdvaluex}{0}\renewcommand{\cdvaluey}{##6}\renewcommand{\cdvaluealign}{c}%
+   }{%
+    \renewcommand{\cdreferx}{-0.5}\renewcommand{\cdrefery}{##6}\renewcommand{\cdreferalign}{r}%
+    \renewcommand{\cdvaluex}{0.5}\renewcommand{\cdvaluey}{##6}\renewcommand{\cdvaluealign}{l}%
+   }%
+  }{}%
+  \ifthenelse{\equal{\cdrefervalueformat}{d}}{%
+   \renewcommand{\cdrefervalueone}{0}%
+   \ifthenelse{\equal{\cdpart}{P}}{%
+    \renewcommand{\cdreferx}{0}\renewcommand{\cdrefery}{##4}\renewcommand{\cdreferalign}{c}%
+    \renewcommand{\cdvaluex}{0}\renewcommand{\cdvaluey}{##4}\renewcommand{\cdvaluealign}{c}%
+   }{%
+    \renewcommand{\cdreferx}{-0.5}\renewcommand{\cdrefery}{##4}\renewcommand{\cdreferalign}{r}%
+    \renewcommand{\cdvaluex}{0.5}\renewcommand{\cdvaluey}{##4}\renewcommand{\cdvaluealign}{l}%
+   }%
+  }{}%
+ }%
+ \newcommand{\posrefervalueTL}{%
+  \ifthenelse{\boolean{circledtrans}}{%
+   \ifthenelse{\equal{\cdrefervalueformat}{l}}{%
+    \ifthenelse{\equal{\cdsubpart}{nenh*}\or\equal{\cdsubpart}{penh*}\or\equal{\cdsubpart}{ndep*}\or%
+     \equal{\cdsubpart}{pdep*}}{%
+     \renewcommand{\cdrefervalueone}{0}%
+     \renewcommand{\cdreferx}{-2.75}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{r}%
+     \renewcommand{\cdvaluex}{-2.75}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{r}%
+    }{%
+     \posrefervaluetwoline{-2.75}{0}{r}{c}%
+    }%
+   }{}%
+   \ifthenelse{\equal{\cdrefervalueformat}{ud}}{%
+    \renewcommand{\cdrefervalueone}{0}%
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \renewcommand{\cdreferx}{-0.25}\renewcommand{\cdrefery}{3.75}\renewcommand{\cdreferalign}{l}%
+     \renewcommand{\cdvaluex}{-0.25}\renewcommand{\cdvaluey}{-3.75}\renewcommand{\cdvaluealign}{l}%
+    }{%
+     \renewcommand{\cdreferx}{-1.25}\renewcommand{\cdrefery}{3.75}\renewcommand{\cdreferalign}{l}%
+     \renewcommand{\cdvaluex}{-1.25}\renewcommand{\cdvaluey}{-3.75}\renewcommand{\cdvaluealign}{l}%
+    }%
+   }{}%
+   \ifthenelse{\equal{\cdrefervalueformat}{r}}{%
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \renewcommand{\cdrefervalueone}{0}%
+     \renewcommand{\cdreferx}{3}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{l}%
+     \renewcommand{\cdvaluex}{3}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{l}%
+    }{%
+     \ifthenelse{\equal{\cdsuborient}{U}}{%
+      \posrefervaluetwoline{3.25}{0}{l}{d}%
+     }{%
+      \posrefervaluetwoline{3.25}{0}{l}{u}%
+     }%
+    }%
+   }{}%
+  }{%
+   \ifthenelse{\equal{\cdrefervalueformat}{l}}{
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \posrefervaluetwoline{-1.25}{0}{r}{c}%
+    }{%
+     \ifthenelse{\equal{\cdsubpart}{nenh*}\or\equal{\cdsubpart}{penh*}\or\equal{\cdsubpart}{ndep*}\or%
+      \equal{\cdsubpart}{pdep*}}{%
+      \renewcommand{\cdrefervalueone}{0}%
+      \renewcommand{\cdreferx}{-2.5}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{r}%
+      \renewcommand{\cdvaluex}{-2.5}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{r}%
+     }{%
+      \posrefervaluetwoline{-2.5}{0}{r}{c}%
+     }%
+    }%
+   }{}%
+   \ifthenelse{\equal{\cdrefervalueformat}{ud}}{%
+    \renewcommand{\cdrefervalueone}{0}%
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \renewcommand{\cdreferx}{-0.25}\renewcommand{\cdrefery}{3.5}\renewcommand{\cdreferalign}{l}%
+     \renewcommand{\cdvaluex}{-0.25}\renewcommand{\cdvaluey}{-3.5}\renewcommand{\cdvaluealign}{l}%
+    }{%
+     \renewcommand{\cdreferx}{-1.25}\renewcommand{\cdrefery}{3.5}\renewcommand{\cdreferalign}{l}%
+     \renewcommand{\cdvaluex}{-1.25}\renewcommand{\cdvaluey}{-3.5}\renewcommand{\cdvaluealign}{l}%
+    }%
+   }{}%
+   \ifthenelse{\equal{\cdrefervalueformat}{r}}{%
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \renewcommand{\cdrefervalueone}{0}%
+     \renewcommand{\cdreferx}{1.75}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{l}%
+     \renewcommand{\cdvaluex}{1.75}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{l}%
+    }{%
+     \ifthenelse{\equal{\cdsubpart}{nj}\or\equal{\cdsubpart}{pj}}{%
+      \ifthenelse{\equal{\cdsuborient}{U}}{%
+       \posrefervaluetwoline{1}{-0.5}{l}{d}%
+      }{%
+       \posrefervaluetwoline{1}{0.5}{l}{u}%
+      }%
+     }{%
+      \ifthenelse{\equal{\cdsuborient}{U}}{%
+       \posrefervaluetwoline{1.75}{0}{l}{d}%
+      }{%
+       \posrefervaluetwoline{1.75}{0}{l}{u}%
+      }%
+     }%
+    }%
+   }{}%
+  }%
+ }%
+ \newcommand{\posrefervalueTR}{%
+  \ifthenelse{\boolean{circledtrans}}{%
+   \ifthenelse{\equal{\cdrefervalueformat}{l}}{%
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \renewcommand{\cdrefervalueone}{0}%
+     \renewcommand{\cdreferx}{-3}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{r}%
+     \renewcommand{\cdvaluex}{-3}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{r}%
+    }{%
+     \ifthenelse{\equal{\cdsuborient}{U}}{%
+      \posrefervaluetwoline{-3.25}{0}{r}{d}%
+     }{%
+      \posrefervaluetwoline{-3.25}{0}{r}{u}%
+     }%
+    }%
+   }{}%
+   \ifthenelse{\equal{\cdrefervalueformat}{ud}}{%
+    \renewcommand{\cdrefervalueone}{0}%
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \renewcommand{\cdreferx}{0.25}\renewcommand{\cdrefery}{3.75}\renewcommand{\cdreferalign}{r}%
+     \renewcommand{\cdvaluex}{0.25}\renewcommand{\cdvaluey}{-3.75}\renewcommand{\cdvaluealign}{r}%
+    }{%
+     \renewcommand{\cdreferx}{1.25}\renewcommand{\cdrefery}{3.75}\renewcommand{\cdreferalign}{r}%
+     \renewcommand{\cdvaluex}{1.25}\renewcommand{\cdvaluey}{-3.75}\renewcommand{\cdvaluealign}{r}%
+    }%
+   }{}%
+   \ifthenelse{\equal{\cdrefervalueformat}{r}}{%
+    \ifthenelse{\equal{\cdsubpart}{nenh*}\or\equal{\cdsubpart}{penh*}\or\equal{\cdsubpart}{ndep*}\or%
+     \equal{\cdsubpart}{pdep*}}{%
+     \renewcommand{\cdrefervalueone}{0}%
+     \renewcommand{\cdreferx}{2.75}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{l}%
+     \renewcommand{\cdvaluex}{2.75}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{l}%
+    }{%
+     \posrefervaluetwoline{2.75}{0}{l}{c}%
+    }%
+   }{}%
+  }{%
+   \ifthenelse{\equal{\cdrefervalueformat}{l}}{%
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \renewcommand{\cdrefervalueone}{0}%
+     \renewcommand{\cdreferx}{-1.75}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{r}%
+     \renewcommand{\cdvaluex}{-1.75}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{r}%
+    }{%
+     \ifthenelse{\equal{\cdsubpart}{nj}\or\equal{\cdsubpart}{pj}}{%
+      \ifthenelse{\equal{\cdsuborient}{U}}{%
+       \posrefervaluetwoline{-1}{-0.5}{r}{d}%
+      }{%
+       \posrefervaluetwoline{-1}{0.5}{r}{u}%
+      }%
+     }{%
+      \ifthenelse{\equal{\cdsuborient}{U}}{%
+       \posrefervaluetwoline{-1.75}{0}{r}{d}%
+      }{%
+       \posrefervaluetwoline{-1.75}{0}{r}{u}%
+      }%
+     }%
+    }%
+   }{}%
+   \ifthenelse{\equal{\cdrefervalueformat}{ud}}{%
+    \renewcommand{\cdrefervalueone}{0}%
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \renewcommand{\cdreferx}{0.25}\renewcommand{\cdrefery}{3.5}\renewcommand{\cdreferalign}{r}%
+     \renewcommand{\cdvaluex}{0.25}\renewcommand{\cdvaluey}{-3.5}\renewcommand{\cdvaluealign}{r}%
+    }{%
+     \renewcommand{\cdreferx}{1.25}\renewcommand{\cdrefery}{3.5}\renewcommand{\cdreferalign}{r}%
+     \renewcommand{\cdvaluex}{1.25}\renewcommand{\cdvaluey}{-3.5}\renewcommand{\cdvaluealign}{r}%
+    }%
+   }{}%
+   \ifthenelse{\equal{\cdrefervalueformat}{r}}{
+    \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+     \posrefervaluetwoline{1.25}{0}{l}{c}%
+    }{%
+     \ifthenelse{\equal{\cdsubpart}{nenh*}\or\equal{\cdsubpart}{penh*}\or\equal{\cdsubpart}{ndep*}\or%
+      \equal{\cdsubpart}{pdep*}}{%
+      \renewcommand{\cdrefervalueone}{0}%
+      \renewcommand{\cdreferx}{2.5}\renewcommand{\cdrefery}{1.5}\renewcommand{\cdreferalign}{l}%
+      \renewcommand{\cdvaluex}{2.5}\renewcommand{\cdvaluey}{-1.5}\renewcommand{\cdvaluealign}{l}%
+     }{%
+      \posrefervaluetwoline{2.5}{0}{l}{c}%
+     }%
+    }%
+   }{}%
+  }%
+ }%
+ \newcommand{\drawrefervalue}{%
+  \ifthenelse{\equal{\cdrefervalueone}{1}}{%
+   \puttext{\cdrefervaluex}{\cdrefervaluey}{\cdrefervaluealign}{\cdrefervalue}%
+  }{%
+   \puttext{\cdreferx}{\cdrefery}{\cdreferalign}{\formatautoref{\cdrefer}}%
+   \puttext{\cdvaluex}{\cdvaluey}{\cdvaluealign}{\cdvalue}%
+  }%
+ }%
+ % Internal wire commands
+ \newcommand{\pinH}[1]{%
+  \posrefervalueH{-1}{0}{1}{-1.75}{0}{1.75}%
+  ##1%
+  \bigcircle{0.8}%
+  \ifthenelse{\equal{\cdorient}{L}\or\equal{\cdorient}{LR}}{\curve(0.4,0, 1,0)}{}%
+  \ifthenelse{\equal{\cdorient}{R}\or\equal{\cdorient}{LR}}{\curve(-1,0, -0.4,0)}{}%
+  \drawrefervalue%
+ }%
+ \newcommand{\pinV}[1]{%
+  \posrefervalueV{-1}{0}{1}{-1.75}{0}{1.75}%
+  ##1%
+  \bigcircle{0.8}%
+  \ifthenelse{\equal{\cdorient}{U}\or\equal{\cdorient}{UD}}{\curve(0,-1, 0,-0.4)}{}%
+  \ifthenelse{\equal{\cdorient}{D}\or\equal{\cdorient}{UD}}{\curve(0,0.4, 0,1)}{}%
+  \drawrefervalue%
+ }%
+ \newcommand{\groundH}[1]{%
+  ##1%
+  \cdthicklines\curve(0,-1.2, 0,1.2)\cdthinlines%
+  \ifthenelse{\equal{\cdorient}{L}}{\curve(0,0, 1,0)}{\curve(0,0, -1,0)}%
+ }%
+ \newcommand{\groundV}[1]{%
+  ##1%
+  \cdthicklines\curve(-1.2,0, 1.2,0)\cdthinlines%
+  \ifthenelse{\equal{\cdorient}{U}}{\curve(0,0, 0,-1)}{\curve(0,0, 0,1)}%
+ }%
+ \newcommand{\powerH}[1]{%
+  \posrefervalueH{-1.25}{0}{1.25}{-1.75}{0}{1.75}%
+  ##1%
+  \ifthenelse{\equal{\cdorient}{L}}{\cdbigarrow[1.9]{-0.9}{0}{180}}{\cdbigarrow[1.9]{0.9}{0}{0}}%
+  \drawrefervalue%
+ }%
+ \newcommand{\powerV}[1]{%
+  \posrefervalueV{-0.75}{0}{0.75}{-2}{0}{2}%
+  ##1%
+  \ifthenelse{\equal{\cdorient}{U}}{\cdbigarrow[1.9]{0}{0.9}{90}}{\cdbigarrow[1.9]{0}{-0.9}{-90}}%
+  \drawrefervalue%
+ }%
+ \newcommand{\currarrowH}[1]{%
+  \posrefervalueH{0}{0}{0}{-1.75}{0}{1.75}%
+  ##1%
+  \ifthenelse{\equal{\cdorient}{L}}{\cdbigarrow{-0.65}{0}{180}}{\cdbigarrow{0.65}{0}{0}}%
+  \drawrefervalue%
+ }%
+ \newcommand{\currarrowV}[1]{%
+  \posrefervalueV{-0.75}{0}{0.75}{0}{0}{0}%
+  ##1%
+  \ifthenelse{\equal{\cdorient}{U}}{\cdbigarrow{0}{0.65}{90}}{\cdbigarrow{0}{-0.65}{-90}}%
+  \drawrefervalue%
+ }%
+ % Internal part commands
+ \newcommand{\voltsrcH}[1]{%
+  \posrefervalueH{-2.25}{0}{2.25}{-3.25}{0}{3.25}%
+  ##1%
+  \cdmedlines\bigcircle{4}\curve(-2,0, 2,0)\cdthinlines%
+  \curve(-3,0, -2,0)\curve(2,0, 3,0)%
+  \drawrefervalue%
+ }%
+ \newcommand{\voltsrcV}[1]{%
+  \posrefervalueV{-2.5}{0}{2.5}{-3}{0}{3}%
+  ##1%
+  \cdmedlines\bigcircle{4}\curve(0,-2, 0,2)\cdthinlines%
+  \curve(0,-3, 0,-2)\curve(0,2, 0,3)%
+  \drawrefervalue%
+ }%
+ \newcommand{\currsrcH}[1]{%
+  \posrefervalueH{-2.25}{0}{2.25}{-3.25}{0}{3.25}%
+  ##1%
+  \cdmedlines\bigcircle{4}\curve(0,-2, 0,2)\cdthinlines%
+  \curve(-3,0, -2,0)\curve(2,0, 3,0)%
+  \drawrefervalue%
+ }%
+ \newcommand{\currsrcV}[1]{%
+  \posrefervalueV{-2.5}{0}{2.5}{-3}{0}{3}%
+  ##1%
+  \cdmedlines\bigcircle{4}\curve(-2,0, 2,0)\cdthinlines%
+  \curve(0,-3, 0,-2)\curve(0,2, 0,3)%
+  \drawrefervalue%
+ }%
+ \newcommand{\resisH}[1]{%
+  \posrefervalueH{-3}{0}{3}{-2.25}{0}{2.25}%
+  ##1%
+  \cdmedlines\rectangle{-2.5}{-0.94}{2.5}{0.94}\cdthinlines%
+  \curve(-3,0, -2.5,0)\curve(2.5,0, 3,0)%
+  \drawrefervalue%
+ }%
+ \newcommand{\resisV}[1]{%
+  \posrefervalueV{-1.5}{0}{1.5}{-3.75}{0}{3.75}%
+  ##1%
+  \cdmedlines\rectangle{-0.94}{-2.5}{0.94}{2.5}\cdthinlines%
+  \curve(0,-3, 0,-2.5)\curve(0,2.5, 0,3)%
+  \drawrefervalue%
+ }%
+ \newcommand{\capacH}[1]{%
+  \posrefervalueH{-1.25}{0}{1.25}{-3}{0}{3}%
+  ##1%
+  \cdmedlines\curve(-0.45,-1.7, -0.45,1.7)\curve(0.45,-1.7, 0.45,1.7)\cdthinlines%
+  \curve(-1,0, -0.45,0)\curve(0.45,0, 1,0)%
+  \drawrefervalue%
+ }%
+ \newcommand{\capacV}[1]{%
+  \posrefervalueV{-2.25}{0}{2.25}{-1.75}{0}{1.75}%
+  ##1%
+  \cdmedlines\curve(-1.7,-0.45, 1.7,-0.45)\curve(-1.7,0.45, 1.7,0.45)\cdthinlines%
+  \curve(0,-1, 0,-0.45)\curve(0,0.45, 0,1)%
+  \drawrefervalue%
+ }%
+ \newcommand{\inducH}[1]{%
+  \iffilledinduc%
+   \posrefervalueH{-3}{0}{3}{-2.25}{0}{2.25}%
+  \else%
+   \ifcurlyinduc%
+    \ifthenelse{\equal{\cdsuborient}{U}}{%
+     \posrefervalueH{-3.25}{0}{3.25}{-2}{0}{2.5}%
+    }{%
+     \posrefervalueH{-3.25}{0}{3.25}{-2.5}{0}{2}%
+    }%
+   \else%
+    \ifthenelse{\equal{\cdsuborient}{U}}{%
+     \posrefervalueH{-3.25}{0}{3.25}{-1.5}{0}{2.5}%
+    }{%
+     \posrefervalueH{-3.25}{0}{3.25}{-2.5}{0}{1.5}%
+    }%
+   \fi%
+  \fi%
+  ##1%
+  \ifthenelse{\equal{\cdcommand}{}}{\windings{4}}{}%
+  \drawrefervalue%
+ }%
+ \newcommand{\inducV}[1]{%
+  \iffilledinduc%
+   \posrefervalueV{-1.5}{0}{1.5}{-3.75}{0}{3.75}%
+  \else%
+   \ifcurlyinduc% 
+    \ifthenelse{\equal{\cdsuborient}{L}}{%
+     \posrefervalueV{-1.5}{0}{1}{-4}{0}{4}%
+    }{%
+     \posrefervalueV{-1}{0}{1.5}{-4}{0}{4}%
+    }%
+   \else%
+    \ifthenelse{\equal{\cdsuborient}{L}}{%
+     \posrefervalueV{-1.5}{0}{0.5}{-4}{0}{4}%
+    }{%
+     \posrefervalueV{-0.5}{0}{1.5}{-4}{0}{4}%
+    }%
+   \fi%
+  \fi%
+  ##1%
+  \ifthenelse{\equal{\cdcommand}{}}{\windings{4}}{}%
+  \drawrefervalue%
+ }%
+ \newcommand{\diodeH}[1]{%
+  \ifthenelse{\equal{\cdcommand}{capdio1}}{}{%
+   \posrefervalueH{-1.75}{0}{1.75}{-2.75}{0}{2.75}%
+   ##1%
+  }%
+  \ifthenelse{\equal{\cdcommand}{capdio2}}{}{%
+   \iffilleddiode%
+    \textcolor{cdfillcolor}{%
+     \ifthenelse{\equal{\cdorient}{L}}{%
+      \polygon*(-1.25,0)(1.25,-1.25)(1.25,1.25)%
+     }{%
+      \polygon*(1.25,0)(-1.25,-1.25)(-1.25,1.25)%
+     }%
+    }%
+   \fi%
+   \cdmedlines%
+   \curve(-1.25,-1.25, -1.25,1.25)\curve(1.25,-1.25, 1.25,1.25)%
+   \ifthenelse{\equal{\cdorient}{L}}{%
+    \curve(-1.25,0, 1.25,-1.25)\curve(-1.25,0, 1.25,1.25)%
+   }{%
+    \curve(-1.25,-1.25, 1.25,0)\curve(-1.25,1.25, 1.25,0)%
+   }%
+   \cdthinlines%
+  }%
+  \ifthenelse{\equal{\cdcommand}{capdio1}}{}{%
+   \ifthenelse{\equal{\cdcommand}{capdio2}}{%
+    \ifthenelse{\equal{\cdorient}{L}}{%
+     \cdmedlines\curve(-1.7,-1.25, -1.7,1.25)\cdthinlines%
+     \curve(-2,0, -1.7,0)%
+     \ifemptydiode%
+      \curve(1.7,0, 2,0)%
+     \else%
+      \curve(-0.7,0, 2,0)%
+     \fi%
+    }{%
+     \cdmedlines\curve(1.7,-1.25, 1.7,1.25)\cdthinlines%
+     \ifemptydiode%
+      \curve(-2,0, -1.7,0)%
+     \else%
+      \curve(-2,0, 0.7,0)%
+     \fi%
+     \curve(1.7,0, 2,0)%
+    }%
+   }{%
+    \ifemptydiode%
+     \curve(-2,0, -1.25,0)\curve(1.25,0, 2,0)%
+    \else%
+     \curve(-2,0, 2,0)%
+    \fi%
+   }%
+   \drawrefervalue%
+  }%
+ }%
+ \newcommand{\diodeV}[1]{%
+  \ifthenelse{\equal{\cdcommand}{capdio1}}{}{%
+   \posrefervalueV{-1.75}{0}{1.75}{-2.75}{0}{2.75}%
+   ##1%
+  }%
+  \ifthenelse{\equal{\cdcommand}{capdio2}}{}{%
+   \iffilleddiode%
+    \textcolor{cdfillcolor}{%
+     \ifthenelse{\equal{\cdorient}{U}}{%
+      \polygon*(0,1.25)(-1.25,-1.25)(1.25,-1.25)%
+     }{%
+      \polygon*(0,-1.25)(-1.25,1.25)(1.25,1.25)%
+     }%
+    }%
+   \fi%
+   \cdmedlines%
+   \curve(-1.25,-1.25, 1.25,-1.25)\curve(-1.25,1.25, 1.25,1.25)%
+   \ifthenelse{\equal{\cdorient}{U}}{%
+    \curve(-1.25,-1.25, 0,1.25)\curve(1.25,-1.25, 0,1.25)%
+   }{%
+    \curve(0,-1.25, -1.25,1.25)\curve(0,-1.25, 1.25,1.25)%
+   }%
+   \cdthinlines%
+  }%
+  \ifthenelse{\equal{\cdcommand}{capdio1}}{}{%
+   \ifthenelse{\equal{\cdcommand}{capdio2}}{%
+    \ifthenelse{\equal{\cdorient}{U}}{%
+     \cdmedlines\curve(-1.25,1.7, 1.25,1.7)\cdthinlines%
+     \ifemptydiode%
+      \curve(0,-2, 0,-1.7)%
+     \else%
+      \curve(0,-2, 0,0.7)%
+     \fi%
+     \curve(0,1.75, 0,2)%
+    }{%
+     \cdmedlines\curve(-1.25,-1.7, 1.25,-1.7)\cdthinlines%
+     \curve(0,-2, 0,-1.7)%
+     \ifemptydiode%
+      \curve(0,1.7, 0,2)%
+     \else%
+      \curve(0,-0.7, 0,2)%
+     \fi%
+    }%
+   }{%
+    \ifemptydiode%
+     \curve(0,-2, 0,-1.25)\curve(0,1.25, 0,2)%
+    \else%
+     \curve(0,-2, 0,2)%
+    \fi%
+   }%
+   \drawrefervalue%
+  }%
+ }%
+ \newcommand{\transL}[1]{%
+  \posrefervalueTL%
+  ##1%
+  \ifcircledtrans\cdmedlines\put(0.2,0){\bigcircle{5.325}}\cdthinlines\fi%
+  \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+   \cdthicklines\curve(1.1,-1.75, 1.1,1.75)\cdthinlines%
+   \curve(3,0, 1.1,0)%
+   \curve(1.1,-0.7, -1,-2.377)\curve(-1,-2.377, -1,-3)%
+   \curve(1.1,0.7, -1,2.377)\curve(-1,2.377, -1,3)%
+   \ifthenelse{\equal{\cdsubpart}{npn}}{%
+    \ifthenelse{\equal{\cdsuborient}{U}}{%
+     \cdbigarrow{-0.79}{2.209}{141.4}%
+    }{%
+     \cdbigarrow{-0.79}{-2.209}{-141.4}%
+    }%
+   }{%
+    \ifthenelse{\equal{\cdsuborient}{U}}{%
+     \cdbigarrow{0.68}{1.035}{-38.6}%
+    }{%
+     \cdbigarrow{0.68}{-1.035}{38.6}%
+    }%
+   }%
+  }{%
+   \curve(0.2,-1.5, -2,-1.5)\curve(-2,-1.5, -2,-2.5)%
+   \curve(0.2,1.5, -2,1.5)\curve(-2,1.5, -2,2.5)%
+   \ifthenelse{\equal{\cdsubpart}{nj}\or\equal{\cdsubpart}{pj}}{%
+    \cdthicklines\curve(0.2,-1.9, 0.2,1.9)\cdthinlines%
+    \ifthenelse{\equal{\cdsuborient}{U}}{%
+     \curve(3,1.5, 0.2,1.5)%
+     \ifthenelse{\equal{\cdsubpart}{nj}}{%
+      \cdbigarrow{0.4}{1.5}{180}%
+     }{%
+      \cdbigarrow{2.2}{1.5}{0}%
+     }%
+    }{%
+     \curve(3,-1.5, 0.2,-1.5)%
+     \ifthenelse{\equal{\cdsubpart}{nj}}{%
+      \cdbigarrow{0.4}{-1.5}{180}%
+     }{%
+      \cdbigarrow{2.2}{-1.5}{0}%
+     }%
+    }%
+   }{
+    \cdthicklines%
+    \ifthenelse{\equal{\cdsubpart}{nenh}\or\equal{\cdsubpart}{nenh*}\or\equal{\cdsubpart}{penh}\or%
+     \equal{\cdsubpart}{penh*}}{%
+     \curve(0.2,-1.9, 0.2,-1.1)\curve(0.2,-0.4, 0.2,0.4)\curve(0.2,1.1, 0.2,1.9)%
+    }{%
+     \curve(0.2,-1.9, 0.2,1.9)%
+    }%
+    \cdthinlines%
+    \curve(1.1,-1.5, 1.1,1.5)%
+    \ifthenelse{\equal{\cdsuborient}{U}}{\curve(3,1.5, 1.1,1.5)}{\curve(3,-1.5, 1.1,-1.5)}%
+    \ifthenelse{\equal{\cdsubpart}{nenh}\or\equal{\cdsubpart}{penh}\or\equal{\cdsubpart}{ndep}\or%
+     \equal{\cdsubpart}{pdep}}{%
+     \curve(0.2,0, -2,0)%
+     \ifthenelse{\equal{\cdsuborient}{U}}{\curve(-2,0, -2,1.5)}{\curve(-2,0, -2,-1.5)}%
+    }{%
+     \curve(0.2,0, -3,0)%
+    }%
+    \ifthenelse{\equal{\cdsubpart}{nenh}\or\equal{\cdsubpart}{nenh*}\or\equal{\cdsubpart}{ndep}\or%
+     \equal{\cdsubpart}{ndep*}}{%
+     \cdbigarrow{0}{0}{0}%
+    }{%
+     \cdbigarrow{-1.8}{0}{180}%
+    }%
+   }%
+  }%
+  \drawrefervalue%
+ }%
+ \newcommand{\transR}[1]{%
+  \posrefervalueTR%
+  ##1%
+  \ifcircledtrans\cdmedlines\put(-0.2,0){\bigcircle{5.325}}\cdthinlines\fi%
+  \ifthenelse{\equal{\cdsubpart}{npn}\or\equal{\cdsubpart}{pnp}}{%
+   \cdthicklines\curve(-1.1,-1.75, -1.1,1.75)\cdthinlines%
+   \curve(-3,0, -1.1,0)%
+   \curve(-1.1,-0.7, 1,-2.377)\curve(1,-2.377, 1,-3)%
+   \curve(-1.1,0.7, 1,2.377)\curve(1,2.377, 1,3)%
+   \ifthenelse{\equal{\cdsubpart}{npn}}{%
+    \ifthenelse{\equal{\cdsuborient}{U}}{%
+     \cdbigarrow{0.79}{2.209}{38.6}%
+    }{%
+     \cdbigarrow{0.79}{-2.209}{-38.6}%
+    }%
+   }{%
+    \ifthenelse{\equal{\cdsuborient}{U}}{%
+     \cdbigarrow{-0.68}{1.035}{-141.4}%
+    }{%
+     \cdbigarrow{-0.68}{-1.035}{141.4}%
+    }%
+   }%
+  }{%
+   \curve(-0.2,-1.5, 2,-1.5)\curve(2,-1.5, 2,-2.5)%
+   \curve(-0.2,1.5, 2,1.5)\curve(2,1.5, 2,2.5)%
+   \ifthenelse{\equal{\cdsubpart}{nj}\or\equal{\cdsubpart}{pj}}{%
+    \cdthicklines\curve(-0.2,-1.9, -0.2,1.9)\cdthinlines%
+    \ifthenelse{\equal{\cdsuborient}{U}}{%
+     \curve(-3,1.5, -0.2,1.5)%
+     \ifthenelse{\equal{\cdsubpart}{nj}}{%
+      \cdbigarrow{-0.4}{1.5}{0}%
+     }{%
+      \cdbigarrow{-2.2}{1.5}{180}%
+     }%
+    }{%
+     \curve(-3,-1.5, -0.2,-1.5)%
+     \ifthenelse{\equal{\cdsubpart}{nj}}{%
+      \cdbigarrow{-0.4}{-1.5}{0}%
+     }{%
+      \cdbigarrow{-2.2}{-1.5}{180}%
+     }%
+    }%
+   }{
+    \cdthicklines%
+    \ifthenelse{\equal{\cdsubpart}{nenh}\or\equal{\cdsubpart}{nenh*}\or\equal{\cdsubpart}{penh}\or%
+     \equal{\cdsubpart}{penh*}}{%
+     \curve(-0.2,-1.9, -0.2,-1.1)\curve(-0.2,-0.4, -0.2,0.4)\curve(-0.2,1.1, -0.2,1.9)%
+    }{%
+     \curve(-0.2,-1.9, -0.2,1.9)%
+    }%
+    \cdthinlines%
+    \curve(-1.1,-1.5, -1.1,1.5)%
+    \ifthenelse{\equal{\cdsuborient}{U}}{\curve(-3,1.5, -1.1,1.5)}{\curve(-3,-1.5, -1.1,-1.5)}%
+    \ifthenelse{\equal{\cdsubpart}{nenh}\or\equal{\cdsubpart}{penh}\or\equal{\cdsubpart}{ndep}\or%
+     \equal{\cdsubpart}{pdep}}{%
+     \curve(-0.2,0, 2,0)%
+     \ifthenelse{\equal{\cdsuborient}{U}}{\curve(2,0, 2,1.5)}{\curve(2,0, 2,-1.5)}%
+    }{%
+     \curve(-0.2,0, 3,0)%
+    }%
+    \ifthenelse{\equal{\cdsubpart}{nenh}\or\equal{\cdsubpart}{nenh*}\or\equal{\cdsubpart}{ndep}\or%
+     \equal{\cdsubpart}{ndep*}}{%
+     \cdbigarrow{0}{0}{180}%
+    }{%
+     \cdbigarrow{1.8}{0}{0}%
+    }%
+   }%
+  }%
+  \drawrefervalue%
+ }%
+ \newcommand{\opampL}[1]{%
+  \posrefervalueH{-3.5}{0}{3.75}{-4.5}{0}{4.5}%
+  ##1%
+  \cdmedlines%
+  \curve(3.2,-3.4,-3.2,0)\curve(-3.2,0,3.2,3.4)\curve(3.2,3.4,3.2,-3.4)%
+  \cdthinlines%
+  \curve(2.7,-2,1.9,-2)\curve(2.7,2,1.9,2)%
+  \ifthenelse{\equal{\cdsuborient}{U}}{%
+   \curve(2.3,2.4,2.3,1.6)%
+  }{%
+   \curve(2.3,-2.4,2.3,-1.6)%
+  }%
+  \curve(3.2,-2,4,-2)\curve(3.2,2,4,2)\curve(-3.2,0,-4,0)%
+  \drawrefervalue%
+ }%
+ \newcommand{\opampR}[1]{%
+  \posrefervalueH{-3.75}{0}{3.5}{-4.5}{0}{4.5}%
+  ##1%
+  \cdmedlines%
+  \curve(-3.2,-3.4,3.2,0)\curve(3.2,0,-3.2,3.4)\curve(-3.2,3.4,-3.2,-3.4)%
+  \cdthinlines%
+  \curve(-2.7,-2,-1.9,-2)\curve(-2.7,2,-1.9,2)%
+  \ifthenelse{\equal{\cdsuborient}{U}}{%
+   \curve(-2.3,2.4,-2.3,1.6)%
+  }{%
+   \curve(-2.3,-2.4,-2.3,-1.6)%
+  }%
+  \curve(-3.2,-2,-4,-2)\curve(-3.2,2,-4,2)\curve(3.2,0,4,0)%
+  \drawrefervalue%
+ }%
+ \newcommand{\gateL}[1]{%
+  \ifthenelse{\equal{\cdsubpart}{not}}{%
+   \posrefervalueH{-2}{0.5}{2.75}{-3.75}{0}{3.75}%
+  }{%
+   \posrefervalueH{-3.5}{-0.25}{3}{-3.75}{0}{3.75}%
+  }%
+  ##1%
+  \cdmedlines%
+  \ifthenelse{\equal{\cdsubpart}{and}\or\equal{\cdsubpart}{nand}}{%
+   \curve(2.2,-2.4, 2.2,2.4)\curve(2.2,-2.4, -0.8,-2.4)\curve(2.2,2.4, -0.8,2.4)%
+   \put(-0.8,0){\arc(0,2.4){180}}%
+  }{}%
+  \ifthenelse{\equal{\cdsubpart}{or}\or\equal{\cdsubpart}{nor}}{%
+   \put(7,0){\arc(-4.613025,2.4){54.972}}%
+   \curve(2.386975,-2.4, 0.3,-2.4)%
+   \put(0.3,1.352083){\arc(0,-3.752083){-68.878}}%
+   \curve(2.386975,2.4, 0.3,2.4)%
+   \put(0.3,-1.352083){\arc(0,3.752083){68.878}}%
+  }{}%
+  \ifthenelse{\equal{\cdsubpart}{xor}}{%
+   \put(7.2,0){\arc(-4.613025,2.4){54.972}}%
+   \put(6.8,0){\arc(-4.613025,2.4){54.972}}%
+   \curve(2.186975,-2.4, 0.3,-2.4)%
+   \put(0.3,1.352083){\arc(0,-3.752083){-68.878}}%
+   \curve(2.186975,2.4, 0.3,2.4)%
+   \put(0.3,-1.352083){\arc(0,3.752083){68.878}}%
+  }{}%
+  \ifthenelse{\equal{\cdsubpart}{not}}{%
+   \curve(2.3,-2.4, 2.3,2.4)\curve(2.3,-2.4, -2.3,0)\curve(2.3,2.4, -2.3,0)%
+  }{}%
+  \cdthinlines%
+  \ifthenelse{\equal{\cdsubpart}{not}}{%
+   \put(-2.65,0){\bigcircle{0.7}}\curve(2.3,0, 3,0)%
+  }{%
+   \put(-0.6,0){}%
+   \ifthenelse{\equal{\cdsubpart}{nand}\or\equal{\cdsubpart}{nor}}{%
+    \curve(-4,0, -3.9,0)\put(-3.55,0){\bigcircle{0.7}}%
+   }{%
+    \curve(-4,0, -3.2,0)%
+   }%
+   \ifthenelse{\equal{\cdcommand}{}}{\inputs{2}}{}%
+  }%
+  \drawrefervalue%
+ }%
+ \newcommand{\gateR}[1]{%
+  \ifthenelse{\equal{\cdsubpart}{not}}{%
+   \posrefervalueH{-2.75}{-0.5}{2}{-3.75}{0}{3.75}%
+  }{%
+   \posrefervalueH{-3}{0.25}{3.5}{-3.75}{0}{3.75}%
+  }%
+  ##1%
+  \cdmedlines%
+  \ifthenelse{\equal{\cdsubpart}{and}\or\equal{\cdsubpart}{nand}}{%
+   \curve(-2.2,-2.4, -2.2,2.4)\curve(-2.2,-2.4, 0.8,-2.4)\curve(-2.2,2.4, 0.8,2.4)%
+   \put(0.8,0){\arc(0,-2.4){180}}%
+  }{}%
+  \ifthenelse{\equal{\cdsubpart}{or}\or\equal{\cdsubpart}{nor}}{%
+   \put(-7,0){\arc(4.613025,-2.4){54.972}}%
+   \curve(-2.386975,-2.4, -0.3,-2.4)%
+   \put(-0.3,1.352083){\arc(0,-3.752083){68.878}}%
+   \curve(-2.386975,2.4, -0.3,2.4)%
+   \put(-0.3,-1.352083){\arc(0,3.752083){-68.878}}%
+  }{}%
+  \ifthenelse{\equal{\cdsubpart}{xor}}{%
+   \put(-7.2,0){\arc(4.613025,-2.4){54.972}}%
+   \put(-6.8,0){\arc(4.613025,-2.4){54.972}}%
+   \curve(-2.186975,-2.4, -0.3,-2.4)%
+   \put(-0.3,1.352083){\arc(0,-3.752083){68.878}}%
+   \curve(-2.186975,2.4, -0.3,2.4)%
+   \put(-0.3,-1.352083){\arc(0,3.752083){-68.878}}%
+  }{}%
+  \ifthenelse{\equal{\cdsubpart}{not}}{%
+   \curve(-2.3,-2.4, -2.3,2.4)\curve(-2.3,-2.4, 2.3,0)\curve(-2.3,2.4, 2.3,0)%
+  }{}%
+  \cdthinlines%
+  \ifthenelse{\equal{\cdsubpart}{not}}{%
+   \curve(-3,0, -2.3,0)\put(2.65,0){\bigcircle{0.7}}%
+  }{%
+   \ifthenelse{\equal{\cdcommand}{}}{\inputs{2}}{}%
+   \ifthenelse{\equal{\cdsubpart}{nand}\or\equal{\cdsubpart}{nor}}{%
+    \put(3.55,0){\bigcircle{0.7}}\curve(3.9,0, 4,0)%
+   }{%
+    \curve(3.2,0, 4,0)%
+   }%
+  }%
+  \drawrefervalue%
+ }%
+ \newcommand{\flipflopL}[1]{%
+  \posrefervalueH{-4}{0}{4}{-4.5}{0}{4.5}%
+  ##1%
+  \cdmedlines\rectangle{-3.3}{-3.3}{3.3}{3.3}\cdthinlines%
+  \digitalpin{L}{2}{Q}%
+  \digitalpin{R}{-2}{K}\digitalpin[d]{R}{0}{C}\digitalpin{R}{2}{J}%
+  \drawrefervalue%
+ }%
+ \newcommand{\flipflopR}[1]{%
+  \posrefervalueH{-4}{0}{4}{-4.5}{0}{4.5}%
+  ##1%
+  \cdmedlines\rectangle{-3.3}{-3.3}{3.3}{3.3}\cdthinlines%
+  \digitalpin{L}{-2}{K}\digitalpin[d]{L}{0}{C}\digitalpin{L}{2}{J}%
+  \digitalpin{R}{2}{Q}%
+  \drawrefervalue%
+ }%
+ % Automatic wires
+ \newcommand{\setinducend}{%
+  \ifthenelse{\equal{\cdcommand}{}}{%
+   \setcounter{cdcounter}{3}%
+  }{%
+   \FPmul\cdfloat{0.75}\cdcommand\FPadd\cdfloat\cdfloat{0.999}\FPtrunc\cdfloat\cdfloat0%
+   \setcounter{cdcounter}{\FPprint\cdfloat}%
+  }%
+ }%
+ \newcommand{\wireL}[1]{%
+  \ifthenelse{\equal{\cdpart}{C}\or\equal{\cdpart}{P}}{\put(-1,0){\curve(0,0, -##1,0)}}{}%
+  \ifthenelse{\equal{\cdpart}{D}}{\put(-2,0){\curve(0,0, -##1,0)}}{}%
+  \ifthenelse{\equal{\cdpart}{UI}\or\equal{\cdpart}{R}}{\put(-3,0){\curve(0,0, -##1,0)}}{}%
+  \ifthenelse{\equal{\cdpart}{L}}{\setinducend\put(-\thecdcounter,0){\curve(0,0, -##1,0)}}{}%
+ }%
+ \newcommand{\wireR}[1]{%
+  \ifthenelse{\equal{\cdpart}{C}\or\equal{\cdpart}{P}}{\put(1,0){\curve(0,0, ##1,0)}}{}%
+  \ifthenelse{\equal{\cdpart}{D}}{\put(2,0){\curve(0,0, ##1,0)}}{}%
+  \ifthenelse{\equal{\cdpart}{UI}\or\equal{\cdpart}{R}}{\put(3,0){\curve(0,0, ##1,0)}}{}%
+  \ifthenelse{\equal{\cdpart}{L}}{\setinducend\put(\thecdcounter,0){\curve(0,0, ##1,0)}}{}%
+ }%
+ \newcommand{\wireLR}[1]{\wireL{##1}\wireR{##1}}%
+ \newcommand{\wireU}[1]{%
+  \ifthenelse{\equal{\cdpart}{C}\or\equal{\cdpart}{P}}{\put(0,1){\curve(0,0, 0,##1)}}{}%
+  \ifthenelse{\equal{\cdpart}{D}}{\put(0,2){\curve(0,0, 0,##1)}}{}%
+  \ifthenelse{\equal{\cdpart}{UI}\or\equal{\cdpart}{R}}{\put(0,3){\curve(0,0, 0,##1)}}{}%
+  \ifthenelse{\equal{\cdpart}{L}}{\setinducend\put(0,\thecdcounter){\curve(0,0, 0,##1)}}{}%
+ }%
+ \newcommand{\wireD}[1]{%
+  \ifthenelse{\equal{\cdpart}{C}\or\equal{\cdpart}{P}}{\put(0,-1){\curve(0,0, 0,-##1)}}{}%
+  \ifthenelse{\equal{\cdpart}{D}}{\put(0,-2){\curve(0,0, 0,-##1)}}{}%
+  \ifthenelse{\equal{\cdpart}{UI}\or\equal{\cdpart}{R}}{\put(0,-3){\curve(0,0, 0,-##1)}}{}%
+  \ifthenelse{\equal{\cdpart}{L}}{\setinducend\put(0,-\thecdcounter){\curve(0,0, 0,-##1)}}{}%
+ }%
+ \newcommand{\wireUD}[1]{\wireU{##1}\wireD{##1}}%
+ % Parts of the part commands
+ \newcommand{\windings}[1]{%
+  \renewcommand{\cdcommand}{##1}\setcounter{cdcounter}{##1}%
+  \cdmedlines%
+  \ifthenelse{\equal{\cdorient}{H}}{%
+   \iffilledinduc%
+    \setinducend%
+    \FPmul\cdfloat{0.75}{##1}\FPsub\cdfloat\cdfloat{0.5}%
+    \fillrectangle{-\FPprint\cdfloat}{-0.94}{\FPprint\cdfloat}{0.94}%
+    \cdthinlines%
+    \curve(-\FPprint\cdfloat,0, -\thecdcounter,0)%
+    \curve(\FPprint\cdfloat,0, \thecdcounter,0)%
+   \else%
+    \ifthenelse{\equal{\cdsuborient}{U}}{%
+     \ifcurlyinduc%
+      \whiledo{\value{cdcounter}>1}{%
+       \FPmul\cdfloat2\thecdcounter\FPsub\cdfloat\cdfloat{##1}%
+       \FPsub\cdfloat\cdfloat2\FPmul\cdfloat\cdfloat{0.75}%
+       \put(\FPprint\cdfloat,0){%
+        \put(-0.75,-0.1){\arc(0,0.95){-90}}%
+        \put(0,-0.1){\arc(0.2,0){-180}}%
+        \put(0.75,-0.1){\arc(-0.95,0){-90}}%
+       }%
+       \addtocounter{cdcounter}{-1}%
+      }%
+      \FPmul\cdfloat{0.75}{##1}\FPsub\cdfloat\cdfloat{0.75}%
+      \put(-\FPprint\cdfloat,0.1){\arc(-0.75,0){-90}}%
+      \put(\FPprint\cdfloat,0.1){\arc(0,0.75){-90}}%
+     \else%
+      \whiledo{\value{cdcounter}>0}{%
+       \FPmul\cdfloat2\thecdcounter\FPsub\cdfloat\cdfloat{##1}%
+       \FPsub\cdfloat\cdfloat1\FPmul\cdfloat\cdfloat{0.75}%
+       \put(\FPprint\cdfloat,0.1){\arc(0.75,0){180}}%
+       \addtocounter{cdcounter}{-1}%
+      }%
+     \fi%
+    }{%
+     \ifcurlyinduc%
+      \whiledo{\value{cdcounter}>1}{%
+       \FPmul\cdfloat2\thecdcounter\FPsub\cdfloat\cdfloat{##1}%
+       \FPsub\cdfloat\cdfloat2\FPmul\cdfloat\cdfloat{0.75}%
+       \put(\FPprint\cdfloat,0){%
+        \put(-0.75,0.1){\arc(0,-0.95){90}}%
+        \put(0,0.1){\arc(0.2,0){180}}%
+        \put(0.75,0.1){\arc(-0.95,0){90}}%
+       }%
+       \addtocounter{cdcounter}{-1}%
+      }%
+      \FPmul\cdfloat{0.75}{##1}\FPsub\cdfloat\cdfloat{0.75}%
+      \put(-\FPprint\cdfloat,-0.1){\arc(-0.75,0){90}}%
+      \put(\FPprint\cdfloat,-0.1){\arc(0,-0.75){90}}%
+     \else%
+      \whiledo{\value{cdcounter}>0}{%
+       \FPmul\cdfloat2\thecdcounter\FPsub\cdfloat\cdfloat{##1}%
+       \FPsub\cdfloat\cdfloat1\FPmul\cdfloat\cdfloat{0.75}%
+       \put(\FPprint\cdfloat,-0.1){\arc(-0.75,0){180}}%
+       \addtocounter{cdcounter}{-1}%
+      }%
+     \fi%
+    }%
+    \cdthinlines%
+    \ifthenelse{\equal{##1}{4}\or\equal{##1}{8}}{}{%
+     \setinducend%
+     \FPmul\cdfloat{0.75}{##1}%
+     \curve(-\FPprint\cdfloat,0, -\thecdcounter,0)%
+     \curve(\FPprint\cdfloat,0, \thecdcounter,0)%
+    }%
+   \fi%
+  }{%
+   \iffilledinduc%
+    \setinducend%
+    \FPmul\cdfloat{0.75}{##1}\FPsub\cdfloat\cdfloat{0.5}%
+    \fillrectangle{-0.94}{-\FPprint\cdfloat}{0.94}{\FPprint\cdfloat}%
+    \cdthinlines%
+    \curve(0,-\FPprint\cdfloat, 0,-\thecdcounter)%
+    \curve(0,\FPprint\cdfloat, 0,\thecdcounter)%
+   \else%
+    \ifthenelse{\equal{\cdsuborient}{L}}{%
+     \ifcurlyinduc%
+      \whiledo{\value{cdcounter}>1}{%
+       \FPmul\cdfloat2\thecdcounter\FPsub\cdfloat\cdfloat{##1}%
+       \FPsub\cdfloat\cdfloat2\FPmul\cdfloat\cdfloat{0.75}%
+       \put(0,\FPprint\cdfloat){%
+        \put(0.1,-0.75){\arc(0,0.95){90}}%
+        \put(0.1,0){\arc(0,-0.2){180}}%
+        \put(0.1,0.75){\arc(-0.95,0){90}}%
+       }%
+       \addtocounter{cdcounter}{-1}%
+      }%
+      \FPmul\cdfloat{0.75}{##1}\FPsub\cdfloat\cdfloat{0.75}%
+      \put(-0.1,-\FPprint\cdfloat){\arc(-0.75,0){90}}%
+      \put(-0.1,\FPprint\cdfloat){\arc(0,0.75){90}}%
+     \else%
+      \whiledo{\value{cdcounter}>0}{%
+       \FPmul\cdfloat2\thecdcounter\FPsub\cdfloat\cdfloat{##1}%
+       \FPsub\cdfloat\cdfloat1\FPmul\cdfloat\cdfloat{0.75}%
+       \put(-0.1,\FPprint\cdfloat){\arc(0,0.75){180}}%
+       \addtocounter{cdcounter}{-1}%
+      }%
+     \fi%
+    }{%
+     \ifcurlyinduc%
+      \whiledo{\value{cdcounter}>1}{%
+       \FPmul\cdfloat2\thecdcounter\FPsub\cdfloat\cdfloat{##1}%
+       \FPsub\cdfloat\cdfloat2\FPmul\cdfloat\cdfloat{0.75}%
+       \put(0,\FPprint\cdfloat){%
+        \put(-0.1,-0.75){\arc(0.95,0){90}}%
+        \put(-0.1,0){\arc(0,0.2){180}}%
+        \put(-0.1,0.75){\arc(0,-0.95){90}}%
+       }%
+       \addtocounter{cdcounter}{-1}%
+      }%
+      \FPmul\cdfloat{0.75}{##1}\FPsub\cdfloat\cdfloat{0.75}%
+      \put(0.1,-\FPprint\cdfloat){\arc(0,-0.75){90}}%
+      \put(0.1,\FPprint\cdfloat){\arc(0.75,0){90}}%
+     \else%
+      \whiledo{\value{cdcounter}>0}{%
+       \FPmul\cdfloat2\thecdcounter\FPsub\cdfloat\cdfloat{##1}%
+       \FPsub\cdfloat\cdfloat1\FPmul\cdfloat\cdfloat{0.75}%
+       \put(0.1,\FPprint\cdfloat){\arc(0,-0.75){180}}%
+       \addtocounter{cdcounter}{-1}%
+      }%
+     \fi%
+    }%
+    \cdthinlines%
+    \ifthenelse{\equal{##1}{4}\or\equal{##1}{8}}{}{%
+     \setinducend%
+     \FPmul\cdfloat{0.75}{##1}%
+     \curve(0,-\FPprint\cdfloat, 0,-\thecdcounter)%
+     \curve(0,\FPprint\cdfloat, 0,\thecdcounter)%
+    }%
+   \fi%
+  }%
+ }%
+ \newcommand{\inputs}[1]{%
+  \ifthenelse{##1>3}{%
+   \cdmedlines%
+   \setcounter{cdcounter}{##1}\addtocounter{cdcounter}{-1}%
+   \ifthenelse{\equal{\cdsubpart}{and}\or\equal{\cdsubpart}{nand}}{%
+    \ifthenelse{\equal{\cdorient}{L}}{%
+     \curve(2.2,-\thecdcounter, 2.2,-2.4)%
+     \curve(2.2,\thecdcounter, 2.2,2.4)%
+    }{}%
+    \ifthenelse{\equal{\cdorient}{R}}{%
+     \curve(-2.2,-\thecdcounter, -2.2,-2.4)%
+     \curve(-2.2,\thecdcounter, -2.2,2.4)%
+    }{}%
+   }{}%
+   \ifthenelse{\equal{\cdsubpart}{or}\or\equal{\cdsubpart}{nor}}{%
+    \ifthenelse{\equal{\cdorient}{L}}{%
+     \curve(2.386975,-\thecdcounter, 2.386975,-2.4)%
+     \curve(2.386975,\thecdcounter, 2.386975,2.4)%
+    }{}%
+    \ifthenelse{\equal{\cdorient}{R}}{%
+     \curve(-2.386975,-\thecdcounter, -2.386975,-2.4)%
+     \curve(-2.386975,\thecdcounter, -2.386975,2.4)%
+    }{}%
+   }{}%
+   \ifthenelse{\equal{\cdsubpart}{xor}}{%
+    \ifthenelse{\equal{\cdorient}{L}}{%
+     \curve(2.586975,-\thecdcounter, 2.586975,-2.4)%
+     \curve(2.586975,\thecdcounter, 2.586975,2.4)%
+    }{}%
+    \ifthenelse{\equal{\cdorient}{R}}{%
+     \curve(-2.586975,-\thecdcounter, -2.586975,-2.4)%
+     \curve(-2.586975,\thecdcounter, -2.586975,2.4)%
+    }{}%
+   }{}%
+   \cdthinlines%
+  }{}%
+  \ifthenelse{\equal{##1}{2}}{\oneinput{-2}\oneinput{2}}{}%
+  \ifthenelse{\equal{##1}{3}\or\equal{##1}{5}\or\equal{##1}{7}}{%
+   \oneinput{0}\oneinput{-2}\oneinput{2}%
+   \ifthenelse{##1>4}{\oneinput{-4}\oneinput{4}}{}%
+   \ifthenelse{##1>6}{\oneinput{-6}\oneinput{6}}{}%
+  }{}%
+  \ifthenelse{\equal{##1}{4}\or\equal{##1}{6}\or\equal{##1}{8}}{%
+   \oneinput{-1}\oneinput{1}\oneinput{-3}\oneinput{3}%
+   \ifthenelse{##1>5}{\oneinput{-5}\oneinput{5}}{}%
+   \ifthenelse{##1>7}{\oneinput{-7}\oneinput{7}}{}%
+  }{}%
+  \renewcommand{\cdcommand}{##1}%
+ }%
+ \newcommand{\oneinput}[1]{%
+  \ifthenelse{\equal{\cdsubpart}{and}\or\equal{\cdsubpart}{nand}}{%
+   \ifthenelse{\equal{\cdorient}{L}}{\curve(3,##1, 2.2,##1)}{}%
+   \ifthenelse{\equal{\cdorient}{R}}{\curve(-3,##1, -2.2,##1)}{}%
+  }{}%
+  \ifthenelse{\equal{\cdsubpart}{or}\or\equal{\cdsubpart}{nor}}{%
+   \ifthenelse{\equal{\cdorient}{L}}{%
+    \ifthenelse{##1=0}{\curve(3,##1, 1.8,##1)}{}%
+    \ifthenelse{##1=-1\or##1=1}{\curve(3,##1, 1.897060,##1)}{}%
+    \ifthenelse{##1=-2\or##1=2}{\curve(3,##1, 2.2,##1)}{}%
+    \ifthenelse{##1<-2\or##1>2}{\curve(3,##1, 2.386975,##1)}{}%
+   }{}%
+   \ifthenelse{\equal{\cdorient}{R}}{%
+    \ifthenelse{##1=0}{\curve(-3,##1, -1.8,##1)}{}%
+    \ifthenelse{##1=-1\or##1=1}{\curve(-3,##1, -1.897060,##1)}{}%
+    \ifthenelse{##1=-2\or##1=2}{\curve(-3,##1, -2.2,##1)}{}%
+    \ifthenelse{##1<-2\or##1>2}{\curve(-3,##1, -2.386975,##1)}{}%
+   }{}%
+  }{}%
+  \ifthenelse{\equal{\cdsubpart}{xor}}{%
+   \ifthenelse{\equal{\cdorient}{L}}{%
+    \ifthenelse{##1=0}{\curve(3,##1, 2,##1)}{}%
+    \ifthenelse{##1=-1\or##1=1}{\curve(3,##1, 2.097060,##1)}{}%
+    \ifthenelse{##1=-2\or##1=2}{\curve(3,##1, 2.4,##1)}{}%
+    \ifthenelse{##1<-2\or##1>2}{\curve(3,##1, 2.586975,##1)}{}%
+   }{}%
+   \ifthenelse{\equal{\cdorient}{R}}{%
+    \ifthenelse{##1=0}{\curve(-3,##1, -2,##1)}{}%
+    \ifthenelse{##1=-1\or##1=1}{\curve(-3,##1, -2.097060,##1)}{}%
+    \ifthenelse{##1=-2\or##1=2}{\curve(-3,##1, -2.4,##1)}{}%
+    \ifthenelse{##1<-2\or##1>2}{\curve(-3,##1, -2.586975,##1)}{}%
+   }{}%
+  }{}%
+ }%
+ \newcommand{\digitalpin}[4][]{%
+  \ifthenelse{\equal{##2}{L}}{%
+   \put(-3.3,##3){%
+    \ifthenelse{\equal{##1}{n}}{\put(-0.35,0){\bigcircle{0.7}}}{\curve(0,0, -0.7,0)}%
+    \ifthenelse{\equal{##1}{d}}{%
+     \curve(0,-0.35, 0.75,0)\curve(0,0.35, 0.75,0)\puttext{0.75}{0}{l}{##4}%
+    }{%
+     \puttext{0.3}{0}{l}{##4}%
+    }%
+   }%
+  }{}%
+  \ifthenelse{\equal{##2}{R}}{%
+   \put(3.3,##3){%
+    \ifthenelse{\equal{##1}{n}}{\put(0.35,0){\bigcircle{0.7}}}{\curve(0,0, 0.7,0)}%
+    \ifthenelse{\equal{##1}{d}}{%
+     \curve(0,-0.35, -0.75,0)\curve(0,0.35, -0.75,0)\puttext{-0.75}{0}{r}{##4}%
+    }{%
+     \puttext{-0.3}{0}{r}{##4}%
+    }%
+   }%
+  }{}%
+  \ifthenelse{\equal{##2}{U}}{%
+   \put(##3,3.3){%
+    \ifthenelse{\equal{##1}{n}}{\put(0,0.35){\bigcircle{0.7}}}{\curve(0,0, 0,0.7)}%
+    \puttext{0}{-1.3}{c}{##4}%
+   }%
+  }{}%
+  \ifthenelse{\equal{##2}{D}}{%
+   \put(##3,-3.3){%
+    \ifthenelse{\equal{##1}{n}}{\put(0,-0.35){\bigcircle{0.7}}}{\curve(0,0, 0,-0.7)}%
+    \puttext{0}{1.3}{c} {##4}%
+   }%
+  }{}%
+ }%
+ % Arrows
+ \newcommand{\cdgenarrow}[3]{%
+  \textcolor{cdfillcolor}{\polygon*(0,0)(-##2,##3)(-##2,-##3)}%
+  \curve(0,0, -##2,-##3)\curve(0,0, -##2,##3)\curve(-##2,-##3, -##2,##3)%
+  \ifthenelse{\equal{##1}{}}{}{\curve(-##2,0, -##1,0)}%
+ }%
+ \newcommand{\cdbigarrow}[4][]{%
+  \put(##2,##3){\turnbox{##4}{\cdgenarrow{##1}{1.3}{0.35}}}%
+ }%
+ \newcommand{\cdsmallarrow}[4][]{%
+  \put(##2,##3){\turnbox{##4}{\cdgenarrow{##1}{0.84}{0.21}}}%
+ }%
+ \newcommand{\cdsmallarrows}[5][]{%
+  \put(##2,##3){\turnbox{##4}{%
+   \put(0,-##5){\cdgenarrow{##1}{0.84}{0.21}}\put(0,##5){\cdgenarrow{##1}{0.84}{0.21}}%
+  }}%
+ }%
+ % Add-ons
+ \newcommand{\cdtempx}{}\newcommand{\cdtempy}{}%
+ \newcommand{\modify}[1]{\modifytrim{M}{##1}}%
+ \newcommand{\trim}[1]{\modifytrim{T}{##1}}%
+ \newcommand{\modifytrim}[2]{%
+  \renewcommand{\cdtempx}{0}\renewcommand{\cdtempy}{0}%
+  \ifthenelse{\equal{\cdpart}{L}}{%
+   \iffilledinduc%
+   \else%
+    \ifcurlyinduc%
+     \ifthenelse{\equal{\cdorient}{H}}{%
+      \ifthenelse{\equal{\cdsuborient}{U}}{\renewcommand{\cdtempy}{0.275}}{\renewcommand{\cdtempy}{-0.275}}%
+     }{%
+      \ifthenelse{\equal{\cdsuborient}{L}}{\renewcommand{\cdtempx}{-0.275}}{\renewcommand{\cdtempx}{0.275}}%
+     }%
+    \else%
+     \ifthenelse{\equal{\cdorient}{H}}{%
+      \ifthenelse{\equal{\cdsuborient}{U}}{\renewcommand{\cdtempy}{0.425}}{\renewcommand{\cdtempy}{-0.425}}%
+     }{%
+      \ifthenelse{\equal{\cdsuborient}{L}}{\renewcommand{\cdtempx}{-0.425}}{\renewcommand{\cdtempx}{0.425}}%
+     }%
+    \fi%
+   \fi%
+  }{}%
+  \put(\cdtempx,\cdtempy){%
+   \ifthenelse{\equal{##2}{LU}\or\equal{##2}{LU*}}{%
+    \ifthenelse{\equal{\cdpart}{R}\or\equal{\cdpart}{L}}{%
+     \curve(-2.3,2.3, 2.5,-2.5)%
+     \ifthenelse{\equal{##1}{M}}{\cdbigarrow{-2.7}{2.7}{135}}{\curve(-2.7,1.9, -1.9,2.7)}%
+     \ifthenelse{\equal{##2}{LU*}}{%
+      \ifthenelse{\equal{\cdorient}{H}}{\wire[H]{2.5}{-2.5}{4}{0}}{\wire[V]{2.5}{-2.5}{0}{-4}}%
+     }{}%
+    }{}%
+    \ifthenelse{\equal{\cdpart}{C}}{%
+     \curve(-2,2, 2.2,-2.2)%
+     \ifthenelse{\equal{##1}{M}}{\cdbigarrow{-2.4}{2.4}{135}}{\curve(-2.4,1.6, -1.6,2.4)}%
+    }{}%
+   }{}%
+   \ifthenelse{\equal{##2}{LD}\or\equal{##2}{LD*}}{%
+    \ifthenelse{\equal{\cdpart}{R}\or\equal{\cdpart}{L}}{%
+     \curve(-2.3,-2.3, 2.5,2.5)%
+     \ifthenelse{\equal{##1}{M}}{\cdbigarrow{-2.7}{-2.7}{-135}}{\curve(-2.7,-1.9, -1.9,-2.7)}%
+     \ifthenelse{\equal{##2}{LD*}}{%
+      \ifthenelse{\equal{\cdorient}{H}}{\wire[H]{2.5}{2.5}{4}{0}}{\wire[V]{2.5}{2.5}{0}{4}}%
+     }{}%
+    }{}%
+    \ifthenelse{\equal{\cdpart}{C}}{%
+     \curve(-2,-2, 2.2,2.2)%
+     \ifthenelse{\equal{##1}{M}}{\cdbigarrow{-2.4}{-2.4}{-135}}{\curve(-2.4,-1.6, -1.6,-2.4)}%
+    }{}%
+   }{}%
+   \ifthenelse{\equal{##2}{RU}\or\equal{##2}{RU*}}{%
+    \ifthenelse{\equal{\cdpart}{R}\or\equal{\cdpart}{L}}{%
+     \curve(2.3,2.3, -2.5,-2.5)%
+     \ifthenelse{\equal{##1}{M}}{\cdbigarrow{2.7}{2.7}{45}}{\curve(2.7,1.9, 1.9,2.7)}%
+     \ifthenelse{\equal{##2}{RU*}}{%
+      \ifthenelse{\equal{\cdorient}{H}}{\wire[H]{-2.5}{-2.5}{-4}{0}}{\wire[V]{-2.5}{-2.5}{0}{-4}}%
+     }{}%
+    }{}%
+    \ifthenelse{\equal{\cdpart}{C}}{%
+     \curve(2,2, -2.2,-2.2)%
+     \ifthenelse{\equal{##1}{M}}{\cdbigarrow{2.4}{2.4}{45}}{\curve(2.4,1.6, 1.6,2.4)}%
+    }{}%
+   }{}%
+   \ifthenelse{\equal{##2}{RD}\or\equal{##2}{RD*}}{%
+    \ifthenelse{\equal{\cdpart}{R}\or\equal{\cdpart}{L}}{%
+     \curve(2.3,-2.3, -2.5,2.5)%
+     \ifthenelse{\equal{##1}{M}}{\cdbigarrow{2.7}{-2.7}{-45}}{\curve(2.7,-1.9, 1.9,-2.7)}%
+     \ifthenelse{\equal{##2}{RD*}}{%
+      \ifthenelse{\equal{\cdorient}{H}}{\wire[H]{-2.5}{2.5}{-4}{0}}{\wire[V]{-2.5}{2.5}{0}{4}}%
+     }{}%
+    }{}%
+    \ifthenelse{\equal{\cdpart}{C}}{%
+     \curve(2,-2, -2.2,2.2)%
+     \ifthenelse{\equal{##1}{M}}{\cdbigarrow{2.4}{-2.4}{-45}}{\curve(2.4,-1.6, 1.6,-2.4)}%
+    }{}%
+   }{}%
+  }%
+ }%
+ \newcommand{\emit}[1]{%
+  \ifthenelse{\equal{\cdorient}{L}}{%
+   \ifthenelse{\equal{##1}{U}}{\cdsmallarrows[2]{-0.518}{3.432}{105}{0.5}}{}%
+   \ifthenelse{\equal{##1}{D}}{\cdsmallarrows[2]{-0.518}{-3.432}{-105}{0.5}}{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{R}}{%
+   \ifthenelse{\equal{##1}{U}}{\cdsmallarrows[2]{0.518}{3.432}{75}{0.5}}{}%
+   \ifthenelse{\equal{##1}{D}}{\cdsmallarrows[2]{0.518}{-3.432}{-75}{0.5}}{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{U}}{%
+   \ifthenelse{\equal{##1}{L}}{\cdsmallarrows[2]{-3.432}{0.518}{165}{0.5}}{}%
+   \ifthenelse{\equal{##1}{R}}{\cdsmallarrows[2]{3.432}{0.518}{15}{0.5}}{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{D}}{%
+   \ifthenelse{\equal{##1}{L}}{\cdsmallarrows[2]{-3.432}{-0.518}{-165}{0.5}}{}%
+   \ifthenelse{\equal{##1}{R}}{\cdsmallarrows[2]{3.432}{-0.518}{-15}{0.5}}{}%
+  }{}%
+ }%
+ \newcommand{\photo}[1]{%
+  \ifthenelse{\equal{\cdorient}{L}}{%
+   \ifthenelse{\equal{##1}{U}}{\cdsmallarrows[2]{0}{1.5}{-75}{0.5}}{}%
+   \ifthenelse{\equal{##1}{D}}{\cdsmallarrows[2]{0}{-1.5}{75}{0.5}}{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{H}\or\equal{\cdorient}{R}}{%
+   \ifthenelse{\equal{##1}{U}}{\cdsmallarrows[2]{0}{1.5}{-105}{0.5}}{}%
+   \ifthenelse{\equal{##1}{D}}{\cdsmallarrows[2]{0}{-1.5}{105}{0.5}}{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{U}}{%
+   \ifthenelse{\equal{##1}{L}}{\cdsmallarrows[2]{-1.5}{0}{-15}{0.5}}{}%
+   \ifthenelse{\equal{##1}{R}}{\cdsmallarrows[2]{1.5}{0}{-165}{0.5}}{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{V}\or\equal{\cdorient}{D}}{%
+   \ifthenelse{\equal{##1}{L}}{\cdsmallarrows[2]{-1.5}{0}{15}{0.5}}{}%
+   \ifthenelse{\equal{##1}{R}}{\cdsmallarrows[2]{1.5}{0}{165}{0.5}}{}%
+  }{}%
+ }%
+ \newcommand{\ironcore}{%
+  \ifthenelse{\equal{\cdcommand}{}}{\FPset\cdfloat3}{\FPmul\cdfloat{0.75}\cdcommand}%
+  \iffilledinduc\FPsub\cdfloat\cdfloat{0.45}\fi%
+  \ifthenelse{\equal{\cdorient}{H}}{%
+   \ifthenelse{\equal{\cdsuborient}{U}}{%
+    \curve(-\FPprint\cdfloat,1.28, \FPprint\cdfloat,1.28)%
+   }{%
+    \curve(-\FPprint\cdfloat,-1.28, \FPprint\cdfloat,-1.28)%
+   }%
+  }{%
+   \ifthenelse{\equal{\cdsuborient}{L}}{%
+    \curve(-1.28,-\FPprint\cdfloat, -1.28,\FPprint\cdfloat)%
+   }{%
+    \curve(1.28,-\FPprint\cdfloat, 1.28,\FPprint\cdfloat)%
+   }%
+  }%
+ }%
+ \newcommand{\zener}[1]{%
+  \cdmedlines%
+  \ifthenelse{\equal{\cdorient}{L}}{%
+   \ifthenelse{\equal{##1}{U}}{\curve(-1.25,1.25, -0.4,1.25)}{}%
+   \ifthenelse{\equal{##1}{D}}{\curve(-1.25,-1.25, -0.4,-1.25)}{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{R}}{%
+   \ifthenelse{\equal{##1}{U}}{\curve(1.25,1.25, 0.4,1.25)}{}%
+   \ifthenelse{\equal{##1}{D}}{\curve(1.25,-1.25, 0.4,-1.25)}{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{U}}{%
+   \ifthenelse{\equal{##1}{L}}{\curve(-1.25,1.25, -1.25,0.4)}{}%
+   \ifthenelse{\equal{##1}{R}}{\curve(1.25,1.25, 1.25,0.4)}{}%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{D}}{%
+   \ifthenelse{\equal{##1}{L}}{\curve(-1.25,-1.25, -1.25,-0.4)}{}%
+   \ifthenelse{\equal{##1}{R}}{\curve(1.25,-1.25, 1.25,-0.4)}{}%
+  }{}%
+  \cdthinlines%
+ }%
+ \newcommand{\tunnel}{%
+  \cdmedlines%
+  \ifthenelse{\equal{\cdorient}{L}}{\curve(-1.25,1.25, -0.4,1.25)\curve(-1.25,-1.25, -0.4,-1.25)}{}%
+  \ifthenelse{\equal{\cdorient}{R}}{\curve(1.25,1.25, 0.4,1.25)\curve(1.25,-1.25, 0.4,-1.25)}{}%
+  \ifthenelse{\equal{\cdorient}{U}}{\curve(-1.25,1.25, -1.25,0.4)\curve(1.25,1.25, 1.25,0.4)}{}%
+  \ifthenelse{\equal{\cdorient}{D}}{\curve(-1.25,-1.25, -1.25,-0.4)\curve(1.25,-1.25, 1.25,-0.4)}{}%
+  \cdthinlines%
+ }%
+ \newcommand{\capdio}{%
+  \renewcommand{\cdcommand}{capdio1}%
+  \ifthenelse{\equal{\cdorient}{L}}{\put(0.45,0){\diodeH{L}{}{}}}{}%
+  \ifthenelse{\equal{\cdorient}{R}}{\put(-0.45,0){\diodeH{R}{}{}}}{}%
+  \ifthenelse{\equal{\cdorient}{U}}{\put(0,-0.45){\diodeV{U}{}{}}}{}%
+  \ifthenelse{\equal{\cdorient}{D}}{\put(0,0.45){\diodeV{D}{}{}}}{}%
+  \renewcommand{\cdcommand}{capdio2}%
+ }%
+ \newcommand{\elko}[1]{%
+  \ifthenelse{\equal{##1}{LU}}{\curve(-0.8,1.2,-1.6,1.2)\curve(-1.2,0.8,-1.2,1.6)}{}%
+  \ifthenelse{\equal{##1}{RU}}{\curve(0.8,1.2,1.6,1.2)\curve(1.2,0.8,1.2,1.6)}{}%
+  \ifthenelse{\equal{##1}{LD}}{\curve(-0.8,-1.2,-1.6,-1.2)\curve(-1.2,-0.8,-1.2,-1.6)}{}%
+  \ifthenelse{\equal{##1}{RD}}{\curve(0.8,-1.2,1.6,-1.2)\curve(1.2,-0.8,1.2,-1.6)}{}%
+ }%
+ \newcommand{\supply}[1]{%
+  \ifthenelse{\equal{##1}{U}\or\equal{##1}{UD}}{\curve(0,1.7,0,3)}{}%
+  \ifthenelse{\equal{##1}{D}\or\equal{##1}{UD}}{\curve(0,-1.7,0,-3)}{}%
+ }%
+ \newcommand{\schmitt}{%
+  \ifthenelse{\equal{\cdorient}{L}}{%
+   \ifthenelse{\equal{\cdsubpart}{not}}{%
+    \curve(1.9,-0.9, 0.3,-0.9)\cdsmallarrow[1.8]{0.3}{0.9}{90}%
+    \curve(-0.1,0.9, 1.5,0.9)\cdsmallarrow[1.8]{1.5}{-0.9}{-90}%
+   }{%
+    \curve(0.7,-0.9, -0.9,-0.9)\cdsmallarrow[1.8]{-0.9}{0.9}{90}%
+    \curve(-1.3,0.9, 0.3,0.9)\cdsmallarrow[1.8]{0.3}{-0.9}{-90}%
+   }%
+  }{}%
+  \ifthenelse{\equal{\cdorient}{R}}{%
+   \ifthenelse{\equal{\cdsubpart}{not}}{%
+    \curve(-1.9,-0.9, -0.3,-0.9)\cdsmallarrow[1.8]{-0.3}{0.9}{90}%
+    \curve(0.1,0.9, -1.5,0.9)\cdsmallarrow[1.8]{-1.5}{-0.9}{-90}%
+   }{%
+    \curve(-0.7,-0.9, 0.9,-0.9)\cdsmallarrow[1.8]{0.9}{0.9}{90}%
+    \curve(1.3,0.9, -0.3,0.9)\cdsmallarrow[1.8]{-0.3}{-0.9}{-90}%
+   }%
+  }{}%
+ }%
+ \newcommand{\showinvout}{%
+  \ifthenelse{\equal{\cdorient}{L}}{\digitalpin[n]{L}{-2}{\negbar{Q}}}{\digitalpin[n]{R}{-2}{\negbar{Q}}}%
+ }%
+ \newcommand{\showsetin}[1]{%
+  \ifthenelse{\equal{##1}{p}}{\digitalpin{U}{0}{S}}{\digitalpin[n]{U}{0}{\negbar{S}}}%
+ }%
+ \newcommand{\showresetin}[1]{%
+  \ifthenelse{\equal{##1}{p}}{\digitalpin{D}{0}{R}}{\digitalpin[n]{D}{0}{\negbar{R}}}%
+ }%
+ \newcommand{\putrefer}[3]{%
+  \renewcommand{\cdreferx}{##1}\renewcommand{\cdrefery}{##2}\renewcommand{\cdreferalign}{##3}%
+ }%
+ \newcommand{\putvalue}[3]{%
+  \renewcommand{\cdvaluex}{##1}\renewcommand{\cdvaluey}{##2}\renewcommand{\cdvaluealign}{##3}%
+ }%
+ \newcommand{\putrefervalue}[3]{%
+  \renewcommand{\cdrefervaluex}{##1}\renewcommand{\cdrefervaluey}{##2}\renewcommand{\cdrefervaluealign}{##3}%
+ }%
+ \newcommand{\moverefer}[2]{%
+  \FPadd\cdfloat\cdreferx{##1}\edef\cdreferx{\FPprint\cdfloat}%
+  \FPadd\cdfloat\cdrefery{##2}\edef\cdrefery{\FPprint\cdfloat}%
+ }%
+ \newcommand{\movevalue}[2]{%
+  \FPadd\cdfloat\cdvaluex{##1}\edef\cdvaluex{\FPprint\cdfloat}%
+  \FPadd\cdfloat\cdvaluey{##2}\edef\cdvaluey{\FPprint\cdfloat}%
+ }%
+ \newcommand{\moverefervalue}[2]{%
+  \FPadd\cdfloat\cdrefervaluex{##1}\edef\cdrefervaluex{\FPprint\cdfloat}%
+  \FPadd\cdfloat\cdrefervaluey{##2}\edef\cdrefervaluey{\FPprint\cdfloat}%
+ }%
+ \newcommand{\voltarrow}[2]{%
+  \ifthenelse{\equal{##1}{UL}}{\cdbigarrow[3.6]{-1.8}{2.5}{180}\puttext{0}{4}{c}{##2}}{}%
+  \ifthenelse{\equal{##1}{UR}}{\cdbigarrow[3.6]{1.8}{2.5}{0}\puttext{0}{4}{c}{##2}}{}%
+  \ifthenelse{\equal{##1}{DL}}{\cdbigarrow[3.6]{-1.8}{-2.5}{180}\puttext{0}{-4}{c}{##2}}{}%
+  \ifthenelse{\equal{##1}{DR}}{\cdbigarrow[3.6]{1.8}{-2.5}{0}\puttext{0}{-4}{c}{##2}}{}%
+  \ifthenelse{\equal{##1}{LU}}{\cdbigarrow[3.6]{-2.5}{1.8}{90}\puttext{-3}{0}{r}{##2}}{}%
+  \ifthenelse{\equal{##1}{LD}}{\cdbigarrow[3.6]{-2.5}{-1.8}{-90}\puttext{-3}{0}{r}{##2}}{}%
+  \ifthenelse{\equal{##1}{RU}}{\cdbigarrow[3.6]{2.5}{1.8}{90}\puttext{3}{0}{l}{##2}}{}%
+  \ifthenelse{\equal{##1}{RD}}{\cdbigarrow[3.6]{2.5}{-1.8}{-90}\puttext{3}{0}{l}{##2}}{}%
+ }%
+}{\end{picture}}
+%%%%% Begin part of pict2e.sty
+\newcommand*\pIIe@mode{-1}
+\newcommand*\pIIe@debug@comment{}
+\InputIfFileExists{p2e-\Gin@driver}{}{%
+ \PackageError{pict2e}{Driver file ``p2e-\Gin@driver'' not found}{Q: Is the file properly installed? A: No!}%
+}
+\newcommand*\pIIe@moveto@op{moveto}
+\newcommand*\pIIe@lineto@op{lineto}
+\newcommand*\pIIe@fill@op{fill}
+\newcommand*\pIIe@closepath@op{closepath}
+\@ifdefinable\pIIe@GRAPH{\newtoks\pIIe@GRAPH}
+\newcommand*\pIIe@addtoGraph[1]{%
+ \begingroup
+ \edef\x{\the\pIIe@GRAPH\space#1}%
+ \global\pIIe@GRAPH\expandafter{\x}%
+ \endgroup
+}
+\newcommand*\pIIe@fillGraph{\begingroup \@tempswatrue\pIIe@drawGraph}
+\newcommand*\pIIe@drawGraph{%
+ \edef\x{\pIIe@debug@comment\space\pIIe@scale@PTtoBP}%
+ \if@tempswa
+  \edef\y{\pIIe@fill@op}%
+ \else
+  \edef\x{\x\space\strip@pt\@wholewidth\space\pIIe@setlinewidth@op}%
+  \edef\y{\pIIe@stroke@op}%
+ \fi
+ \expandafter\pIIe@code\expandafter{\expandafter\x\the\pIIe@GRAPH\space\y}%
+ \global\pIIe@GRAPH{}\xdef\pIIe@CPx{}\xdef\pIIe@CPy{}%
+ \endgroup
+}
+\newcommand*\pIIe@add@CP[2]{%
+ \begingroup
+ \@tempdima#1\xdef\pIIe@CPx{\the\@tempdima}%
+ \@tempdimb#2\xdef\pIIe@CPy{\the\@tempdimb}%
+ \pIIe@addtoGraph{\strip@pt\@tempdima\space\strip@pt\@tempdimb}%
+ \endgroup
+}
+\newcommand*\pIIe@PTtoBP{0.99626401 }
+\newcommand*\pIIe@scale@PTtoBP{\pIIe@PTtoBP \pIIe@PTtoBP scale}
+\newcommand*\pIIe@moveto[2]{\pIIe@add@CP{#1}{#2}\pIIe@addtoGraph\pIIe@moveto@op}
+\newcommand*\pIIe@lineto[2]{\pIIe@add@CP{#1}{#2}\pIIe@addtoGraph\pIIe@lineto@op}
+\newcommand*\pIIe@closepath{\pIIe@addtoGraph\pIIe@closepath@op}
+\let\lp@r( \let\rp@r)
+\def\polygon{%
+ \@killglue
+ \@ifstar{\begingroup\@tempswatrue\@polygon}{\begingroup\@tempswafalse\@polygon}%
+}
+\def\@polygon(#1,#2){%
+ \pIIe@moveto{#1\unitlength}{#2\unitlength}%
+ \@ifnextchar\lp@r{\@@polygon}{\PackageWarning{pict2e}{Polygons require at least two vertices!}\ignorespaces}%
+}
+\def\@@polygon(#1,#2){%
+ \pIIe@lineto{#1\unitlength}{#2\unitlength}%
+ \@ifnextchar\lp@r{\@@polygon}{%
+  \pIIe@closepath\if@tempswa
+   \pIIe@fillGraph
+  \else
+   \pIIe@strokeGraph
+  \fi\endgroup\ignorespaces
+ }%
+}
+%%%%% End part of pict2e.sty
