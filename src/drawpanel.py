@@ -45,7 +45,7 @@ class Drawpanel(wx.Window):
         
         
     def OnMouseClick(self, event):
-        self.c.log.append('Click at (' + str(event.GetX()) + '/' + str(event.GetX()) + ')')
+        self.c.log.append('Click at (' + str(event.GetX()) + '/' + str(event.GetY()) + ')')
         self.c.OnLeftClick(event)
         
     def Draw(self, dc):
@@ -63,26 +63,27 @@ class Drawpanel(wx.Window):
         self.DrawNodes(dc, self.c.x_shift, self.c.y_shift, self.c.nodes)
         
         for e in self.c.t.elements:
-            dc.DrawBitmap(self.bmp1, e.x, e.y)
-
+            self.DrawResistor(dc, e.x, e.y)
+            
+        self.DrawResistor(dc, 40, 40)
+    
+    def DrawResistor(self, dc, x, y):
+        dc.SetPen(wx.Pen("black", width=2) )
+        s = self.c.gridsize
+        dc.DrawLine(x, y, x + 0.5*s, y)
+        dc.DrawLine(x + 5.5*s, y, x + 6.0*s, y)
+        dc.DrawRectangle(x+0.5*s, y - 0.94*s  , 5*s, 1.88*s)
+        
+    
     def DrawNodes(self, dc, x, y, nodes):
-        dc.SetPen(wx.Pen("black", width=1) )
+        dc.SetPen(wx.Pen("grey", width=1) )
         dc.SetBrush(wx.Brush(wx.Colour(255,255,255), wx.TRANSPARENT))
         for n in nodes:
             if n.active:
                 dc.SetPen(wx.Pen("black", width=2) )
                 #dc.SetBrush(wx.Brush(wx.Colour(0,255,0)))
             else:
-                dc.SetPen(wx.Pen("black", width=1) )
+                dc.SetPen(wx.Pen("grey", width=1) )
                 #dc.SetBrush(wx.Brush(wx.Colour(255,255,255), wx.TRANSPARENT))
             dc.DrawCircle( x + n.x, y + n.y, n.r)
     
-    def DrawGrid(self, dc, width, height, delta=15):
-        x = delta
-        y = delta
-        while x < width:
-            while y < height:
-                dc.DrawCircle(x, y, 2)
-                y = y + delta
-            y = delta
-            x = x + delta

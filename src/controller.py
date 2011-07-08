@@ -19,12 +19,13 @@ class Controller:
         self.main = main
         self.leftdown = False
         self.x_shift = 0#10
-        self.y_shift = 0#10 
+        self.y_shift = 0#10
+        self.gridsize = 20
         
         self.nodes = []
         j = 1
         for i in range(1,400):
-            self.nodes.append(Node((i % 20) * 15 + 15, j * 15 + 15, 3))
+            self.nodes.append(Node((i % 20) * self.gridsize + self.gridsize, j * self.gridsize + self.gridsize, 3))
             if i % 20 == 0:
                 j += 1
         
