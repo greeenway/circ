@@ -5,26 +5,37 @@
 
 import wx
 from drawpanel import Drawpanel
+from controller import Controller
+from texwizard import Texwizard
+
+ID_SHOW_LOG = wx.NewId()
 
 class Mainwindow(wx.Frame):
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(600,400))
+        wx.Frame.__init__(self, parent, title=title, size=(600,500))
         self.CreateStatusBar()
         
         filemenu = wx.Menu()
-        
-        filemenu.Append(wx.ID_ABOUT, "&About", "Some Information.")
+        filemenu.Append(wx.ID_ABOUT, '&About', 'Some Information.')
         filemenu.AppendSeparator()
-        filemenu.Append(wx.ID_EXIT, "E&xit", "Terminate the program")
+        filemenu.Append(wx.ID_EXIT, 'E&xit', 'Terminate the program')
+        wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
         
-        self.drawpanel = Drawpanel(self)
+        #DEBUG
+        debugmenu = wx.Menu()
+        debugmenu.Append(ID_SHOW_LOG, 'Show &Log', 'Show Controller\'s Log')
+        wx.EVT_MENU(self, ID_SHOW_LOG, self.OnShowLog)
+        
+        self.texwizard = Texwizard()
+        self.controller = Controller(self, self.texwizard) # controller!
+        self.drawpanel = Drawpanel(self, self.controller)
         self.buttons = []
         
         self.vsizer = wx.BoxSizer(wx.HORIZONTAL)
         self.bhsizer = wx.BoxSizer(wx.VERTICAL)
         
         for i in range(0, 6):
-            self.buttons.append(wx.Button(self, -1, "button " + str(i)))
+            self.buttons.append(wx.Button(self, -1, 'button ' + str(i)))
             self.bhsizer.Add(self.buttons[i], 1, wx.EXPAND | wx.BOTTOM, border=2)
             
         self.vsizer.Add(self.bhsizer, 0, wx.EXPAND )
@@ -36,14 +47,21 @@ class Mainwindow(wx.Frame):
         #self.vsizer.Fit(self)
         
         menubar = wx.MenuBar()
-        menubar.Append(filemenu, "&File")
+        menubar.Append(filemenu, '&File')
+        menubar.Append(debugmenu, '&Debug')
         self.SetMenuBar(menubar)
         self.Show(True)
+    
+    def OnShowLog(self, event):
+        print self.controller.PrintLog()
+    
+    def OnClose(self, event):
+        self.Close()
         
 
 if __name__ == '__main__':        
     app = wx.App(False)
-    frame = Mainwindow(None, "CIRC")
+    frame = Mainwindow(None, 'CIRC')
     frame.Show()
     app.MainLoop()
 

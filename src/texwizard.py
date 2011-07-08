@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 # circ - a gui for generating LaTeX code 
-# drawpanel.py - implementation of the drawpanel class
+# texwizard.py - implementation of the texwizard class
 # 
+
+class Element:
+    def __init__(self, name, x, y):
+        self.name = name
+        self.x = x
+        self.y = y
 
 class Texwizard:
     def __init__(self):
