@@ -1,0 +1,14 @@
+#resistor
+#line x1 y1 x2 y2 strength
+#rect x y w h strength filled
+H=Horizontal:
+line(0, 0, 0.5, 0, 1)
+rect(0.5, -0.94, 5, 1.88, 1, 1)
+line(5.5, 0, 6, 0)
+  
+V=Vertical:
+#a comment...
+line(0, 0, 0, 0.5, 1)
+rect(-0.94, 0.5, 1.88, 5, 1, 1)
+line(0, 5.5, 0, 6)
+

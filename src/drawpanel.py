@@ -21,10 +21,10 @@ class Drawpanel(wx.Window):
         wx.EVT_LEFT_DOWN(self, self.OnMouseClick)
         
         #loading files
-        try:
-            self.bmp1 = wx.Image('../files/images/R.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
-        except IOError:
-            print 'no image found.'
+        #try:
+            #self.bmp1 = wx.Image('../files/images/R.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
+        #except IOError:
+        #    print 'no image found.'
     
     def OnPaint(self, event=None):
         #draw buffer to the screen
@@ -63,13 +63,12 @@ class Drawpanel(wx.Window):
         self.DrawNodes(dc, self.c.x_shift, self.c.y_shift, self.c.nodes)
         
         for e in self.c.t.elements:
-            self.DrawResistor(dc, e.x, e.y)
+            self.DrawResistor(dc, e.x, e.y, self.c.gridsize)
             
-        self.DrawResistor(dc, 40, 40)
+        self.DrawResistor(dc, 40, 40, self.c.gridsize)
     
-    def DrawResistor(self, dc, x, y):
+    def DrawResistor(self, dc, x, y, s):
         dc.SetPen(wx.Pen("black", width=2) )
-        s = self.c.gridsize
         dc.DrawLine(x, y, x + 0.5*s, y)
         dc.DrawLine(x + 5.5*s, y, x + 6.0*s, y)
         dc.DrawRectangle(x+0.5*s, y - 0.94*s  , 5*s, 1.88*s)
