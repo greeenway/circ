@@ -6,7 +6,9 @@
 #TODO
 # filled rects todo
 # implement drawing code for circles
-
+# rect asymmetric...
+# invert coordinate system
+# improve codegeneration code
 
 import wx
 from drawpanel import Drawpanel
@@ -14,6 +16,7 @@ from controller import Controller
 from texwizard import Texwizard
 
 ID_SHOW_LOG = wx.NewId()
+ID_WRITE_TEX_TO_FILE = wx.NewId()
 
 class Mainwindow(wx.Frame):
     def __init__(self, parent, title):
@@ -25,6 +28,10 @@ class Mainwindow(wx.Frame):
         filemenu.AppendSeparator()
         filemenu.Append(wx.ID_EXIT, 'E&xit', 'Terminate the program')
         wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
+        
+        buildmenu = wx.Menu()
+        buildmenu.Append(ID_WRITE_TEX_TO_FILE, '&Write Code', 'Generate LaTeX-Output (fileoutput).')
+        wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.OnWriteCodeToFile)
         
         #DEBUG
         debugmenu = wx.Menu()
@@ -64,12 +71,16 @@ class Mainwindow(wx.Frame):
         
         menubar = wx.MenuBar()
         menubar.Append(filemenu, '&File')
+        menubar.Append(buildmenu, '&Build')
         menubar.Append(debugmenu, '&Debug')
         self.SetMenuBar(menubar)
         self.Show(True)
     
     def OnShowLog(self, event):
         print self.controller.PrintLog()
+        
+    def OnWriteCodeToFile(self, event):
+        print self.texwizard.GenerateCode()
     
     def OnClose(self, event):
         self.Close()

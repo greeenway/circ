@@ -15,14 +15,21 @@ class Element:
 class Texwizard:
     def __init__(self):
         self.elements = []
-        self.preamble = r'\begin{circuitdiagram}{50}{50}'
-        self.ending = r'\end{circuitdiagram}'
+        self.preamble = r'\begin{circuitdiagram}{50}{50}' + '\n'
+        self.ending = r'\end{circuitdiagram}' + '\n'
 
     def GenerateCode(self):
         code = self.preamble
         
-        for element in self.elements:
-            pass
+        for e in self.elements:
+            code += "\\"
+            code += e.name 
+           
+            if len(e.option) >= 1:
+                #code += r'{' + e.option + r'}'
+                pass
+            code += '\n'
+            
             
         code += self.ending
         return code
@@ -38,3 +45,6 @@ if __name__ == '__main__':
     t = Texwizard()
     print t.GenerateCode()
     #t.PrintToFile('test.txt')
+    
+    
+    
