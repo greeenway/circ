@@ -3,6 +3,10 @@
 # main.py - executable file of the project
 # 
 
+#TODO
+# fix aiming code for grid
+# implement drawing code for circles
+
 import wx
 from drawpanel import Drawpanel
 from controller import Controller

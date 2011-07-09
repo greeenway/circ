@@ -63,15 +63,27 @@ class Drawpanel(wx.Window):
         self.DrawNodes(dc, self.c.x_shift, self.c.y_shift, self.c.nodes)
         
         for e in self.c.t.elements:
-            self.DrawResistor(dc, e.x, e.y, self.c.gridsize)
+            #self.DrawResistor(dc, e.x, e.y, self.c.gridsize)
+            self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.gridsize)
             
-        self.DrawResistor(dc, 40, 40, self.c.gridsize)
     
-    def DrawResistor(self, dc, x, y, s):
-        dc.SetPen(wx.Pen("black", width=2) )
-        dc.DrawLine(x, y, x + 0.5*s, y)
-        dc.DrawLine(x + 5.5*s, y, x + 6.0*s, y)
-        dc.DrawRectangle(x+0.5*s, y - 0.94*s  , 5*s, 1.88*s)
+    def DrawElement(self, dc, name, option, x, y, s):
+        dlist = self.c.ehandler.GetDrawlist(name, option)
+        x = x + self.c.x_shift
+        y = y + self.c.y_shift
+        
+        for d in dlist:
+            if d[0] == 'line':
+                dc.SetPen(wx.Pen("black", width=d[5]) )
+                dc.DrawLine(x + d[1] * s, y + d[2]* s, x + d[3] *s, y + d[4]*s)
+            elif d[0] == 'rect':
+                dc.SetPen(wx.Pen("black", width=d[5]) )
+                dc.DrawRectangle(x+d[1]*s, y +d[2]*s  , d[3]*s, d[4]*s)
+            elif d[0] == 'circ':
+                pass
+            else:
+                print 'unknown drawdirective...'
+        
         
     
     def DrawNodes(self, dc, x, y, nodes):

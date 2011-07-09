@@ -14,11 +14,13 @@ class Element:
 class Elementhandler:
     def __init__(self):
         self.elements = []
+        self.path = '../files/symbols/'
+        self.ext = '.sym'
     
     def Readfile(self, filename):
         try:
-            f = open(filename)
-            lines = [line.strip() for line in open(filename)]
+            f = open(self.path + filename + self.ext)
+            lines = [line.strip() for line in open(self.path + filename + self.ext)]
             f.close()
             
             e = Element(filename)
@@ -62,14 +64,17 @@ class Elementhandler:
                 for line in element.options[option]:
                     print line
     
-    
+    def GetDrawlist(self, name, option):
+        for e in self.elements:
+            if e.name == name:
+                return e.options[option]
     
 
 
 if __name__ == '__main__':
     e = Elementhandler()
-    e.Readfile('../files/symbols/resistor.sym')
-    e.ShowElements()
-    
+    e.Readfile('resistor')
+    #e.ShowElements()
+    print e.GetDrawlist('resistor', 'H')
     
     

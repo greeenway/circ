@@ -4,6 +4,7 @@
 # 
 
 from texwizard import Element
+from elementhandler import Elementhandler
 
 class Node:
     def __init__(self, x, y, r):
@@ -18,16 +19,29 @@ class Controller:
         self.t = texwizard
         self.main = main
         self.leftdown = False
+        self.grid = []
         self.x_shift = 0#10
         self.y_shift = 0#10
         self.gridsize = 20
+        self.ehandler = Elementhandler()
+        self.ehandler.Readfile('resistor') #nach handler verschieben?!
+        #self.ehandler.ShowElements() #debugging
+        self.SetGrid(10, 10, 40, 40, 15, 2)
+        self.activenode = self.nodes[0]
+        self.nodes[0].active = True
+        self.toDraw = 'resistor'
+        self.toDrawOption = 'option'
         
+
+                
+    def SetGrid(self, x, y, xnodes, ynodes, gridsize, radius): 
+        self.x_shift = x
+        self.y_shift = y
+        self.gridsize = gridsize
         self.nodes = []
-        j = 1
-        for i in range(1,400):
-            self.nodes.append(Node((i % 20) * self.gridsize + self.gridsize, j * self.gridsize + self.gridsize, 3))
-            if i % 20 == 0:
-                j += 1
+        for i in range(0,xnodes):
+            for j in range(0, ynodes): 
+                self.nodes.append(Node(i * self.gridsize + x, j * self.gridsize + y, radius))
         
     def PrintLog(self):
         res = ''
@@ -38,16 +52,18 @@ class Controller:
     
     def OnLeftClick(self, event):
         #print 'leftclick'
-        self.t.elements.append(Element('R', event.GetX(), event.GetY()))
+        
+        self.t.elements.append(Element('resistor', 'H', self.activenode.x, self.activenode.y))
         self.UpdateCanvas()
     
     def OnMouseOver(self, event):
         #highlight nodes
-        x = event.GetX() #+ self.x_shift
-        y = event.GetY() + self.y_shift
+        x = event.GetX() - self.x_shift
+        y = event.GetY() - self.y_shift
         for n in self.nodes:
             if (x - n.x)**2 + (y - n.y)**2 <= (n.r+2)**2:
                 n.active = True
+                self.activenode = n
                 self.UpdateCanvas()
             else:
                 n.active = False

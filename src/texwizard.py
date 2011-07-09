@@ -4,10 +4,11 @@
 # 
 
 class Element:
-    def __init__(self, name, x, y):
+    def __init__(self, name, option, x, y):
         self.name = name
         self.x = x
         self.y = y
+        self.option = option
 
 class Texwizard:
     def __init__(self):
