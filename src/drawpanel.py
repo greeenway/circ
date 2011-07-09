@@ -71,17 +71,17 @@ class Drawpanel(wx.Window):
     def DrawWire(self, dc, x1, y1, x2, y2, s):
         #mh...
         dc.SetPen(wx.Pen("black", width=1) ) #constant sucks.
-        x1 = x1 + self.c.x_shift
-        y1 = y1 + self.c.y_shift
-        x2 = x2 + self.c.x_shift
-        y2 = y2 + self.c.y_shift
+        x1 = x1*s + self.c.x_shift
+        y1 = y1*s + self.c.y_shift
+        x2 = x2*s + self.c.x_shift
+        y2 = y2*s + self.c.y_shift
         dc.DrawLine(x1, y1, x2, y2)
     
     def DrawElement(self, dc, name, option, x, y, s):
               
         dlist = self.c.ehandler.GetDrawlist(name, option)
-        x = x + self.c.x_shift
-        y = y + self.c.y_shift
+        x = x * s + self.c.x_shift
+        y = y * s + self.c.y_shift
         
         
         for d in dlist:
@@ -101,6 +101,7 @@ class Drawpanel(wx.Window):
     def DrawNodes(self, dc, x, y, nodes):
         dc.SetPen(wx.Pen("grey", width=1) )
         dc.SetBrush(wx.Brush(wx.Colour(255,255,255), wx.TRANSPARENT))
+        s = self.c.gridsize
         for n in nodes:
             if n.active:
                 dc.SetPen(wx.Pen("black", width=2) )
@@ -108,5 +109,5 @@ class Drawpanel(wx.Window):
             else:
                 dc.SetPen(wx.Pen("grey", width=1) )
                 #dc.SetBrush(wx.Brush(wx.Colour(255,255,255), wx.TRANSPARENT))
-            dc.DrawCircle( x + n.x, y + n.y, n.r)
+            dc.DrawCircle( x + n.x * s, y + n.y*s, n.r)
     

@@ -20,13 +20,15 @@ class Controller:
         self.main = main
         self.leftdown = False
         self.grid = []
-        self.x_shift = 0#10
-        self.y_shift = 0#10
+        self.x_shift = 20
+        self.y_shift = 20
         self.gridsize = 20
+        self.xnodes = 0
+        self.ynodes = 0
         self.ehandler = Elementhandler()
         self.ehandler.Readfile('resistor') #nach handler verschieben?!
         #self.ehandler.ShowElements() #debugging
-        self.SetGrid(10, 10, 40, 40, 15, 2)
+        self.SetGrid(50, 50, 20, 20, 10, 2)
         self.activenode = self.nodes[0]
         self.nodes[0].active = True
         self.toDraw = 'resistor'
@@ -39,10 +41,12 @@ class Controller:
         self.x_shift = x
         self.y_shift = y
         self.gridsize = gridsize
+        self.xnodes = xnodes
+        self.ynodes = ynodes
         self.nodes = []
         for i in range(0,xnodes):
             for j in range(0, ynodes): 
-                self.nodes.append(Node(i * self.gridsize + x, j * self.gridsize + y, radius))
+                self.nodes.append(Node(i, j, radius))
         
     def PrintLog(self):
         res = ''
@@ -71,7 +75,7 @@ class Controller:
         x = event.GetX() - self.x_shift
         y = event.GetY() - self.y_shift
         for n in self.nodes:
-            if (x - n.x)**2 + (y - n.y)**2 <= (n.r+2)**2:
+            if (x - n.x * self.gridsize)**2 + (y - n.y * self.gridsize)**2 <= (n.r+2)**2:
                 n.active = True
                 self.activenode = n
                 self.UpdateCanvas()

@@ -15,28 +15,57 @@ class Element:
 class Texwizard:
     def __init__(self):
         self.elements = []
-        self.preamble = r'\begin{circuitdiagram}{50}{50}' + '\n'
-        self.ending = r'\end{circuitdiagram}' + '\n'
+        self.c = None
+        #self.preamble = r'\begin{circuitdiagram}{50}{50}' + '\n'
+        #self.ending = r'\end{circuitdiagram}' + '\n'
+    
+    def init(self, controller):
+        self.c = controller
 
     def GenerateCode(self):
-        code = self.preamble
+        code = ''
+        ymax = self.c.ynodes - 1
         
         for e in self.elements:
-            code += "\\"
-            code += e.name 
-           
-            if len(e.option) >= 1:
-                #code += r'{' + e.option + r'}'
-                pass
+            code += "\\" 
+            
+            if e.name == 'wire':
+                code += 'wire'
+                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}{'
+                code += str(e.x2) + '}{' + str(ymax - e.y2) + '}'
+ 
+            if e.name == 'resistor':
+                code += 'resis'
+                code += r'{'
+                if e.option == 'H':
+                    code += str(e.x + 3)
+                if e.option == 'V':
+                    code += str(e.x)
+                code += r'}'
+                if e.option == 'H':
+                    code += '{' + str(ymax - e.y) + '}'
+                if e.option == 'V':
+                    code += '{' + str(ymax - e.y - 3) + '}'
+                
+                code += r'{' + e.option + r'}'
+                code += '{}{}'
+ 
             code += '\n'
             
             
-        code += self.ending
+        #code += self.ending
         return code
         
     def PrintToFile(self, filename):
         f = open(filename, 'w')
-        code = self.GenerateCode()
+        
+        code = r'\documentclass{article}' + '\n'
+        code += r'\usepackage{circdia}' + '\n'
+        code += r'\begin{document}' + '\n'
+        code += r'\begin{circuitdiagram}[draft]{20}{20}' + '\n'
+        code += self.GenerateCode()
+        code += r'\end{circuitdiagram}' + '\n'
+        code += r'\end{document}' + '\n'
         f.write(code)
         f.close()
         

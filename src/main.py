@@ -40,6 +40,7 @@ class Mainwindow(wx.Frame):
         
         self.texwizard = Texwizard()
         self.controller = Controller(self, self.texwizard) # controller!
+        self.texwizard.init(self.controller) #link to controller..
         self.drawpanel = Drawpanel(self, self.controller)
         self.buttons = []
         
@@ -81,6 +82,7 @@ class Mainwindow(wx.Frame):
         
     def OnWriteCodeToFile(self, event):
         print self.texwizard.GenerateCode()
+        self.texwizard.PrintToFile('test.tex')
     
     def OnClose(self, event):
         self.Close()
