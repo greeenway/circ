@@ -30,7 +30,8 @@ class Controller:
         self.activenode = self.nodes[0]
         self.nodes[0].active = True
         self.toDraw = 'resistor'
-        self.toDrawOption = 'option'
+        self.toDrawOption = 'H'
+        self.lastnode = [-1, -1]
         
 
                 
@@ -52,8 +53,17 @@ class Controller:
     
     def OnLeftClick(self, event):
         #print 'leftclick'
-        
-        self.t.elements.append(Element('resistor', 'H', self.activenode.x, self.activenode.y))
+        if self.toDraw == 'wire': #drawing with 2 clicks
+            if self.lastnode[0] >= 0:
+                self.t.elements.append(Element('wire', '', self.lastnode[0], self.lastnode[1],
+                                               self.activenode.x, self.activenode.y ))
+                self.lastnode[0] = -1
+            else:
+                self.lastnode[0] = self.activenode.x
+                self.lastnode[1] = self.activenode.y
+                
+        else:
+            self.t.elements.append(Element(self.toDraw, self.toDrawOption, self.activenode.x, self.activenode.y))
         self.UpdateCanvas()
     
     def OnMouseOver(self, event):
@@ -67,7 +77,17 @@ class Controller:
                 self.UpdateCanvas()
             else:
                 n.active = False
+                
+    def DrawWire(self, event):
+        self.toDraw = 'wire'
         
+    def DrawResistorH(self, event):
+        self.toDraw = 'resistor'
+        self.toDrawOption = 'H'
+
+    def DrawResistorV(self, event):
+        self.toDraw = 'resistor'
+        self.toDrawOption = 'V'
     
     def UpdateCanvas(self):
         self.main.drawpanel.UpdateDrawing()

@@ -4,8 +4,9 @@
 # 
 
 #TODO
-# fix aiming code for grid
+# filled rects todo
 # implement drawing code for circles
+
 
 import wx
 from drawpanel import Drawpanel
@@ -38,7 +39,18 @@ class Mainwindow(wx.Frame):
         self.vsizer = wx.BoxSizer(wx.HORIZONTAL)
         self.bhsizer = wx.BoxSizer(wx.VERTICAL)
         
-        for i in range(0, 6):
+        self.wirebutton = wx.Button(self, -1, 'Draw wire')
+        self.wirebutton.Bind(wx.EVT_BUTTON, self.controller.DrawWire)
+        self.resistorHbutton = wx.Button(self, -1, 'Draw R(H)')
+        self.resistorHbutton.Bind(wx.EVT_BUTTON, self.controller.DrawResistorH)
+        self.resistorVbutton = wx.Button(self, -1, 'Draw R(V)')
+        self.resistorVbutton.Bind(wx.EVT_BUTTON, self.controller.DrawResistorV)
+        
+        self.bhsizer.Add(self.wirebutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.resistorHbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.resistorVbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
+        
+        for i in range(0, 4):
             self.buttons.append(wx.Button(self, -1, 'button ' + str(i)))
             self.bhsizer.Add(self.buttons[i], 1, wx.EXPAND | wx.BOTTOM, border=2)
             

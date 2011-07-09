@@ -10,6 +10,7 @@ class Element:
     def __init__(self, name):
         self.name = name
         self.options = {}
+        
 
 class Elementhandler:
     def __init__(self):

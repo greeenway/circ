@@ -63,14 +63,26 @@ class Drawpanel(wx.Window):
         self.DrawNodes(dc, self.c.x_shift, self.c.y_shift, self.c.nodes)
         
         for e in self.c.t.elements:
-            #self.DrawResistor(dc, e.x, e.y, self.c.gridsize)
-            self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.gridsize)
+            if e.name == 'wire':
+                self.DrawWire(dc, e.x, e.y, e.x2, e.y2, self.c.gridsize)
+            else:
+                self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.gridsize)
             
+    def DrawWire(self, dc, x1, y1, x2, y2, s):
+        #mh...
+        dc.SetPen(wx.Pen("black", width=1) ) #constant sucks.
+        x1 = x1 + self.c.x_shift
+        y1 = y1 + self.c.y_shift
+        x2 = x2 + self.c.x_shift
+        y2 = y2 + self.c.y_shift
+        dc.DrawLine(x1, y1, x2, y2)
     
     def DrawElement(self, dc, name, option, x, y, s):
+              
         dlist = self.c.ehandler.GetDrawlist(name, option)
         x = x + self.c.x_shift
         y = y + self.c.y_shift
+        
         
         for d in dlist:
             if d[0] == 'line':
