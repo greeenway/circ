@@ -10,6 +10,7 @@ from element import Element
 from grid import Grid
 from node import Node
             
+import time
 
 class Controller:
     """
@@ -40,7 +41,6 @@ class Controller:
         self.toDraw = 'resistor'
         self.toDrawOption = 'H'
         
-        
     def PrintLog(self):
         res = ''
         for entry in self.log:
@@ -64,13 +64,11 @@ class Controller:
             self.elements.append(Element(self.toDraw, self.toDrawOption, an.x, an.y))
         self.UpdateCanvas()
         pass
-        
+
     
     def OnMouseOver(self, event):
         if self.grid.findActiveNode(event.GetX(), event.GetY()):
             self.UpdateCanvas()
-            
-        
         
     def OnWriteCodeToFile(self, event):
         print self.t.GenerateCode()
