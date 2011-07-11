@@ -5,13 +5,8 @@
 
 from texwizard import Element
 from elementhandler import Elementhandler
+from node import Node
 
-class Node:
-    def __init__(self, x, y, r):
-        self.x = x
-        self.y = y
-        self.r = r
-        self.active = False
 
 class Controller:
     def __init__(self, main, texwizard):
