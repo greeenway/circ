@@ -42,6 +42,14 @@ class Texwizard:
                 
                 code += r'{' + e.option + r'}'
                 code += '{}{}'
+            if e.name == 'voltsrc':
+                code += r'voltsrc'
+                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
+                if e.option == 'H':
+                    code += '{H}{}{}'
+                else:
+                    code += '{V}{}{}'
+                
  
             code += '\n'
             

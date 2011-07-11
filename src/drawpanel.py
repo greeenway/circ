@@ -62,6 +62,8 @@ class Drawpanel(wx.Window):
             dc.DrawLine(self.c.grid.ln.x * s + x, self.c.grid.ln.y* s + y, self.c.grid.an.x * s + x, self.c.grid.an.y * s + y)
         elif self.c.toDraw == 'resistor' and self.c.grid.an is not None:
             self.DrawElement(dc, 'resistor',  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
+        elif self.c.toDraw == 'voltsrc' and self.c.grid.an is not None:
+            self.DrawElement(dc, 'voltsrc',  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
         
         for e in self.c.t.elements:
             if e.name == 'wire':
@@ -92,7 +94,8 @@ class Drawpanel(wx.Window):
                 dc.SetPen(wx.Pen("black", width=d[5]) )
                 dc.DrawRectangle(x+d[1]*s, y +d[2]*s  , d[3]*s, d[4]*s)
             elif d[0] == 'circ':
-                pass
+                dc.SetPen(wx.Pen("black", width=d[4]) )
+                dc.DrawCircle(x+d[1]*s, y +d[2]*s , d[3]*s)
             else:
                 print 'unknown drawdirective...'
         

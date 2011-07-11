@@ -24,7 +24,7 @@ class Controller:
         
         self.ehandler = Elementhandler()
         self.t = Texwizard(self)
-        self.grid = Grid(x_size=20, y_size=20, nodedistance=15, x=20, y=20)
+        self.grid = Grid(x_size=30, y_size=30, nodedistance=13, x=20, y=20)
         #link
         self.main = main
         
@@ -35,6 +35,7 @@ class Controller:
         
         #init
         self.ehandler.Readfile('resistor') #nach handler verschieben?!
+        self.ehandler.Readfile('voltsrc')
 
         self.toDraw = 'resistor'
         self.toDrawOption = 'H'
@@ -84,6 +85,14 @@ class Controller:
 
     def DrawResistorV(self, event):
         self.toDraw = 'resistor'
+        self.toDrawOption = 'V'
+        
+    def DrawVoltSrcH(self, event):
+        self.toDraw = 'voltsrc'
+        self.toDrawOption = 'H'
+        
+    def DrawVoltSrcV(self, event):
+        self.toDraw = 'voltsrc'
         self.toDrawOption = 'V'
     
     def UpdateCanvas(self):

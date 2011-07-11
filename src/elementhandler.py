@@ -77,8 +77,8 @@ class Elementhandler:
 
 if __name__ == '__main__':
     e = Elementhandler()
-    e.Readfile('resistor')
+    e.Readfile('voltsrc')
     #e.ShowElements()
-    print e.GetDrawlist('resistor', 'H')
+    print e.GetDrawlist('voltsrc', 'H')
     
     
