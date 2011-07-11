@@ -3,26 +3,42 @@
 # controller.py - implementation of the controller class
 # 
 
-from texwizard import Element
+from texwizard import Texwizard
 from elementhandler import Elementhandler
-from node import Node
 
+from node import Node
+from element import Element
 
 class Controller:
-    def __init__(self, main, texwizard):
-        self.log = []
-        self.t = texwizard
+    """
+    The Controller class is the applications's 'workhorse'.
+    All Events are routed to this class and needed informations is
+    stored here. Contains lots of event handlers and code to change
+    what is effictivly drawn to the Drawpanel.
+    """
+    def __init__(self, main):
+        self.elements = []
+        #helper classes
+        
+        self.ehandler = Elementhandler()
+        self.t = Texwizard(self)
+        #link
         self.main = main
+        
+        self.log = []
+        
+        #vars 
         self.leftdown = False
-        self.grid = []
+        self.grid = [] #redo as a class!
         self.x_shift = 20
         self.y_shift = 20
         self.gridsize = 20
         self.xnodes = 0
         self.ynodes = 0
-        self.ehandler = Elementhandler()
+        
+        #init
         self.ehandler.Readfile('resistor') #nach handler verschieben?!
-        #self.ehandler.ShowElements() #debugging
+        
         self.SetGrid(50, 50, 20, 20, 10, 2)
         self.activenode = self.nodes[0]
         self.nodes[0].active = True
@@ -54,7 +70,7 @@ class Controller:
         #print 'leftclick'
         if self.toDraw == 'wire': #drawing with 2 clicks
             if self.lastnode[0] >= 0:
-                self.t.elements.append(Element('wire', '', self.lastnode[0], self.lastnode[1],
+                self.elements.append(Element('wire', '', self.lastnode[0], self.lastnode[1],
                                                self.activenode.x, self.activenode.y ))
                 self.lastnode[0] = -1
             else:
@@ -62,7 +78,7 @@ class Controller:
                 self.lastnode[1] = self.activenode.y
                 
         else:
-            self.t.elements.append(Element(self.toDraw, self.toDrawOption, self.activenode.x, self.activenode.y))
+            self.elements.append(Element(self.toDraw, self.toDrawOption, self.activenode.x, self.activenode.y))
         self.UpdateCanvas()
     
     def OnMouseOver(self, event):
@@ -76,6 +92,10 @@ class Controller:
                 self.UpdateCanvas()
             else:
                 n.active = False
+                
+    def OnWriteCodeToFile(self, event):
+        print self.t.GenerateCode()
+        self.t.PrintToFile('test.tex')
                 
     def DrawWire(self, event):
         self.toDraw = 'wire'

@@ -9,6 +9,11 @@ from controller import Controller
 from controller import Node
 
 class Drawpanel(wx.Window):
+    """
+    Drawpanel is a custom drawing widget which serves as a canvas.
+    Events are routed to the Controller class, where they are interpreted.
+    Drawpanel receives from the controller (elementhandler)
+    """
     def __init__(self, parent, controller):
         wx.Window.__init__(self, parent, style=wx.NO_FULL_REPAINT_ON_RESIZE)
         
@@ -17,14 +22,10 @@ class Drawpanel(wx.Window):
         #events
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         wx.EVT_SIZE(self, self.OnSize)
-        wx.EVT_MOTION(self, self.c.OnMouseOver)
-        wx.EVT_LEFT_DOWN(self, self.OnMouseClick)
         
-        #loading files
-        #try:
-            #self.bmp1 = wx.Image('../files/images/R.png', wx.BITMAP_TYPE_ANY).ConvertToBitmap()
-        #except IOError:
-        #    print 'no image found.'
+        wx.EVT_MOTION(self, self.c.OnMouseOver)
+        wx.EVT_LEFT_DOWN(self, self.c.OnLeftClick)
+        
     
     def OnPaint(self, event=None):
         #draw buffer to the screen
@@ -43,23 +44,12 @@ class Drawpanel(wx.Window):
         self.Refresh()
         self.Update()
         
-        
-    def OnMouseClick(self, event):
-        self.c.log.append('Click at (' + str(event.GetX()) + '/' + str(event.GetY()) + ')')
-        self.c.OnLeftClick(event)
-        
     def Draw(self, dc):
         #actual drawing code
         dc.Clear()
-        dc.SetBrush(wx.Brush("white"))
-
-        
+        dc.SetBrush(wx.Brush("white")) 
         dc.SetPen(wx.Pen("black", width=1) )
     
-        #red = wx.Colour(255,0,0)
-        #brush = wx.Brush(red, wx.TRANSPARENT)
-        #self.DrawGrid(dc, 300, 300)
-        #dc.SetBrush(brush)
         self.DrawNodes(dc, self.c.x_shift, self.c.y_shift, self.c.nodes)
         
         for e in self.c.t.elements:
@@ -81,8 +71,7 @@ class Drawpanel(wx.Window):
               
         dlist = self.c.ehandler.GetDrawlist(name, option)
         x = x * s + self.c.x_shift
-        y = y * s + self.c.y_shift
-        
+        y = y * s + self.c.y_shift 
         
         for d in dlist:
             if d[0] == 'line':

@@ -6,14 +6,14 @@
 from element import Element
 
 class Texwizard:
-    def __init__(self):
-        self.elements = []
-        self.c = None
-        #self.preamble = r'\begin{circuitdiagram}{50}{50}' + '\n'
-        #self.ending = r'\end{circuitdiagram}' + '\n'
-    
-    def init(self, controller):
+    """
+    Texwizward generates the actual output of the program and/or
+    prints it to a file.
+    """
+    def __init__(self, controller):
         self.c = controller
+        self.elements = self.c.elements
+        
 
     def GenerateCode(self):
         code = ''

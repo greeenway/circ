@@ -4,6 +4,10 @@
 # 
 
 class Element:
+    """
+    Represents a circuit element used by controller to 
+    keep track of all items.
+    """
     def __init__(self, name, option, x, y, x2 = 0, y2 = 0):
         self.name = name
         self.x = x

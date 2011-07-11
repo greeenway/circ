@@ -9,10 +9,13 @@ import re
 class Element:
     def __init__(self, name):
         self.name = name
-        self.options = {}
-        
+        self.options = {}      
 
 class Elementhandler:
+    """
+    Elementhandler loads .sym files into memory. Provides
+    information needed for drawing objects
+    """
     def __init__(self):
         self.elements = []
         self.path = '../files/symbols/'

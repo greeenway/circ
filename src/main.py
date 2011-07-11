@@ -19,40 +19,62 @@ ID_SHOW_LOG = wx.NewId()
 ID_WRITE_TEX_TO_FILE = wx.NewId()
 
 class Mainwindow(wx.Frame):
+    """
+    Mainwindow is the main class for the GUI. 
+    Beside of providing a home for Controller and Drawpanel, it
+    also defines the GUI and routes Events.
+    """
     def __init__(self, parent, title):
         wx.Frame.__init__(self, parent, title=title, size=(600,500))
+        
+        self.controller = Controller(self) 
+        self.drawpanel = Drawpanel(self, self.controller)
+
         self.CreateStatusBar()
         
+        # ------------------------- create menue ------------------------------------------
         filemenu = wx.Menu()
         filemenu.Append(wx.ID_ABOUT, '&About', 'Some Information.')
         filemenu.AppendSeparator()
         filemenu.Append(wx.ID_EXIT, 'E&xit', 'Terminate the program')
-        wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
+        
         
         buildmenu = wx.Menu()
         buildmenu.Append(ID_WRITE_TEX_TO_FILE, '&Write Code', 'Generate LaTeX-Output (fileoutput).')
-        wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.OnWriteCodeToFile)
+        
+        # event routing
+        wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
+        wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.controller.OnWriteCodeToFile)
         
         #DEBUG
         debugmenu = wx.Menu()
         debugmenu.Append(ID_SHOW_LOG, 'Show &Log', 'Show Controller\'s Log')
         wx.EVT_MENU(self, ID_SHOW_LOG, self.OnShowLog)
         
-        self.texwizard = Texwizard()
-        self.controller = Controller(self, self.texwizard) # controller!
-        self.texwizard.init(self.controller) #link to controller..
-        self.drawpanel = Drawpanel(self, self.controller)
+        menubar = wx.MenuBar()
+        menubar.Append(filemenu, '&File')
+        menubar.Append(buildmenu, '&Build')
+        menubar.Append(debugmenu, '&Debug')
+        self.SetMenuBar(menubar)
+        # ------------------------- / create menue ------------------------------------------
+        
+        # ---------------------- buttons --------------------------------------------- 
         self.buttons = []
-        
-        self.vsizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.bhsizer = wx.BoxSizer(wx.VERTICAL)
-        
-        self.wirebutton = wx.Button(self, -1, 'Draw wire')
-        self.wirebutton.Bind(wx.EVT_BUTTON, self.controller.DrawWire)
+
+        self.wirebutton = wx.Button(self, -1, 'Draw wire')  
         self.resistorHbutton = wx.Button(self, -1, 'Draw R(H)')
-        self.resistorHbutton.Bind(wx.EVT_BUTTON, self.controller.DrawResistorH)
         self.resistorVbutton = wx.Button(self, -1, 'Draw R(V)')
+        
+        # event routing
+        self.wirebutton.Bind(wx.EVT_BUTTON, self.controller.DrawWire)
+        self.resistorHbutton.Bind(wx.EVT_BUTTON, self.controller.DrawResistorH)
         self.resistorVbutton.Bind(wx.EVT_BUTTON, self.controller.DrawResistorV)
+        
+        # ---------------------- / buttons --------------------------------------------- 
+        
+        # ----------------------- sizers -----------------------------------------------
+        self.vsizer = wx.BoxSizer(wx.HORIZONTAL) 
+        self.bhsizer = wx.BoxSizer(wx.VERTICAL)  
         
         self.bhsizer.Add(self.wirebutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
         self.bhsizer.Add(self.resistorHbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
@@ -68,21 +90,14 @@ class Mainwindow(wx.Frame):
         
         self.SetSizer(self.vsizer)
         self.SetAutoLayout(1)
-        #self.vsizer.Fit(self)
+        # ----------------------- / sizers -----------------------------------------------
         
-        menubar = wx.MenuBar()
-        menubar.Append(filemenu, '&File')
-        menubar.Append(buildmenu, '&Build')
-        menubar.Append(debugmenu, '&Debug')
-        self.SetMenuBar(menubar)
         self.Show(True)
     
     def OnShowLog(self, event):
         print self.controller.PrintLog()
         
-    def OnWriteCodeToFile(self, event):
-        print self.texwizard.GenerateCode()
-        self.texwizard.PrintToFile('test.tex')
+
     
     def OnClose(self, event):
         self.Close()

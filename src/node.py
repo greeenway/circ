@@ -4,6 +4,9 @@
 # 
 
 class Node:
+    """
+    Node represents a node in the grid.
+    """
     def __init__(self, x, y, r):
         self.x = x
         self.y = y
