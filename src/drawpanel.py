@@ -51,6 +51,17 @@ class Drawpanel(wx.Window):
         dc.SetPen(wx.Pen("black", width=1) )
     
         self.DrawNodes(dc, self.c.grid.x, self.c.grid.y)
+        s = self.c.grid.ndist
+        x = self.c.grid.x
+        y = self.c.grid.y
+       
+        
+        #draw active
+        if self.c.toDraw == 'wire' and self.c.grid.ln is not None and self.c.grid.an is not None:
+            dc.SetPen(wx.Pen("grey", width=1) )
+            dc.DrawLine(self.c.grid.ln.x * s + x, self.c.grid.ln.y* s + y, self.c.grid.an.x * s + x, self.c.grid.an.y * s + y)
+        elif self.c.toDraw == 'resistor' and self.c.grid.an is not None:
+            self.DrawElement(dc, 'resistor',  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
         
         for e in self.c.t.elements:
             if e.name == 'wire':

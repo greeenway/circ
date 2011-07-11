@@ -35,24 +35,10 @@ class Controller:
         
         #init
         self.ehandler.Readfile('resistor') #nach handler verschieben?!
-        
 
         self.toDraw = 'resistor'
         self.toDrawOption = 'H'
-        self.lastnode = [-1, -1]
         
-
-                
-    def SetGrid(self, x, y, xnodes, ynodes, gridsize, radius): 
-        self.x_shift = x
-        self.y_shift = y
-        self.gridsize = gridsize
-        self.xnodes = xnodes
-        self.ynodes = ynodes
-        self.nodes = []
-        for i in range(0,xnodes):
-            for j in range(0, ynodes): 
-                self.nodes.append(Node(i, j, radius))
         
     def PrintLog(self):
         res = ''
@@ -80,7 +66,7 @@ class Controller:
         
     
     def OnMouseOver(self, event):
-        if self.grid.findActiveNode(event.GetX(), event.GetY()) == True:
+        if self.grid.findActiveNode(event.GetX(), event.GetY()):
             self.UpdateCanvas()
             
         
