@@ -6,7 +6,7 @@
 import wx
 
 from controller import Controller
-from controller import Node
+from node import Node
 
 class Drawpanel(wx.Window):
     """
@@ -50,28 +50,28 @@ class Drawpanel(wx.Window):
         dc.SetBrush(wx.Brush("white")) 
         dc.SetPen(wx.Pen("black", width=1) )
     
-        self.DrawNodes(dc, self.c.x_shift, self.c.y_shift, self.c.nodes)
+        self.DrawNodes(dc, self.c.grid.x, self.c.grid.y)
         
         for e in self.c.t.elements:
             if e.name == 'wire':
-                self.DrawWire(dc, e.x, e.y, e.x2, e.y2, self.c.gridsize)
+                self.DrawWire(dc, e.x, e.y, e.x2, e.y2, self.c.grid.ndist)
             else:
-                self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.gridsize)
+                self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist)
             
     def DrawWire(self, dc, x1, y1, x2, y2, s):
         #mh...
         dc.SetPen(wx.Pen("black", width=1) ) #constant sucks.
-        x1 = x1*s + self.c.x_shift
-        y1 = y1*s + self.c.y_shift
-        x2 = x2*s + self.c.x_shift
-        y2 = y2*s + self.c.y_shift
+        x1 = x1*s + self.c.grid.x
+        y1 = y1*s + self.c.grid.y
+        x2 = x2*s + self.c.grid.x
+        y2 = y2*s + self.c.grid.y
         dc.DrawLine(x1, y1, x2, y2)
     
     def DrawElement(self, dc, name, option, x, y, s):
               
         dlist = self.c.ehandler.GetDrawlist(name, option)
-        x = x * s + self.c.x_shift
-        y = y * s + self.c.y_shift 
+        x = x * s + self.c.grid.x
+        y = y * s + self.c.grid.y 
         
         for d in dlist:
             if d[0] == 'line':
@@ -87,16 +87,24 @@ class Drawpanel(wx.Window):
         
         
     
-    def DrawNodes(self, dc, x, y, nodes):
+    def DrawNodes(self, dc, x, y):
         dc.SetPen(wx.Pen("grey", width=1) )
         dc.SetBrush(wx.Brush(wx.Colour(255,255,255), wx.TRANSPARENT))
-        s = self.c.gridsize
-        for n in nodes:
-            if n.active:
-                dc.SetPen(wx.Pen("black", width=2) )
-                #dc.SetBrush(wx.Brush(wx.Colour(0,255,0)))
-            else:
-                dc.SetPen(wx.Pen("grey", width=1) )
-                #dc.SetBrush(wx.Brush(wx.Colour(255,255,255), wx.TRANSPARENT))
-            dc.DrawCircle( x + n.x * s, y + n.y*s, n.r)
+        s = self.c.grid.ndist
+        dc.SetPen(wx.Pen("black", width=1) )
+        for n in  self.c.grid.nodes:
+            #dc.DrawCircle( x + n.x * s, y + n.y*s, 1)
+            dc.DrawPoint( x + n.x * s, y + n.y*s)
+        #dc.SetPen(wx.Pen("black", width=2) )
+        a = self.c.grid.an
+        if a:
+            dc.DrawCircle( x + a.x * s, y + a.y*s, 3)
+        #if self.c.grid.ln: #debug
+        #    dc.DrawCircle( x + self.c.grid.ln.x * s, y + self.c.grid.ln.y*s, 2)
+                
+
+    
+    
+    
+    
     

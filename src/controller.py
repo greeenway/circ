@@ -6,8 +6,10 @@
 from texwizard import Texwizard
 from elementhandler import Elementhandler
 
-from node import Node
 from element import Element
+from grid import Grid
+from node import Node
+            
 
 class Controller:
     """
@@ -22,6 +24,7 @@ class Controller:
         
         self.ehandler = Elementhandler()
         self.t = Texwizard(self)
+        self.grid = Grid(x_size=20, y_size=20, nodedistance=15, x=20, y=20)
         #link
         self.main = main
         
@@ -29,19 +32,11 @@ class Controller:
         
         #vars 
         self.leftdown = False
-        self.grid = [] #redo as a class!
-        self.x_shift = 20
-        self.y_shift = 20
-        self.gridsize = 20
-        self.xnodes = 0
-        self.ynodes = 0
         
         #init
         self.ehandler.Readfile('resistor') #nach handler verschieben?!
         
-        self.SetGrid(50, 50, 20, 20, 10, 2)
-        self.activenode = self.nodes[0]
-        self.nodes[0].active = True
+
         self.toDraw = 'resistor'
         self.toDrawOption = 'H'
         self.lastnode = [-1, -1]
@@ -67,32 +62,29 @@ class Controller:
         return res
     
     def OnLeftClick(self, event):
-        #print 'leftclick'
+        an = self.grid.an
+        ln = self.grid.ln
+        if an == None:
+            return
+
         if self.toDraw == 'wire': #drawing with 2 clicks
-            if self.lastnode[0] >= 0:
-                self.elements.append(Element('wire', '', self.lastnode[0], self.lastnode[1],
-                                               self.activenode.x, self.activenode.y ))
-                self.lastnode[0] = -1
+            if self.grid.ln is not None:
+                self.elements.append(Element('wire', '', ln.x, ln.y, an.x, an.y ))
+                self.grid.ln = None
             else:
-                self.lastnode[0] = self.activenode.x
-                self.lastnode[1] = self.activenode.y
-                
+                self.grid.ln = Node(an.x, an.y)    
         else:
-            self.elements.append(Element(self.toDraw, self.toDrawOption, self.activenode.x, self.activenode.y))
+            self.elements.append(Element(self.toDraw, self.toDrawOption, an.x, an.y))
         self.UpdateCanvas()
+        pass
+        
     
     def OnMouseOver(self, event):
-        #highlight nodes
-        x = event.GetX() - self.x_shift
-        y = event.GetY() - self.y_shift
-        for n in self.nodes:
-            if (x - n.x * self.gridsize)**2 + (y - n.y * self.gridsize)**2 <= (n.r+2)**2:
-                n.active = True
-                self.activenode = n
-                self.UpdateCanvas()
-            else:
-                n.active = False
-                
+        if self.grid.findActiveNode(event.GetX(), event.GetY()) == True:
+            self.UpdateCanvas()
+            
+        
+        
     def OnWriteCodeToFile(self, event):
         print self.t.GenerateCode()
         self.t.PrintToFile('test.tex')

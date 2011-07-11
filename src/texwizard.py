@@ -17,7 +17,7 @@ class Texwizard:
 
     def GenerateCode(self):
         code = ''
-        ymax = self.c.ynodes - 1
+        ymax = self.c.grid.y_size - 1
         
         for e in self.elements:
             code += "\\" 

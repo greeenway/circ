@@ -7,8 +7,7 @@ class Node:
     """
     Node represents a node in the grid.
     """
-    def __init__(self, x, y, r):
+    def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.r = r
         self.active = False
