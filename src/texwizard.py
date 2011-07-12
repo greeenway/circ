@@ -31,14 +31,14 @@ class Texwizard:
                 code += 'resis'
                 code += r'{'
                 if e.option == 'H':
-                    code += str(e.x + 3)
+                    code += str(e.x)
                 if e.option == 'V':
                     code += str(e.x)
                 code += r'}'
                 if e.option == 'H':
                     code += '{' + str(ymax - e.y) + '}'
                 if e.option == 'V':
-                    code += '{' + str(ymax - e.y - 3) + '}'
+                    code += '{' + str(ymax - e.y) + '}'
                 
                 code += r'{' + e.option + r'}'
                 code += '{}{}'

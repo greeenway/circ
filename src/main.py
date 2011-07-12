@@ -9,6 +9,7 @@
 # rect asymmetric...
 # invert coordinate system
 # improve codegeneration code
+# collision detection
 
 import wx
 from drawpanel import Drawpanel
@@ -17,6 +18,7 @@ from texwizard import Texwizard
 
 ID_SHOW_LOG = wx.NewId()
 ID_WRITE_TEX_TO_FILE = wx.NewId()
+ID_TOGGLE_BBOX = wx.NewId()
 
 class Mainwindow(wx.Frame):
     """
@@ -49,7 +51,9 @@ class Mainwindow(wx.Frame):
         #DEBUG
         debugmenu = wx.Menu()
         debugmenu.Append(ID_SHOW_LOG, 'Show &Log', 'Show Controller\'s Log')
-        wx.EVT_MENU(self, ID_SHOW_LOG, self.OnShowLog)
+        debugmenu.Append(ID_TOGGLE_BBOX, '&Toggle Visibility of BoundingBoxes')
+        wx.EVT_MENU(self, ID_SHOW_LOG, self.OnShowLog) #move to controller?
+        wx.EVT_MENU(self, ID_TOGGLE_BBOX, self.controller.OnToggleBoundingBox)
         
         menubar = wx.MenuBar()
         menubar.Append(filemenu, '&File')

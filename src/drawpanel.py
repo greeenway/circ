@@ -10,6 +10,7 @@ from node import Node
 
 GREY = (205, 205, 205)
 BLACK = (0, 0, 0)
+LIGHTBLUE = (0, 0, 255)
 
 class Drawpanel(wx.Window):
     """
@@ -71,12 +72,14 @@ class Drawpanel(wx.Window):
         elif self.c.toDraw == 'voltsrc' and self.c.grid.an is not None:
             self.DrawElement(dc, 'voltsrc',  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
         
-        self.color = BLACK
+        
         for e in self.c.t.elements:
+            self.color = BLACK
             if e.name == 'wire':
                 self.DrawWire(dc, e.x, e.y, e.x2, e.y2, self.c.grid.ndist)
             else:
-                self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist)
+                self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist, 
+                                 self.c.settings.drawboundingbox)
             
     def DrawWire(self, dc, x1, y1, x2, y2, s):
         #mh...
@@ -87,7 +90,7 @@ class Drawpanel(wx.Window):
         y2 = y2*s + self.c.grid.y
         dc.DrawLine(x1, y1, x2, y2)
     
-    def DrawElement(self, dc, name, option, x, y, s):
+    def DrawElement(self, dc, name, option, x, y, s, bbox = False):
               
         dlist = self.c.ehandler.GetDrawlist(name, option)
         x = x * s + self.c.grid.x
@@ -103,8 +106,10 @@ class Drawpanel(wx.Window):
             elif d[0] == 'circ':
                 dc.SetPen(wx.Pen(self.color, width=d[4]) )
                 dc.DrawCircle(x+d[1]*s, y +d[2]*s , d[3]*s)
-            else:
-                print 'unknown drawdirective...'
+            elif d[0] == 'bbox' and bbox:
+                dc.SetPen(wx.Pen(LIGHTBLUE, width=1) )
+                dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , (d[3]-d[1])*s, (d[4]-d[2])*s)
+
         
         
     

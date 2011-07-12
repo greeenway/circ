@@ -40,7 +40,7 @@ class Elementhandler:
                     cur_option = opt[0]
                     e.options[cur_option] = []
                 elif len(cur_option) > 0:
-                    if line[0:4] == 'line' or line[0:4] == 'circ' or line[0:4] == 'rect':
+                    if line[0:4] == 'line' or line[0:4] == 'circ' or line[0:4] == 'rect' or line[0:4] == 'bbox':
                         params = line[5:-1].rsplit(',')
                         l = [line[0:4]]
                         for p in params:

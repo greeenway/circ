@@ -5,6 +5,7 @@
 
 from texwizard import Texwizard
 from elementhandler import Elementhandler
+from settings import Settings
 
 from element import Element
 from grid import Grid
@@ -24,6 +25,7 @@ class Controller:
         #helper classes
         
         self.ehandler = Elementhandler()
+        self.settings = Settings()
         self.t = Texwizard(self)
         self.grid = Grid(x_size=30, y_size=30, nodedistance=13, x=20, y=20)
         #link
@@ -73,6 +75,9 @@ class Controller:
     def OnWriteCodeToFile(self, event):
         print self.t.GenerateCode()
         self.t.PrintToFile('test.tex')
+    
+    def OnToggleBoundingBox(self, event):
+        self.settings.drawboundingbox = not self.settings.drawboundingbox 
                 
     def DrawWire(self, event):
         self.toDraw = 'wire'
