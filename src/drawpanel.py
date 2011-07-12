@@ -96,19 +96,24 @@ class Drawpanel(wx.Window):
         x = x * s + self.c.grid.x
         y = y * s + self.c.grid.y 
         
+        #the asymmetric resistor (rect) problem:
+        #it is needed to add linewidth to the rect-width
+        #despite this the value 1.88 seems to leads to some rounding errors,
+        #eg. 2.0 produces a totally symmetric result
+        
         for d in dlist:
             if d[0] == 'line':
                 dc.SetPen(wx.Pen(self.color, width=d[5]) )
                 dc.DrawLine(x + d[1] * s, y + d[2]* s, x + d[3] *s, y + d[4]*s)
             elif d[0] == 'rect':
                 dc.SetPen(wx.Pen(self.color, width=d[5]) )
-                dc.DrawRectangle(x+d[1]*s, y +d[2]*s  , d[3]*s, d[4]*s)
+                dc.DrawRectangle(x+d[1]*s, y +d[2]*s  , d[3]*s+1*d[5], d[4]*s+1*d[5]) 
             elif d[0] == 'circ':
                 dc.SetPen(wx.Pen(self.color, width=d[4]) )
                 dc.DrawCircle(x+d[1]*s, y +d[2]*s , d[3]*s)
             elif d[0] == 'bbox' and bbox:
                 dc.SetPen(wx.Pen(LIGHTBLUE, width=1) )
-                dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , (d[3]-d[1])*s, (d[4]-d[2])*s)
+                dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , (d[3]-d[1])*s+1, (d[4]-d[2])*s+1)
 
         
         
