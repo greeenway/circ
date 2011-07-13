@@ -41,6 +41,12 @@ class Mainwindow(wx.Frame):
         self.preview = Preview(propertyPanel, self.controller)
         self.CreateStatusBar()
         
+        self.toolbar = wx.ToolBar(self, -1, style=wx.TB_VERTICAL)
+        self.toolbar.AddLabelTool(ID_REMOVE_LAST, 'Back', wx.Bitmap('../files/images/back.png'))
+        self.toolbar.AddLabelTool(ID_REMOVE_SELECTED, 'Delete', wx.Bitmap('../files/images/delete.png'))
+        self.toolbar.Realize()
+        self.Bind(wx.EVT_TOOL, self.controller.OnRemoveLast, id=ID_REMOVE_LAST)
+        self.Bind(wx.EVT_TOOL, self.controller.DeleteSelectedElements, id=ID_REMOVE_SELECTED)
         
         
         
@@ -116,14 +122,14 @@ class Mainwindow(wx.Frame):
         self.bhsizer.Add(self.currsrcButton, 1, wx.EXPAND | wx.BOTTOM, border=2)
             
         #self.vsizer.Add(self.bhsizer, 0, wx.EXPAND )
-        self.drawingBoxSizer = wx.BoxSizer(wx.VERTICAL)
+        self.drawingBoxSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.drawingBoxSizer.Add(self.drawpanel, 1, wx.EXPAND | wx.ALL, border=0)
-
         
         propertyPanel.SetSizer(self.bhsizer)
         drawingPanel.SetSizer(self.drawingBoxSizer)
         self.mainsizer = wx.BoxSizer(wx.HORIZONTAL)
         self.mainsizer.Add(splitter, 1, wx.EXPAND | wx.ALL, 0)
+        self.mainsizer.Add(self.toolbar, 0, wx.EXPAND)
         splitter.SplitVertically(propertyPanel, drawingPanel, 150)
         self.SetSizer(self.mainsizer)
         self.SetAutoLayout(1)

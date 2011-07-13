@@ -60,7 +60,7 @@ class Preview(wx.Window):
         
         if name is not None:
             if name == 'wire':
-                self.c.artist.DrawWire(dc, WIDTH/5, HEIGHT*0.4, 3*WIDTH/4, HEIGHT*0.2, 1, preview = True)
+                self.c.artist.DrawWire(dc, WIDTH*0.2, HEIGHT*0.5, WIDTH*0.8, HEIGHT*0.5, 1, preview = True)
             else:
                 self.c.artist.DrawElement(dc, name, option, WIDTH/2, HEIGHT/2, WIDTH/12, False, preview = True)
  
