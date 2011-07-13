@@ -11,7 +11,7 @@ from node import Node
 GREY = (205, 205, 205)
 BLACK = (0, 0, 0)
 LIGHTBLUE = (0, 0, 255)
-GREEN = (0, 255, 0)
+SELECTED = (255, 204, 0)
 
 class Drawpanel(wx.Window):
     """
@@ -45,6 +45,8 @@ class Drawpanel(wx.Window):
         size  = self.ClientSize
         self._Buffer = wx.EmptyBitmap(*size)
         self.UpdateDrawing()
+        self.c.UpdateSize(event)
+        
      
     def UpdateDrawing(self):
         dc = wx.MemoryDC()
@@ -68,17 +70,6 @@ class Drawpanel(wx.Window):
         #dc.DrawLabel('Hallo Welt', wx.Rect(40,40, 50, 20), alignment= wx.ALIGN_LEFT)
         #dc.DrawTextPoint('Hallo Welt', wx.Point(40,40))
         
-        #draw active
-        self.color = GREY
-        if self.c.toDraw is not None and self.c.grid.an is not None:
-            if self.c.toDraw == 'wire' and self.c.grid.ln is not None and self.c.grid.an is not None:
-                dc.SetPen(wx.Pen(GREY, width=1) )
-                dc.DrawLine(self.c.grid.ln.x * s + x, self.c.grid.ln.y* s + y, self.c.grid.an.x * s + x, self.c.grid.an.y * s + y)
-            elif self.c.toDraw is not 'wire':
-                self.DrawElement(dc, self.c.toDraw,  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
-           
-        
-        
         for e in self.c.elements:
             self.color = BLACK
             if e.name == 'wire':
@@ -91,6 +82,18 @@ class Drawpanel(wx.Window):
                 else:
                     self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist, 
                                  self.c.settings.drawboundingbox)
+        
+        #draw active
+        self.color = GREY
+        if self.c.toDraw is not None and self.c.grid.an is not None:
+            if self.c.toDraw == 'wire' and self.c.grid.ln is not None and self.c.grid.an is not None:
+                dc.SetPen(wx.Pen(GREY, width=1) )
+                dc.DrawLine(self.c.grid.ln.x * s + x, self.c.grid.ln.y* s + y, self.c.grid.an.x * s + x, self.c.grid.an.y * s + y)
+            elif self.c.toDraw is not 'wire':
+                self.DrawElement(dc, self.c.toDraw,  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
+           
+        
+    
             
     def DrawWire(self, dc, x1, y1, x2, y2, s):
         #mh...
@@ -111,22 +114,31 @@ class Drawpanel(wx.Window):
         #it is needed to add linewidth to the rect-width
         #despite this the value 1.88 seems to leads to some rounding errors,
         #eg. 2.0 produces a totally symmetric result
+        thick = 0
+        oldcolor = self.color
         
-        if selected:
-            self.color = GREEN
         for d in dlist:
-            if d[0] == 'line':
-                dc.SetPen(wx.Pen(self.color, width=d[5]) )
-                dc.DrawLine(x + d[1] * s, y + d[2]* s, x + d[3] *s, y + d[4]*s)
-            elif d[0] == 'rect':
-                dc.SetPen(wx.Pen(self.color, width=d[5]) )
-                dc.DrawRectangle(x+d[1]*s, y +d[2]*s  , d[3]*s+1*d[5], d[4]*s+1*d[5]) 
-            elif d[0] == 'circ':
-                dc.SetPen(wx.Pen(self.color, width=d[4]) )
-                dc.DrawCircle(x+d[1]*s, y +d[2]*s , d[3]*s)
-            elif d[0] == 'bbox' and bbox:
-                dc.SetPen(wx.Pen(LIGHTBLUE, width=1) )
-                dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , d[3]*s+1, d[4]*s+1)
+            for i in range(2):
+                if selected:
+                    if i is 0:
+                        thick = 5
+                        self.color = SELECTED
+                    else:
+                        thick = 0
+                        self.color = oldcolor
+            
+                if d[0] == 'line':
+                    dc.SetPen(wx.Pen(self.color, width=d[5]+thick) )
+                    dc.DrawLine(x + d[1] * s, y + d[2]* s, x + d[3] *s, y + d[4]*s)
+                elif d[0] == 'rect':
+                    dc.SetPen(wx.Pen(self.color, width=d[5]+thick) )
+                    dc.DrawRectangle(x+d[1]*s, y +d[2]*s  , d[3]*s+1*d[5], d[4]*s+1*d[5]) 
+                elif d[0] == 'circ':
+                    dc.SetPen(wx.Pen(self.color, width=d[4]+thick) )
+                    dc.DrawCircle(x+d[1]*s, y +d[2]*s , d[3]*s)
+                elif d[0] == 'bbox' and bbox:
+                    dc.SetPen(wx.Pen(LIGHTBLUE, width=1) )
+                    dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , d[3]*s+1, d[4]*s+1)
 
         
         

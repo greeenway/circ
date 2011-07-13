@@ -131,6 +131,16 @@ class Controller:
             self.elements.pop()
         self.UpdateCanvas()
     
+    def UpdateSize(self, event):
+        size = event.GetSize()
+        w = size[0]
+        h = size[1]
+        w_b = w - self.grid.ndist * self.grid.x_size
+        w_h = h - self.grid.ndist * self.grid.y_size
+        if w_b/2 > 0:
+            self.grid.x = w_b/2
+        if w_h/2 > 0:
+            self.grid.y = w_h/2
     
     def DrawWire(self, event):
         if self.toDraw is 'wire':
