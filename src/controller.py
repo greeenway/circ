@@ -83,6 +83,8 @@ class Controller:
     def OnRightClick(self, event):
         if self.toDraw is not None:
             self.toDraw = None
+            self.grid.ln = None
+            self.main.preview.UpdateDrawing()
             return
 
         for e in self.elements:
@@ -106,6 +108,11 @@ class Controller:
     def OnMouseOver(self, event):
         if self.grid.findActiveNode(event.GetX(), event.GetY()):
             self.UpdateCanvas()
+            
+    def OnAbout(self, event):
+        dlg = wx.MessageDialog(self.main, 'CIRC \n a GUI frontend for circdia.sty\t\n' '2011-\t', 'About',wx.OK | wx.ICON_INFORMATION)
+        dlg.ShowModal()
+        dlg.Destroy()
                    
     def OnKeyDown(self, event):
         print 'keydown'

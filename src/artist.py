@@ -4,6 +4,9 @@
 # 
 import wx
 
+LIGHTBLUE = (0, 0, 255)
+SELECTED = (255, 204, 0)
+
 class Artist:
     """
     provides a wrapper to the drawing function
@@ -12,13 +15,14 @@ class Artist:
         self.c = controller
         self.color = (255, 255, 255)
 
-    def DrawWire(self, dc, x1, y1, x2, y2, s):
+    def DrawWire(self, dc, x1, y1, x2, y2, s, preview = False):
         #mh...
         dc.SetPen(wx.Pen(self.color, width=1) ) #constant sucks.
-        x1 = x1*s + self.c.grid.x
-        y1 = y1*s + self.c.grid.y
-        x2 = x2*s + self.c.grid.x
-        y2 = y2*s + self.c.grid.y
+        if not preview:
+            x1 = x1*s + self.c.grid.x
+            y1 = y1*s + self.c.grid.y
+            x2 = x2*s + self.c.grid.x
+            y2 = y2*s + self.c.grid.y
         dc.DrawLine(x1, y1, x2, y2)
     
     def DrawElement(self, dc, name, option, x, y, s, bbox = False, selected = False, preview = False):

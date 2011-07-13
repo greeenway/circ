@@ -5,12 +5,9 @@
 
 #TODO
 # filled rects todo
-# implement drawing code for circles
-# rect asymmetric...
-# invert coordinate system
 # improve codegeneration code
-# collision detection
 # add text to elements.
+# add red status bar on errors
 
 import wx
 from drawpanel import Drawpanel
@@ -63,6 +60,7 @@ class Mainwindow(wx.Frame):
         
         # event routing
         wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
+        wx.EVT_MENU(self, wx.ID_ABOUT, self.controller.OnAbout)
         wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.controller.OnWriteCodeToFile) 
         wx.EVT_MENU(self, ID_REMOVE_SELECTED, self.controller.DeleteSelectedElements)
         wx.EVT_MENU(self, ID_REMOVE_LAST, self.controller.OnRemoveLast)

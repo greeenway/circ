@@ -77,7 +77,7 @@ class Drawpanel(wx.Window):
                 self.c.artist.DrawWire(dc, e.x, e.y, e.x2, e.y2, self.c.grid.ndist)
             else:
                 if e.selected:
-                    self.c.artistDrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist, 
+                    self.c.artist.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist, 
                                  self.c.settings.drawboundingbox,
                                  selected = True)
                 else:
