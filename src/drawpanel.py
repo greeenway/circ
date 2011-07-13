@@ -11,6 +11,7 @@ from node import Node
 GREY = (205, 205, 205)
 BLACK = (0, 0, 0)
 LIGHTBLUE = (0, 0, 255)
+GREEN = (0, 255, 0)
 
 class Drawpanel(wx.Window):
     """
@@ -29,8 +30,11 @@ class Drawpanel(wx.Window):
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         wx.EVT_SIZE(self, self.OnSize)
         
+        #make events local?
         wx.EVT_MOTION(self, self.c.OnMouseOver)
         wx.EVT_LEFT_DOWN(self, self.c.OnLeftClick)
+        wx.EVT_RIGHT_DOWN(self, self.c.OnRightClick)
+        wx.EVT_KEY_DOWN(self, self.c.OnKeyDown)
     
     def OnPaint(self, event=None):
         #draw buffer to the screen
@@ -61,6 +65,8 @@ class Drawpanel(wx.Window):
         x = self.c.grid.x
         y = self.c.grid.y
        
+        #dc.DrawLabel('Hallo Welt', wx.Rect(40,40, 50, 20), alignment= wx.ALIGN_LEFT)
+        #dc.DrawTextPoint('Hallo Welt', wx.Point(40,40))
         
         #draw active
         self.color = GREY
@@ -73,12 +79,17 @@ class Drawpanel(wx.Window):
             self.DrawElement(dc, 'voltsrc',  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
         
         
-        for e in self.c.t.elements:
+        for e in self.c.elements:
             self.color = BLACK
             if e.name == 'wire':
                 self.DrawWire(dc, e.x, e.y, e.x2, e.y2, self.c.grid.ndist)
             else:
-                self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist, 
+                if e.selected:
+                    self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist, 
+                                 self.c.settings.drawboundingbox,
+                                 selected = True)
+                else:
+                    self.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist, 
                                  self.c.settings.drawboundingbox)
             
     def DrawWire(self, dc, x1, y1, x2, y2, s):
@@ -90,7 +101,7 @@ class Drawpanel(wx.Window):
         y2 = y2*s + self.c.grid.y
         dc.DrawLine(x1, y1, x2, y2)
     
-    def DrawElement(self, dc, name, option, x, y, s, bbox = False):
+    def DrawElement(self, dc, name, option, x, y, s, bbox = False, selected = False):
               
         dlist = self.c.ehandler.GetDrawlist(name, option)
         x = x * s + self.c.grid.x
@@ -101,6 +112,8 @@ class Drawpanel(wx.Window):
         #despite this the value 1.88 seems to leads to some rounding errors,
         #eg. 2.0 produces a totally symmetric result
         
+        if selected:
+            self.color = GREEN
         for d in dlist:
             if d[0] == 'line':
                 dc.SetPen(wx.Pen(self.color, width=d[5]) )
@@ -113,7 +126,7 @@ class Drawpanel(wx.Window):
                 dc.DrawCircle(x+d[1]*s, y +d[2]*s , d[3]*s)
             elif d[0] == 'bbox' and bbox:
                 dc.SetPen(wx.Pen(LIGHTBLUE, width=1) )
-                dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , (d[3]-d[1])*s+1, (d[4]-d[2])*s+1)
+                dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , d[3]*s+1, d[4]*s+1)
 
         
         

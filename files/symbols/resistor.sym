@@ -1,16 +1,16 @@
 #resistor
 #line x1 y1 x2 y2 strength
 #rect x y w h strength filled
-#bbox x1 y1 x2 y2 the bounding box
+#bbox x1 y1 w h the bounding box
 H=Horizontal:
 line(-3, 0, -2.5, 0, 1)
 rect(-2.5, -0.94, 5, 1.88, 2, 0)
 line(2.5, 0, 3, 0, 1)
-bbox(-3, -0.94, 3, 0.94)
+bbox(-3, -0.94, 6, 1.88)
   
 V=Vertical:
 #a comment...
 line(0, 2.5, 0, 3, 1)
 rect(-0.94, -2.5, 1.88, 5, 2, 0)
 line(0, -2.5, 0, -3, 1)
-bbox(-0.94, -3, 0.94, 3)
+bbox(-0.94, -3, 1.88, 6)

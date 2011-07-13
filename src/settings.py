@@ -6,7 +6,7 @@
 class Settings:
     """
     The Settings class holds the application's settings.
-    Maybe saves and loades them (todo)
+    Maybe saves and loads them (todo)
     """
     def __init__(self):
         self.drawboundingbox = False

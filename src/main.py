@@ -10,6 +10,7 @@
 # invert coordinate system
 # improve codegeneration code
 # collision detection
+# add text to elements.
 
 import wx
 from drawpanel import Drawpanel
@@ -19,6 +20,8 @@ from texwizard import Texwizard
 ID_SHOW_LOG = wx.NewId()
 ID_WRITE_TEX_TO_FILE = wx.NewId()
 ID_TOGGLE_BBOX = wx.NewId()
+ID_REMOVE_SELECTED = wx.NewId()
+ID_REMOVE_LAST = wx.NewId()
 
 class Mainwindow(wx.Frame):
     """
@@ -44,9 +47,15 @@ class Mainwindow(wx.Frame):
         buildmenu = wx.Menu()
         buildmenu.Append(ID_WRITE_TEX_TO_FILE, '&Write Code', 'Generate LaTeX-Output (fileoutput).')
         
+        editmenu = wx.Menu()
+        editmenu.Append(ID_REMOVE_SELECTED, '&Remove selected Elements', 'Remove all selected elements.')
+        editmenu.Append(ID_REMOVE_LAST, '&Remove last Element', 'Remove the last created object.')
+        
         # event routing
         wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
-        wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.controller.OnWriteCodeToFile)
+        wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.controller.OnWriteCodeToFile) 
+        wx.EVT_MENU(self, ID_REMOVE_SELECTED, self.controller.DeleteSelectedElements)
+        wx.EVT_MENU(self, ID_REMOVE_LAST, self.controller.OnRemoveLast)
         
         #DEBUG
         debugmenu = wx.Menu()
@@ -57,6 +66,7 @@ class Mainwindow(wx.Frame):
         
         menubar = wx.MenuBar()
         menubar.Append(filemenu, '&File')
+        menubar.Append(editmenu, '&Edit')
         menubar.Append(buildmenu, '&Build')
         menubar.Append(debugmenu, '&Debug')
         self.SetMenuBar(menubar)

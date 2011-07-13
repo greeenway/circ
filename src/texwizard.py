@@ -12,14 +12,13 @@ class Texwizard:
     """
     def __init__(self, controller):
         self.c = controller
-        self.elements = self.c.elements
         
 
     def GenerateCode(self):
         code = ''
         ymax = self.c.grid.y_size - 1
         
-        for e in self.elements:
+        for e in self.c.elements:
             code += "\\" 
             
             if e.name == 'wire':

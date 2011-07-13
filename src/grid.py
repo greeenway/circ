@@ -35,7 +35,7 @@ class Grid:
     def findActiveNode(self, x, y):
         x = x - self.x
         y = y - self.y
-        g = int(self.ndist / 2)**2+1 #precalculated radius
+        g = int(self.ndist / 2)**2+4 #precalculated radius
         gs = self.ndist
         
         if self.an == None:
