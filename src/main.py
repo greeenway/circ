@@ -16,6 +16,7 @@ import wx
 from drawpanel import Drawpanel
 from controller import Controller
 from texwizard import Texwizard
+from preview import Preview
 
 ID_SHOW_LOG = wx.NewId()
 ID_WRITE_TEX_TO_FILE = wx.NewId()
@@ -30,26 +31,35 @@ class Mainwindow(wx.Frame):
     also defines the GUI and routes Events.
     """
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(600,500))
+        wx.Frame.__init__(self, parent, title=title, size=(800,600))
+        
+        ###
+        splitter = wx.SplitterWindow(self, -1)
+        propertyPanel = wx.Panel(splitter, -1, style=wx.BORDER_RAISED)
+        drawingPanel = wx.Panel(splitter, -1, style=wx.BORDER_RAISED)
+        ##
         
         self.controller = Controller(self) 
-        self.drawpanel = Drawpanel(self, self.controller)
-
+        self.drawpanel = Drawpanel(drawingPanel, self.controller)
+        self.preview = Preview(propertyPanel, self.controller)
         self.CreateStatusBar()
+        
+        
+        
         
         # ------------------------- create menue ------------------------------------------
         filemenu = wx.Menu()
         filemenu.Append(wx.ID_ABOUT, '&About', 'Some Information.')
         filemenu.AppendSeparator()
-        filemenu.Append(wx.ID_EXIT, 'E&xit', 'Terminate the program')
+        filemenu.Append(wx.ID_EXIT, 'E&xit', 'Terminate the program\tCtrl+Q')
         
         
         buildmenu = wx.Menu()
-        buildmenu.Append(ID_WRITE_TEX_TO_FILE, '&Write Code', 'Generate LaTeX-Output (fileoutput).')
+        buildmenu.Append(ID_WRITE_TEX_TO_FILE, '&Write Code\tCtrl+W', 'Generate LaTeX-Output (fileoutput).')
         
         editmenu = wx.Menu()
         editmenu.Append(ID_REMOVE_SELECTED, '&Remove selected Elements', 'Remove all selected elements.')
-        editmenu.Append(ID_REMOVE_LAST, '&Remove last Element', 'Remove the last created object.')
+        editmenu.Append(ID_REMOVE_LAST, '&Remove last Element\tCtrl+Z', 'Remove the last created object.')
         
         # event routing
         wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
@@ -60,7 +70,8 @@ class Mainwindow(wx.Frame):
         #DEBUG
         debugmenu = wx.Menu()
         debugmenu.Append(ID_SHOW_LOG, 'Show &Log', 'Show Controller\'s Log')
-        debugmenu.Append(ID_TOGGLE_BBOX, '&Toggle Visibility of BoundingBoxes')
+        debugmenu.Append(ID_TOGGLE_BBOX, '&Show BoundingBoxes', kind=wx.ITEM_CHECK)
+        debugmenu.Check(ID_TOGGLE_BBOX, False)
         wx.EVT_MENU(self, ID_SHOW_LOG, self.OnShowLog) #move to controller?
         wx.EVT_MENU(self, ID_TOGGLE_BBOX, self.controller.OnToggleBoundingBox)
         
@@ -75,13 +86,13 @@ class Mainwindow(wx.Frame):
         # ---------------------- buttons --------------------------------------------- 
         self.buttons = []
 
-        self.wirebutton = wx.Button(self, -1, 'wire')  
-        self.resistorHbutton = wx.Button(self, -1, 'R(H)')
-        self.resistorVbutton = wx.Button(self, -1, 'R(V)')
-        self.vltsrcHbutton = wx.Button(self, -1, 'VSrc(H)')
-        self.vltsrcVbutton = wx.Button(self, -1, 'VSrc(V)')
-        self.currsrcButton = wx.Button(self, -1, 'Iq')
-        self.capacitorButton = wx.Button(self, -1, 'C')
+        self.wirebutton = wx.Button(propertyPanel, -1, 'wire')  
+        self.resistorHbutton = wx.Button(propertyPanel, -1, 'R(H)')
+        self.resistorVbutton = wx.Button(propertyPanel, -1, 'R(V)')
+        self.vltsrcHbutton = wx.Button(propertyPanel, -1, 'VSrc(H)')
+        self.vltsrcVbutton = wx.Button(propertyPanel, -1, 'VSrc(V)')
+        self.currsrcButton = wx.Button(propertyPanel, -1, 'Iq')
+        self.capacitorButton = wx.Button(propertyPanel, -1, 'C')
         
         # event routing
         self.wirebutton.Bind(wx.EVT_BUTTON, self.controller.DrawWire)
@@ -95,9 +106,9 @@ class Mainwindow(wx.Frame):
         # ---------------------- / buttons --------------------------------------------- 
         
         # ----------------------- sizers -----------------------------------------------
-        self.vsizer = wx.BoxSizer(wx.HORIZONTAL) 
-        self.bhsizer = wx.BoxSizer(wx.VERTICAL)  
         
+        self.bhsizer = wx.BoxSizer(wx.VERTICAL)  
+        self.bhsizer.Add(self.preview, 0, wx.EXPAND | wx.BOTTOM, border=0)
         self.bhsizer.Add(self.wirebutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
         self.bhsizer.Add(self.resistorHbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
         self.bhsizer.Add(self.resistorVbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
@@ -106,11 +117,17 @@ class Mainwindow(wx.Frame):
         self.bhsizer.Add(self.capacitorButton, 1, wx.EXPAND | wx.BOTTOM, border=2)
         self.bhsizer.Add(self.currsrcButton, 1, wx.EXPAND | wx.BOTTOM, border=2)
             
-        self.vsizer.Add(self.bhsizer, 0, wx.EXPAND )
-        self.vsizer.Add(self.drawpanel, 1, wx.EXPAND | wx.ALL, border=3)
+        #self.vsizer.Add(self.bhsizer, 0, wx.EXPAND )
+        self.drawingBoxSizer = wx.BoxSizer(wx.VERTICAL)
+        self.drawingBoxSizer.Add(self.drawpanel, 1, wx.EXPAND | wx.ALL, border=0)
 
         
-        self.SetSizer(self.vsizer)
+        propertyPanel.SetSizer(self.bhsizer)
+        drawingPanel.SetSizer(self.drawingBoxSizer)
+        self.mainsizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.mainsizer.Add(splitter, 1, wx.EXPAND | wx.ALL, 0)
+        splitter.SplitVertically(propertyPanel, drawingPanel, 150)
+        self.SetSizer(self.mainsizer)
         self.SetAutoLayout(1)
         # ----------------------- / sizers -----------------------------------------------
         

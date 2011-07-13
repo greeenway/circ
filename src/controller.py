@@ -6,6 +6,7 @@
 from texwizard import Texwizard
 from elementhandler import Elementhandler
 from settings import Settings
+from artist import Artist
 
 from element import Element
 from grid import Grid
@@ -29,6 +30,7 @@ class Controller:
         self.settings = Settings()
         self.t = Texwizard(self)
         self.grid = Grid(x_size=30, y_size=30, nodedistance=13, x=20, y=20)
+        self.artist = Artist(self)
         
         #link
         self.main = main
@@ -148,22 +150,27 @@ class Controller:
             self.toDraw = None
         else:
             self.toDraw = 'wire'
+        self.main.preview.UpdateDrawing()
         
     def DrawResistorH(self, event):
         self.toDraw = 'resistor'
         self.toDrawOption = 'H'
+        self.main.preview.UpdateDrawing()
 
     def DrawResistorV(self, event):
         self.toDraw = 'resistor'
         self.toDrawOption = 'V'
+        self.main.preview.UpdateDrawing()
         
     def DrawVoltSrcH(self, event):
         self.toDraw = 'voltsrc'
         self.toDrawOption = 'H'
+        self.main.preview.UpdateDrawing()
         
     def DrawVoltSrcV(self, event):
         self.toDraw = 'voltsrc'
         self.toDrawOption = 'V'
+        self.main.preview.UpdateDrawing()
     
     def DrawCapacitor(self, event):
         self.toDraw = 'capacitor'
@@ -171,6 +178,7 @@ class Controller:
             self.toDrawOption = 'H'
         else:
             self.toDrawOption = 'V'
+        self.main.preview.UpdateDrawing()
     
     def DrawCurrSrc(self, event):
         self.toDraw = 'currsrc'
@@ -178,9 +186,11 @@ class Controller:
             self.toDrawOption = 'H'
         else:
             self.toDrawOption = 'V'
+        self.main.preview.UpdateDrawing()
         
     def UpdateCanvas(self):
         self.main.drawpanel.UpdateDrawing()
+        
         
         
         
