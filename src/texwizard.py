@@ -41,6 +41,22 @@ class Texwizard:
                 
                 code += r'{' + e.option + r'}'
                 code += '{}{}'
+                
+            if e.name == 'capacitor':
+                code += 'capac'
+                code += r'{'
+                if e.option == 'H':
+                    code += str(e.x)
+                if e.option == 'V':
+                    code += str(e.x)
+                code += r'}'
+                if e.option == 'H':
+                    code += '{' + str(ymax - e.y) + '}'
+                if e.option == 'V':
+                    code += '{' + str(ymax - e.y) + '}'
+                code += r'{' + e.option + r'}'
+                code += '{}{}'
+              
             if e.name == 'voltsrc':
                 code += r'voltsrc'
                 code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'

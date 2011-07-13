@@ -70,13 +70,13 @@ class Drawpanel(wx.Window):
         
         #draw active
         self.color = GREY
-        if self.c.toDraw == 'wire' and self.c.grid.ln is not None and self.c.grid.an is not None:
-            dc.SetPen(wx.Pen(GREY, width=1) )
-            dc.DrawLine(self.c.grid.ln.x * s + x, self.c.grid.ln.y* s + y, self.c.grid.an.x * s + x, self.c.grid.an.y * s + y)
-        elif self.c.toDraw == 'resistor' and self.c.grid.an is not None:
-            self.DrawElement(dc, 'resistor',  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
-        elif self.c.toDraw == 'voltsrc' and self.c.grid.an is not None:
-            self.DrawElement(dc, 'voltsrc',  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
+        if self.c.toDraw is not None and self.c.grid.an is not None:
+            if self.c.toDraw == 'wire' and self.c.grid.ln is not None and self.c.grid.an is not None:
+                dc.SetPen(wx.Pen(GREY, width=1) )
+                dc.DrawLine(self.c.grid.ln.x * s + x, self.c.grid.ln.y* s + y, self.c.grid.an.x * s + x, self.c.grid.an.y * s + y)
+            elif self.c.toDraw is not 'wire':
+                self.DrawElement(dc, self.c.toDraw,  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
+           
         
         
         for e in self.c.elements:

@@ -75,11 +75,12 @@ class Mainwindow(wx.Frame):
         # ---------------------- buttons --------------------------------------------- 
         self.buttons = []
 
-        self.wirebutton = wx.Button(self, -1, 'Draw wire')  
-        self.resistorHbutton = wx.Button(self, -1, 'Draw R(H)')
-        self.resistorVbutton = wx.Button(self, -1, 'Draw R(V)')
+        self.wirebutton = wx.Button(self, -1, 'wire')  
+        self.resistorHbutton = wx.Button(self, -1, 'R(H)')
+        self.resistorVbutton = wx.Button(self, -1, 'R(V)')
         self.vltsrcHbutton = wx.Button(self, -1, 'VSrc(H)')
         self.vltsrcVbutton = wx.Button(self, -1, 'VSrc(V)')
+        self.capacitorButton = wx.Button(self, -1, 'C')
         
         # event routing
         self.wirebutton.Bind(wx.EVT_BUTTON, self.controller.DrawWire)
@@ -87,6 +88,7 @@ class Mainwindow(wx.Frame):
         self.resistorVbutton.Bind(wx.EVT_BUTTON, self.controller.DrawResistorV)
         self.vltsrcHbutton.Bind(wx.EVT_BUTTON, self.controller.DrawVoltSrcH)
         self.vltsrcVbutton.Bind(wx.EVT_BUTTON, self.controller.DrawVoltSrcV)
+        self.capacitorButton.Bind(wx.EVT_BUTTON, self.controller.DrawCapacitor)
         
         # ---------------------- / buttons --------------------------------------------- 
         
@@ -99,10 +101,7 @@ class Mainwindow(wx.Frame):
         self.bhsizer.Add(self.resistorVbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
         self.bhsizer.Add(self.vltsrcHbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
         self.bhsizer.Add(self.vltsrcVbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
-        
-        for i in range(0, 4):
-            self.buttons.append(wx.Button(self, -1, 'button ' + str(i)))
-            self.bhsizer.Add(self.buttons[i], 1, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.capacitorButton, 1, wx.EXPAND | wx.BOTTOM, border=2)
             
         self.vsizer.Add(self.bhsizer, 0, wx.EXPAND )
         self.vsizer.Add(self.drawpanel, 1, wx.EXPAND | wx.ALL, border=3)

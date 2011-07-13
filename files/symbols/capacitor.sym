@@ -1,0 +1,18 @@
+#capazitor
+#line x1 y1 x2 y2 strength
+#rect x y w h strength filled
+#bbox x1 y1 w h the bounding box
+H=Horizontal:
+line(-1, 0, -0.45, 0, 1)
+line(-0.45, -1.7, -0.45, 1.7, 2)
+line(0.45, -1.7, 0.45, 1.7, 2)
+line(0.45, 0, 1, 0, 1)
+bbox(-1, -1.7, 2, 3.4)
+  
+V=Vertical:
+#a comment...
+line(0, -1, 0, -0.45, 1)
+line(-1.7, -0.45, 1.7, -0.45, 2)
+line(-1.7, 0.45, 1.7, 0.45, 2)
+line(0, 1, 0, 0.45, 1)
+bbox(-1.7, -1, 3.4, 2)

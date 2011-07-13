@@ -41,6 +41,7 @@ class Controller:
         #init
         self.ehandler.Readfile('resistor') #nach handler verschieben?!
         self.ehandler.Readfile('voltsrc')
+        self.ehandler.Readfile('capacitor')
 
         self.toDraw = None
         self.toDrawOption = None
@@ -153,6 +154,13 @@ class Controller:
         self.toDraw = 'voltsrc'
         self.toDrawOption = 'V'
     
+    def DrawCapacitor(self, event):
+        self.toDraw = 'capacitor'
+        if self.toDrawOption is not 'H':
+            self.toDrawOption = 'H'
+        else:
+            self.toDrawOption = 'V'
+        
     def UpdateCanvas(self):
         self.main.drawpanel.UpdateDrawing()
         
