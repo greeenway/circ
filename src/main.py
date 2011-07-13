@@ -80,6 +80,7 @@ class Mainwindow(wx.Frame):
         self.resistorVbutton = wx.Button(self, -1, 'R(V)')
         self.vltsrcHbutton = wx.Button(self, -1, 'VSrc(H)')
         self.vltsrcVbutton = wx.Button(self, -1, 'VSrc(V)')
+        self.currsrcButton = wx.Button(self, -1, 'Iq')
         self.capacitorButton = wx.Button(self, -1, 'C')
         
         # event routing
@@ -88,6 +89,7 @@ class Mainwindow(wx.Frame):
         self.resistorVbutton.Bind(wx.EVT_BUTTON, self.controller.DrawResistorV)
         self.vltsrcHbutton.Bind(wx.EVT_BUTTON, self.controller.DrawVoltSrcH)
         self.vltsrcVbutton.Bind(wx.EVT_BUTTON, self.controller.DrawVoltSrcV)
+        self.currsrcButton.Bind(wx.EVT_BUTTON, self.controller.DrawCurrSrc)
         self.capacitorButton.Bind(wx.EVT_BUTTON, self.controller.DrawCapacitor)
         
         # ---------------------- / buttons --------------------------------------------- 
@@ -102,6 +104,7 @@ class Mainwindow(wx.Frame):
         self.bhsizer.Add(self.vltsrcHbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
         self.bhsizer.Add(self.vltsrcVbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
         self.bhsizer.Add(self.capacitorButton, 1, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.currsrcButton, 1, wx.EXPAND | wx.BOTTOM, border=2)
             
         self.vsizer.Add(self.bhsizer, 0, wx.EXPAND )
         self.vsizer.Add(self.drawpanel, 1, wx.EXPAND | wx.ALL, border=3)

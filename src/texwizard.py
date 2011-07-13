@@ -64,6 +64,14 @@ class Texwizard:
                     code += '{H}{}{}'
                 else:
                     code += '{V}{}{}'
+            
+            if e.name == 'currsrc':
+                code += r'currsrc'
+                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
+                if e.option == 'H':
+                    code += '{H}{}{}'
+                else:
+                    code += '{V}{}{}'
                 
  
             code += '\n'

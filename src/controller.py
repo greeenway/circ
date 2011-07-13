@@ -42,6 +42,7 @@ class Controller:
         self.ehandler.Readfile('resistor') #nach handler verschieben?!
         self.ehandler.Readfile('voltsrc')
         self.ehandler.Readfile('capacitor')
+        self.ehandler.Readfile('currsrc')
 
         self.toDraw = None
         self.toDrawOption = None
@@ -166,6 +167,13 @@ class Controller:
     
     def DrawCapacitor(self, event):
         self.toDraw = 'capacitor'
+        if self.toDrawOption is not 'H':
+            self.toDrawOption = 'H'
+        else:
+            self.toDrawOption = 'V'
+    
+    def DrawCurrSrc(self, event):
+        self.toDraw = 'currsrc'
         if self.toDrawOption is not 'H':
             self.toDrawOption = 'H'
         else:

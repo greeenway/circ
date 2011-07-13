@@ -1,0 +1,17 @@
+#current source
+#line x1 y1 x2 y2 strength
+#circ x y r strength filled
+H=Horizontal:
+line(-3, 0, -2, 0, 1)
+circ(0, 0, 2, 2, 0)
+line(2, 0, 3, 0, 1)
+line(0, -2, 0, 2, 2)
+bbox(-3, -2, 6, 4)
+
+V=Vertical:
+line(0, -3, 0, -2, 1)
+circ(0, 0, 2, 2, 0)
+line(0, 2, 0, 3, 1)
+line(-2, 0, 2, 0, 2)
+bbox(-2, -3, 4, 6)
+
