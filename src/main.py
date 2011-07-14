@@ -14,6 +14,7 @@ from drawpanel import Drawpanel
 from controller import Controller
 from texwizard import Texwizard
 from preview import Preview
+from elementlist import Elementlist
 
 ID_SHOW_LOG = wx.NewId()
 ID_WRITE_TEX_TO_FILE = wx.NewId()
@@ -28,7 +29,7 @@ class Mainwindow(wx.Frame):
     also defines the GUI and routes Events.
     """
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(800,600))
+        wx.Frame.__init__(self, parent, title=title, size=(800,700))
         
         ###
         splitter = wx.SplitterWindow(self, -1)
@@ -39,6 +40,11 @@ class Mainwindow(wx.Frame):
         self.controller = Controller(self) 
         self.drawpanel = Drawpanel(drawingPanel, self.controller)
         self.preview = Preview(propertyPanel, self.controller)
+        self.searchbar = wx.TextCtrl(propertyPanel, style=wx.TE_PROCESS_ENTER) 
+        #self.searchbar.SetFocus() 
+        self.elementlist = Elementlist(propertyPanel, self.controller)
+
+        
         self.CreateStatusBar()
         
         self.toolbar = wx.ToolBar(self, -1, style=wx.TB_VERTICAL)
@@ -70,6 +76,7 @@ class Mainwindow(wx.Frame):
         wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.controller.OnWriteCodeToFile) 
         wx.EVT_MENU(self, ID_REMOVE_SELECTED, self.controller.DeleteSelectedElements)
         wx.EVT_MENU(self, ID_REMOVE_LAST, self.controller.OnRemoveLast)
+        self.searchbar.Bind(wx.EVT_TEXT, self.controller.OnSearchbarTextChange)
         
         #DEBUG
         debugmenu = wx.Menu()
@@ -113,13 +120,18 @@ class Mainwindow(wx.Frame):
         
         self.bhsizer = wx.BoxSizer(wx.VERTICAL)  
         self.bhsizer.Add(self.preview, 0, wx.EXPAND | wx.BOTTOM, border=0)
-        self.bhsizer.Add(self.wirebutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
-        self.bhsizer.Add(self.resistorHbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
-        self.bhsizer.Add(self.resistorVbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
-        self.bhsizer.Add(self.vltsrcHbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
-        self.bhsizer.Add(self.vltsrcVbutton, 1, wx.EXPAND | wx.BOTTOM, border=2)
-        self.bhsizer.Add(self.capacitorButton, 1, wx.EXPAND | wx.BOTTOM, border=2)
-        self.bhsizer.Add(self.currsrcButton, 1, wx.EXPAND | wx.BOTTOM, border=2)
+        
+        
+        self.bhsizer.Add(self.wirebutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.resistorHbutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.resistorVbutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.vltsrcHbutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.vltsrcVbutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.capacitorButton, 0, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.currsrcButton, 0, wx.EXPAND | wx.BOTTOM, border=2)
+        
+        self.bhsizer.Add(self.searchbar, 0, wx.EXPAND | wx.BOTTOM, border=2)
+        self.bhsizer.Add(self.elementlist, 1, wx.EXPAND | wx.LEFT | wx.BOTTOM, border=0)
             
         #self.vsizer.Add(self.bhsizer, 0, wx.EXPAND )
         self.drawingBoxSizer = wx.BoxSizer(wx.HORIZONTAL)

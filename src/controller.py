@@ -120,6 +120,9 @@ class Controller:
         if keycode == wx.WXK_DELETE:
             print 'deletekey'
             self.DeleteSelectedElements()
+            
+    def OnSearchbarTextChange(self, event):
+        self.main.elementlist.TextChange(self.main.searchbar.GetValue())
         
     def OnWriteCodeToFile(self, event):
         print self.t.GenerateCode()
@@ -197,6 +200,7 @@ class Controller:
         
     def UpdateCanvas(self):
         self.main.drawpanel.UpdateDrawing()
+        self.main.preview.UpdateDrawing()
         
         
         
