@@ -68,30 +68,21 @@ class Drawpanel(wx.Window):
         y = self.c.grid.y
        
         #dc.DrawLabel('Hallo Welt', wx.Rect(40,40, 50, 20), alignment= wx.ALIGN_LEFT)
-        font1 = wx.Font(13, wx.SWISS, wx.NORMAL, wx.NORMAL, False, u'Arial')
-        dc.SetFont(font1)
+        #font1 = wx.Font(13, wx.SWISS, wx.NORMAL, wx.NORMAL, False, u'Arial')
+        #dc.SetFont(font1)
         #dc.DrawTextPoint('Hallo Welt! 123456789', wx.Point(40,40))
+        
         for e in self.c.elements:
             self.c.artist.color = BLACK
-            if e.name == 'wire':
-                self.c.artist.DrawWire(dc, e.x, e.y, e.x2, e.y2, self.c.grid.ndist)
-            else:
-                if e.selected:
-                    self.c.artist.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist, 
-                                 self.c.settings.drawboundingbox,
-                                 selected = True)
-                else:
-                    self.c.artist.DrawElement(dc, e.name, e.option, e.x, e.y, self.c.grid.ndist, 
-                                 self.c.settings.drawboundingbox)
-        
+            self.c.artist.DrawElement(dc, e)
+
         #draw active
         self.c.artist.color = GREY
-        if self.c.toDraw is not None and self.c.grid.an is not None:
-            if self.c.toDraw == 'wire' and self.c.grid.ln is not None and self.c.grid.an is not None:
-                dc.SetPen(wx.Pen(GREY, width=1) )
-                dc.DrawLine(self.c.grid.ln.x * s + x, self.c.grid.ln.y* s + y, self.c.grid.an.x * s + x, self.c.grid.an.y * s + y)
-            elif self.c.toDraw is not 'wire':
-                self.c.artist.DrawElement(dc, self.c.toDraw,  self.c.toDrawOption, self.c.grid.an.x, self.c.grid.an.y, self.c.grid.ndist)
+        if self.c.curPattern is not None and self.c.grid.an is not None:
+            self.c.curPattern.sample.x = self.c.grid.an.x #wire to do
+            self.c.curPattern.sample.y = self.c.grid.an.y
+            self.c.artist.DrawElement(dc, self.c.curPattern.sample)
+
            
 
     

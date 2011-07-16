@@ -31,6 +31,7 @@ class Controller:
         self.t = Texwizard(self)
         self.grid = Grid(x_size=30, y_size=30, nodedistance=13, x=20, y=20)
         self.artist = Artist(self)
+        self.curPattern = None
         
         #link
         self.main = main
@@ -62,34 +63,38 @@ class Controller:
         if an == None:
             return
         
-        if self.toDraw is None:
-            return
+        if self.curPattern is not None:
+            elem = self.curPattern.CreateElement(an.x, an.y, x2 = 0, y2 = 0)
+            self.elements.append(elem)
+        # if self.toDraw is None:
+            # return
         
-        if self.toDraw == 'wire': #drawing with 2 clicks
-            if self.grid.ln is not None:
-                self.elements.append(Element('wire', '', ln.x, ln.y, an.x, an.y ))
-                self.grid.ln = None
-            else:
-                self.grid.ln = Node(an.x, an.y)    
-        else:
-            dl = self.ehandler.GetDrawlist(self.toDraw, self.toDrawOption)   
+        # if self.toDraw == 'wire': #drawing with 2 clicks
+            # if self.grid.ln is not None:
+                # self.elements.append(Element('wire', '', ln.x, ln.y, an.x, an.y ))
+                # self.grid.ln = None
+            # else:
+                # self.grid.ln = Node(an.x, an.y)    
+        # else:
+            # dl = self.ehandler.GetDrawlist(self.toDraw, self.toDrawOption)   
             
-            box = Rectangle(self.grid.an.x+dl[-1][1], an.y+ dl[-1][2], dl[-1][3], dl[-1][4])
-            #print 'x = '+str(box.x) + ', y='+str(box.y)+ ', w='+str(box.w)+ ', h='+str(box.h) 
-            self.elements.append(Element(self.toDraw, self.toDrawOption, an.x, an.y, bbox=box))
+            # box = Rectangle(self.grid.an.x+dl[-1][1], an.y+ dl[-1][2], dl[-1][3], dl[-1][4])
+           ## print 'x = '+str(box.x) + ', y='+str(box.y)+ ', w='+str(box.w)+ ', h='+str(box.h) 
+            # self.elements.append(Element(self.toDraw, self.toDrawOption, an.x, an.y, bbox=box))
         
         self.UpdateCanvas()
         
     def OnRightClick(self, event):
-        if self.toDraw is not None:
-            self.toDraw = None
-            self.grid.ln = None
-            self.main.preview.UpdateDrawing()
-            return
+        # if self.toDraw is not None:
+            # self.toDraw = None
+            # self.grid.ln = None
+            # self.UpdateCanvas()
+            # return
 
         for e in self.elements:
             if e.bbox is not None:
                 if self.IsInBoundingBox(event.GetX(), event.GetY(), e.bbox):
+                    
                     e.selected = not e.selected
                     self.UpdateCanvas()
         
@@ -160,35 +165,24 @@ class Controller:
             self.toDraw = None
         else:
             self.toDraw = 'wire'
-        self.main.preview.UpdateDrawing()
+        self.UpdateCanvas() #improve!
         
-    def DrawResistorH(self, event):
-        self.toDraw = 'resistor'
-        self.toDrawOption = 'H'
-        self.main.preview.UpdateDrawing()
+    def DrawResistor(self, event):
+        self.curPattern = self.main.pages[self.main.activePage].resistorPattern
+        self.main.pages[self.main.activePage].ChangeActive()
+        self.UpdateCanvas() #improve!
 
-    def DrawResistorV(self, event):
-        self.toDraw = 'resistor'
-        self.toDrawOption = 'V'
-        self.main.preview.UpdateDrawing()
         
-    def DrawVoltSrcH(self, event):
+    def DrawVoltSrc(self, event):
         self.toDraw = 'voltsrc'
         self.toDrawOption = 'H'
-        self.main.preview.UpdateDrawing()
+        self.UpdateCanvas() #improve!
         
-    def DrawVoltSrcV(self, event):
-        self.toDraw = 'voltsrc'
-        self.toDrawOption = 'V'
-        self.main.preview.UpdateDrawing()
     
     def DrawCapacitor(self, event):
-        self.toDraw = 'capacitor'
-        if self.toDrawOption is not 'H':
-            self.toDrawOption = 'H'
-        else:
-            self.toDrawOption = 'V'
-        self.main.preview.UpdateDrawing()
+        self.curPattern = self.main.pages[self.main.activePage].capacitorPattern
+        self.main.pages[self.main.activePage].ChangeActive()
+        self.UpdateCanvas() #improve!
     
     def DrawCurrSrc(self, event):
         self.toDraw = 'currsrc'
@@ -196,11 +190,13 @@ class Controller:
             self.toDrawOption = 'H'
         else:
             self.toDrawOption = 'V'
-        self.main.preview.UpdateDrawing()
+        self.UpdateCanvas() #improve!
         
     def UpdateCanvas(self):
         self.main.drawpanel.UpdateDrawing()
-        self.main.preview.UpdateDrawing()
+        
+        #maybe optimize this:
+        self.main.pages[self.main.activePage].preview.UpdateDrawing()
         
         
         

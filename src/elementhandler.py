@@ -6,7 +6,7 @@
 import wx
 import re
 
-class Element:
+class Drawingpattern:
     def __init__(self, name):
         self.name = name
         self.options = {}      
@@ -17,7 +17,7 @@ class Elementhandler:
     information needed for drawing objects
     """
     def __init__(self):
-        self.elements = []
+        self.patterns = []
         self.path = '../files/symbols/'
         self.ext = '.sym'
     
@@ -27,7 +27,7 @@ class Elementhandler:
             lines = [line.strip() for line in open(self.path + filename + self.ext)]
             f.close()
             
-            e = Element(filename)
+            d = Drawingpattern(filename)
             cur_option = ''
             
             for line in lines:
@@ -38,14 +38,14 @@ class Elementhandler:
                     opt = line[:-1]
                     opt = opt.rsplit('=')
                     cur_option = opt[0]
-                    e.options[cur_option] = []
+                    d.options[cur_option] = []
                 elif len(cur_option) > 0:
                     if line[0:4] == 'line' or line[0:4] == 'circ' or line[0:4] == 'rect' or line[0:4] == 'bbox':
                         params = line[5:-1].rsplit(',')
                         l = [line[0:4]]
                         for p in params:
                             l.append(float(p))
-                        e.options[cur_option].append(l)
+                        d.options[cur_option].append(l)
 
                     else:
                         raise Exception('Invalid format')
@@ -57,28 +57,33 @@ class Elementhandler:
             print 'Cannout read ' + filename 
         except Exception:
             print 'Invalid format'
-        self.elements.append(e) 
+        self.patterns.append(d) 
         
-    def ShowElements(self):
+    def ShowDrawingpatterns(self):
         #debug
-        for element in self.elements:
-            print 'name = ' + element.name
-            for option in element.options:
+        for d in self.patterns:
+            print 'name = ' + d.name
+            for option in d.options:
                 print option
-                for line in element.options[option]:
+                for line in d.options[option]:
                     print line
     
     def GetDrawlist(self, name, option):
-        for e in self.elements:
-            if e.name == name:
-                return e.options[option]
+        for p in self.patterns:
+            if p.name == name:
+                return p.options[option]
+    
+    def GetPattern(self, name):
+        for p in self.patterns:
+            if p.name == name:
+                return p
     
 
 
 if __name__ == '__main__':
     e = Elementhandler()
     e.Readfile('voltsrc')
-    #e.ShowElements()
-    print e.GetDrawlist('voltsrc', 'H')
+    e.ShowDrawingpatterns()
+    #print e.GetDrawlist('voltsrc', 'H')
     
     

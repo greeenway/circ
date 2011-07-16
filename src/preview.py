@@ -48,23 +48,26 @@ class Preview(wx.Window):
     def Draw(self, dc):
         #actual drawing code
         dc.Clear()
-        dc.SetBrush(wx.Brush("white")) 
+        dc.SetBrush(wx.Brush("white")) #dc.SetBrush(wx.Brush("white")) 
         self.c.artist.color = BLACK
-        name = self.c.toDraw
-        option = self.c.toDrawOption
+        #name = self.c.toDraw
+        #option = self.c.toDrawOption
         
         font1 = wx.Font(13, wx.SWISS, wx.NORMAL, wx.NORMAL, False, u'Arial')
         dc.SetFont(font1)
-        dc.DrawTextPoint(str(name), (WIDTH/4, HEIGHT*5/6))
-        #dc.DrawLabel(str(name), wx.Rect(WIDTH/2, HEIGHT*5/6, WIDTH, HEIGHT/2), alignment=wx.ALIGN_TOP)
+        #dc.DrawTextPoint(str(name), (WIDTH/4, HEIGHT*5/6))
+        # dc.DrawLabel(str(name), wx.Rect(WIDTH/2, HEIGHT*5/6, WIDTH, HEIGHT/2), alignment=wx.ALIGN_TOP)
         
-        if name is not None:
-            if name == 'wire':
-                self.c.artist.DrawWire(dc, WIDTH*0.2, HEIGHT*0.5, WIDTH*0.8, HEIGHT*0.5, 1, preview = True)
-            else:
-                self.c.artist.DrawElement(dc, name, option, WIDTH/2, HEIGHT/2, WIDTH/12, False, preview = True)
+        # if name is not None:
+            # if name == 'wire':
+                # self.c.artist.DrawWire(dc, WIDTH*0.2, HEIGHT*0.5, WIDTH*0.8, HEIGHT*0.5, 1, preview = True)
+            # else:
+                # self.c.artist.DrawElement(dc, name, option, WIDTH/2, HEIGHT/2, WIDTH/12, False, preview = True)
  
-    
+        if self.c.curPattern is not None:
+            self.c.artist.DrawElement(dc, self.c.curPattern.sample,
+                    preview = True, px = WIDTH/2 , py = HEIGHT/2, ps = WIDTH/12)
+            
 
            
         

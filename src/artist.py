@@ -25,23 +25,29 @@ class Artist:
             y2 = y2*s + self.c.grid.y
         dc.DrawLine(x1, y1, x2, y2)
     
-    def DrawElement(self, dc, name, option, x, y, s, bbox = False, selected = False, preview = False):
+    def DrawElement(self, dc, elem, preview = False, px = 0 , py = 0, ps = 0):
               
-        dlist = self.c.ehandler.GetDrawlist(name, option)
-        if not preview:
+        dlist = elem.GetDrawlist()
+        s = self.c.grid.ndist
+        
+        x = elem.x
+        y = elem.y
+        if preview:
+            s = ps
+            x = px
+            y = py
+        else:
+            s = self.c.grid.ndist
             x = x * s + self.c.grid.x
             y = y * s + self.c.grid.y 
         
-        #the asymmetric resistor (rect) problem:
-        #it is needed to add linewidth to the rect-width
-        #despite this the value 1.88 seems to leads to some rounding errors,
-        #eg. 2.0 produces a totally symmetric result
+        
         thick = 0
         oldcolor = self.color
         
         for d in dlist:
             for i in range(2):
-                if selected:
+                if elem.selected:
                     if i is 0:
                         thick = 5
                         self.color = SELECTED
@@ -58,7 +64,7 @@ class Artist:
                 elif d[0] == 'circ':
                     dc.SetPen(wx.Pen(self.color, width=d[4]+thick) )
                     dc.DrawCircle(x+d[1]*s, y +d[2]*s , d[3]*s)
-                elif d[0] == 'bbox' and bbox:
+                elif d[0] == 'bbox' and elem.showBbox:
                     dc.SetPen(wx.Pen(LIGHTBLUE, width=1) )
                     dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , d[3]*s+1, d[4]*s+1)
 
