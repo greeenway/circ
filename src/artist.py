@@ -88,5 +88,6 @@ class Artist:
         #dc.SetPen(wx.Pen("black", width=2) )
         a = self.c.grid.an
         if a:
-            dc.DrawCircle( x + a.x * s, y + a.y*s, 3)
+            dc.SetPen(wx.Pen(SELECTED, width=2) )
+            dc.DrawCircle( x + a.x * s, y + a.y*s, 2)
 

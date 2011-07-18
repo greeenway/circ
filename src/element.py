@@ -21,14 +21,10 @@ class Element:
         
     def GetDrawlist(self):
         return self.pattern.GetDrawlist( self.options)
+    
+    def Rotate(self):
+        if self.options['Orientation'] is 'V':
+            self.options['Orientation'] = 'H'
+        else:
+            self.options['Orientation'] = 'V'
 
-
-        
-class Resistor(Element):
-    def __init__(self):
-        Element.__init__(self, '', '', 0, 0, x2 = 0, y2 = 0, bbox = None)
-
-        self.options.append(['LIST', 'Orientation', 'H','V'])
-        self.options.append(['TEXT', 'Name', 'R1'])
-        self.options.append(['TEXT', 'Value', '100Ohm'])
-        

@@ -27,6 +27,7 @@ ID_WRITE_TEX_TO_FILE = wx.NewId()
 ID_TOGGLE_BBOX = wx.NewId()
 ID_REMOVE_SELECTED = wx.NewId()
 ID_REMOVE_LAST = wx.NewId()
+ID_ROTATE = wx.NewId()
 
 class CButton(wx.BitmapButton):
     def __init__(self, parent, path, size=(40,40)):
@@ -52,7 +53,6 @@ class SidePanel(wx.Panel):
         self.mainsizer.Add(self.preview,0 , wx.EXPAND |wx.RIGHT, 1)
         self.buttonsizer = wx.BoxSizer(wx.VERTICAL)
         self.mainsizer.Add(self.prop, 3, wx.EXPAND |wx.ALL, 5)
-
         
         self.mainsizer.Add(self.buttonsizer, 5, wx.SHAPED |wx.ALL, 5)
         self.preview.OnSize()
@@ -255,8 +255,9 @@ class Mainwindow(wx.Frame):
         buildmenu.Append(ID_WRITE_TEX_TO_FILE, '&Write Code\tCtrl+W', 'Generate LaTeX-Output (fileoutput).')
         
         editmenu = wx.Menu()
-        editmenu.Append(ID_REMOVE_SELECTED, '&Remove selected Elements', 'Remove all selected elements.')
-        editmenu.Append(ID_REMOVE_LAST, '&Remove last Element\tCtrl+Z', 'Remove the last created object.')
+        editmenu.Append(ID_REMOVE_SELECTED, 'Remove &selected Elements', 'Remove all selected elements.')
+        editmenu.Append(ID_REMOVE_LAST, 'Remove &last Element\tCtrl+Z', 'Remove the last created object.')
+        editmenu.Append(ID_ROTATE, 'Rotate selected Elements\tCtrl+R', 'Rotate all selected elements.')
         
         # event routing
         wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
@@ -264,6 +265,7 @@ class Mainwindow(wx.Frame):
         wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.controller.OnWriteCodeToFile) 
         wx.EVT_MENU(self, ID_REMOVE_SELECTED, self.controller.DeleteSelectedElements)
         wx.EVT_MENU(self, ID_REMOVE_LAST, self.controller.OnRemoveLast)
+        wx.EVT_MENU(self, ID_ROTATE, self.controller.OnRotate)
         
         
         #DEBUG

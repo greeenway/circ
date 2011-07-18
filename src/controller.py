@@ -47,8 +47,8 @@ class Controller:
         self.ehandler.Readfile('capacitor')
         self.ehandler.Readfile('currsrc')
 
-        self.toDraw = None
-        self.toDrawOption = None
+        #self.toDraw = None
+        #self.toDrawOption = None
         
     def PrintLog(self):
         res = ''
@@ -56,6 +56,17 @@ class Controller:
             res += entry
             res += '\n'
         return res
+        
+    def OnRotate(self, event=None):
+        if self.curPattern:
+            self.curPattern.sample.Rotate()
+        
+        for e in self.elements:
+            if e.selected:
+                e.Rotate()
+        self.UpdateCanvas()
+        
+        
     
     def OnLeftClick(self, event):
         an = self.grid.an
@@ -66,29 +77,34 @@ class Controller:
         if self.curPattern is not None:
             if self.curPattern.special is None:
                 elem = self.curPattern.CreateElement(an.x, an.y, x2 = 0, y2 = 0)
+                if self.elements:
+                    self.elements[-1].selected = False
+                elem.selected = True
                 self.elements.append(elem)
                 
-            elif self.curPattern.special is 'wire':
+            if self.curPattern.special is 'wire':
                 if ln is None:
                     self.grid.ln = an
-                else:
-                    elem = self.curPattern.CreateElement(ln.x, ln.y, an.x, an.y)
-                    self.elements.append(elem)
-                    self.grid.ln = None
-                  
-
-        
-
         
         self.UpdateCanvas()
         
+    def OnLeftUp(self, event):
+        an = self.grid.an
+        ln = self.grid.ln
+        
+        if an == None:
+            return
+        if self.curPattern is not None:
+            if self.curPattern.special is 'wire':
+                if ln is not None:
+                    elem = self.curPattern.CreateElement(ln.x, ln.y, an.x, an.y)
+                    self.elements.append(elem)
+                    self.grid.ln = None
+                    self.UpdateCanvas()
+                
+                
+        
     def OnRightClick(self, event):
-        # if self.toDraw is not None:
-            # self.toDraw = None
-            # self.grid.ln = None
-            # self.UpdateCanvas()
-            # return
-
         for e in self.elements:
             if e.bbox is not None:
                 if self.IsInBoundingBox(event.GetX(), event.GetY(), e.bbox):

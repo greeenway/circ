@@ -34,6 +34,7 @@ class Drawpanel(wx.Window):
         wx.EVT_MOTION(self, self.c.OnMouseOver)
         wx.EVT_LEFT_DOWN(self, self.c.OnLeftClick)
         wx.EVT_RIGHT_DOWN(self, self.c.OnRightClick)
+        self.Bind(wx.EVT_LEFT_UP, self.c.OnLeftUp)
         #wx.EVT_KEY_DOWN(self, self.c.OnKeyDown)
     
     def OnPaint(self, event=None):

@@ -21,6 +21,7 @@ class Elementpattern:
         self.cur_options = {}
         self.special = None
         self.name = ''
+        self.sample = None
         
     
     def CreateElement(self):
@@ -47,6 +48,7 @@ class Resistorpattern(Elementpattern):
         self.cur_options['Value'] = '100 Ohm'
         self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
         self.name = 'resis'
+
     
     def CreateElement(self, x, y, x2 = 0, y2 = 0):
         ne = Element(x, y, x2, y2)
@@ -59,6 +61,7 @@ class Resistorpattern(Elementpattern):
         if d[-1][0] == 'bbox':
             ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
         ne.options = copy.deepcopy(self.cur_options)
+        print ne.options
         return ne
         
 class Capacitorpattern(Elementpattern):
