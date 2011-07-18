@@ -32,6 +32,9 @@ class Artist:
         
         x = elem.x
         y = elem.y
+        x2 = elem.x2
+        y2 = elem.y2
+        
         if preview:
             s = ps
             x = px
@@ -40,10 +43,15 @@ class Artist:
             s = self.c.grid.ndist
             x = x * s + self.c.grid.x
             y = y * s + self.c.grid.y 
-        
+            x2 = x2 * s + self.c.grid.x
+            y2 = y2 * s + self.c.grid.y
         
         thick = 0
         oldcolor = self.color
+        
+        if dlist is 'wire':
+            dc.SetPen(wx.Pen(self.color, width=1))
+            dc.DrawLine(x, y, x2, y2)
         
         for d in dlist:
             for i in range(2):

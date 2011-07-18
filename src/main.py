@@ -85,6 +85,8 @@ class SidePanel(wx.Panel):
         print 'change active'
         if self.controller.curPattern is not None: 
             self.SetOptions(self.controller.curPattern)
+            self.controller.UpdateCanvas()
+        
     
     def ClearOptions(self):
         self.prop.Clear(True)
@@ -99,13 +101,11 @@ class PanelRLC(SidePanel):
         SidePanel.__init__(self, parent, controller)
         self.controller = controller
         
-        self.elements = []
+        #self.elements = []
         
         self.resistorPattern = Resistorpattern(self.controller.ehandler.GetPattern('resistor'))
         self.capacitorPattern = Capacitorpattern(self.controller.ehandler.GetPattern('capacitor'))
         
-        self.ChangeActive()
-
         
         self.resistorButton = wx.Button(self, -1, 'Resistor')  
         self.capacitorButton = wx.Button(self, -1, 'Capacitor')
@@ -122,15 +122,38 @@ class PanelRLC(SidePanel):
 class PanelSources(SidePanel):
     def __init__(self, parent, controller):
         SidePanel.__init__(self, parent, controller)
-        self.test = wx.Button(self, -1, 'Sources')  
-        self.AddButton(self.test)
+        
+        self.vltsrcPattern = Voltagesourcepattern(self.controller.ehandler.GetPattern('voltsrc'))
+        self.cursrcPattern = Currentsourcepattern(self.controller.ehandler.GetPattern('currsrc'))
+        
+        #self.cur
+  
+        
+        self.voltsrcButton = wx.Button(self, -1, 'Voltage Source')  
+        self.currsrcButton = wx.Button(self, -1, 'Current Source')
+        
+        self.voltsrcButton.Bind(wx.EVT_BUTTON, self.controller.DrawVoltSrc)
+        self.currsrcButton.Bind(wx.EVT_BUTTON, self.controller.DrawCurrSrc)
+        
+        self.AddButton(self.voltsrcButton)
+        self.AddButton(self.currsrcButton)
+        
+        
+        
         self.SetSizer(self.mainsizer)
         
 class PanelWires(SidePanel):
     def __init__(self, parent, controller):
         SidePanel.__init__(self, parent, controller)
-        self.test = wx.Button(self, -1, 'Wires')  
-        self.AddButton(self.test)
+        
+        self.wirePattern = Wirepattern()
+        
+        self.curPattern = self.wirePattern
+        
+        self.wireButton = wx.Button(self, -1, 'Wire')
+        self.wireButton.Bind(wx.EVT_BUTTON, self.controller.DrawWire)
+        self.AddButton(self.wireButton)
+        
         self.SetSizer(self.mainsizer)
 
 class PanelDiodes(SidePanel):
@@ -168,7 +191,7 @@ class Mainwindow(wx.Frame):
     also defines the GUI and routes Events.
     """
     def __init__(self, parent, title):
-        wx.Frame.__init__(self, parent, title=title, size=(800,700))
+        wx.Frame.__init__(self, parent, title=title, size=(900,600))
 
         self.controller = Controller(self) 
         self.drawpanel = Drawpanel(self, self.controller)
@@ -202,7 +225,7 @@ class Mainwindow(wx.Frame):
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.OnNbChange)
         
         self.mainsizer = wx.BoxSizer(wx.HORIZONTAL) 
-        self.mainsizer.Add(nb, 3, wx.EXPAND | wx.ALL, border=0)
+        self.mainsizer.Add(nb, 5, wx.EXPAND | wx.ALL, border=0)
         self.mainsizer.Add(self.drawpanel  , 8, wx.EXPAND | wx.ALL, border=0)
         
         
@@ -236,12 +259,12 @@ class Mainwindow(wx.Frame):
         editmenu.Append(ID_REMOVE_LAST, '&Remove last Element\tCtrl+Z', 'Remove the last created object.')
         
         # event routing
-        # wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
-        # wx.EVT_MENU(self, wx.ID_ABOUT, self.controller.OnAbout)
-        # wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.controller.OnWriteCodeToFile) 
-        # wx.EVT_MENU(self, ID_REMOVE_SELECTED, self.controller.DeleteSelectedElements)
-        # wx.EVT_MENU(self, ID_REMOVE_LAST, self.controller.OnRemoveLast)
-        # self.searchbar.Bind(wx.EVT_TEXT, self.controller.OnSearchbarTextChange)
+        wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
+        wx.EVT_MENU(self, wx.ID_ABOUT, self.controller.OnAbout)
+        wx.EVT_MENU(self, ID_WRITE_TEX_TO_FILE, self.controller.OnWriteCodeToFile) 
+        wx.EVT_MENU(self, ID_REMOVE_SELECTED, self.controller.DeleteSelectedElements)
+        wx.EVT_MENU(self, ID_REMOVE_LAST, self.controller.OnRemoveLast)
+        
         
         #DEBUG
         debugmenu = wx.Menu()

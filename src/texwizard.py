@@ -21,28 +21,29 @@ class Texwizard:
         for e in self.c.elements:
             code += "\\" 
             
-            if e.name == 'wire':
+            #TODO FIX GENERATION CODE...
+            if e.pattern.name == 'wire':
                 code += 'wire'
                 code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}{'
                 code += str(e.x2) + '}{' + str(ymax - e.y2) + '}'
  
-            if e.name == 'resistor':
+            if e.pattern.name == 'resis':
                 code += 'resis'
                 code += r'{'
-                if e.option == 'H':
+                if e.options['Orientation'] == 'H':
                     code += str(e.x)
-                if e.option == 'V':
+                if e.options['Orientation'] == 'V':
                     code += str(e.x)
                 code += r'}'
-                if e.option == 'H':
+                if e.options['Orientation'] == 'H':
                     code += '{' + str(ymax - e.y) + '}'
-                if e.option == 'V':
+                if e.options['Orientation'] == 'V':
                     code += '{' + str(ymax - e.y) + '}'
                 
-                code += r'{' + e.option + r'}'
+                code += r'{' + e.options['Orientation'] + r'}'
                 code += '{}{}'
                 
-            if e.name == 'capacitor':
+            if e.pattern.name == 'capac':
                 code += 'capac'
                 code += r'{'
                 if e.option == 'H':
@@ -57,7 +58,7 @@ class Texwizard:
                 code += r'{' + e.option + r'}'
                 code += '{}{}'
               
-            if e.name == 'voltsrc':
+            if e.pattern.name== 'voltsrc':
                 code += r'voltsrc'
                 code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
                 if e.option == 'H':
@@ -65,7 +66,7 @@ class Texwizard:
                 else:
                     code += '{V}{}{}'
             
-            if e.name == 'currsrc':
+            if e.pattern.name == 'currsrc':
                 code += r'currsrc'
                 code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
                 if e.option == 'H':

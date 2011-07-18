@@ -64,23 +64,21 @@ class Controller:
             return
         
         if self.curPattern is not None:
-            elem = self.curPattern.CreateElement(an.x, an.y, x2 = 0, y2 = 0)
-            self.elements.append(elem)
-        # if self.toDraw is None:
-            # return
+            if self.curPattern.special is None:
+                elem = self.curPattern.CreateElement(an.x, an.y, x2 = 0, y2 = 0)
+                self.elements.append(elem)
+                
+            elif self.curPattern.special is 'wire':
+                if ln is None:
+                    self.grid.ln = an
+                else:
+                    elem = self.curPattern.CreateElement(ln.x, ln.y, an.x, an.y)
+                    self.elements.append(elem)
+                    self.grid.ln = None
+                  
+
         
-        # if self.toDraw == 'wire': #drawing with 2 clicks
-            # if self.grid.ln is not None:
-                # self.elements.append(Element('wire', '', ln.x, ln.y, an.x, an.y ))
-                # self.grid.ln = None
-            # else:
-                # self.grid.ln = Node(an.x, an.y)    
-        # else:
-            # dl = self.ehandler.GetDrawlist(self.toDraw, self.toDrawOption)   
-            
-            # box = Rectangle(self.grid.an.x+dl[-1][1], an.y+ dl[-1][2], dl[-1][3], dl[-1][4])
-           ## print 'x = '+str(box.x) + ', y='+str(box.y)+ ', w='+str(box.w)+ ', h='+str(box.h) 
-            # self.elements.append(Element(self.toDraw, self.toDrawOption, an.x, an.y, bbox=box))
+
         
         self.UpdateCanvas()
         
@@ -160,36 +158,31 @@ class Controller:
         if w_h/2 > 0:
             self.grid.y = w_h/2
     
-    def DrawWire(self, event):
-        if self.toDraw is 'wire':
-            self.toDraw = None
-        else:
-            self.toDraw = 'wire'
+    def DrawWire(self, event = None):
+        self.curPattern = self.main.pages[self.main.activePage].wirePattern
+        self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
         
-    def DrawResistor(self, event):
+    def DrawResistor(self, event= None):
         self.curPattern = self.main.pages[self.main.activePage].resistorPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
 
         
-    def DrawVoltSrc(self, event):
-        self.toDraw = 'voltsrc'
-        self.toDrawOption = 'H'
+    def DrawVoltSrc(self, event = None):
+        self.curPattern = self.main.pages[self.main.activePage].vltsrcPattern
+        self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
         
     
-    def DrawCapacitor(self, event):
+    def DrawCapacitor(self, event = None):
         self.curPattern = self.main.pages[self.main.activePage].capacitorPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
     
-    def DrawCurrSrc(self, event):
-        self.toDraw = 'currsrc'
-        if self.toDrawOption is not 'H':
-            self.toDrawOption = 'H'
-        else:
-            self.toDrawOption = 'V'
+    def DrawCurrSrc(self, event = None):
+        self.curPattern = self.main.pages[self.main.activePage].cursrcPattern
+        self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
         
     def UpdateCanvas(self):

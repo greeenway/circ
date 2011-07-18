@@ -79,9 +79,18 @@ class Drawpanel(wx.Window):
         #draw active
         self.c.artist.color = GREY
         if self.c.curPattern is not None and self.c.grid.an is not None:
-            self.c.curPattern.sample.x = self.c.grid.an.x #wire to do
-            self.c.curPattern.sample.y = self.c.grid.an.y
-            self.c.artist.DrawElement(dc, self.c.curPattern.sample)
+            if self.c.curPattern.special is 'wire':
+                if self.c.grid.ln is not None and self.c.grid.an is not None:
+                    self.c.curPattern.sample.x = self.c.grid.ln.x
+                    self.c.curPattern.sample.y = self.c.grid.ln.y
+                    self.c.curPattern.sample.x2 = self.c.grid.an.x
+                    self.c.curPattern.sample.y2 = self.c.grid.an.y
+                    self.c.artist.DrawElement(dc, self.c.curPattern.sample)
+                    
+            else:
+                self.c.curPattern.sample.x = self.c.grid.an.x #wire to do
+                self.c.curPattern.sample.y = self.c.grid.an.y
+                self.c.artist.DrawElement(dc, self.c.curPattern.sample)
 
            
 
