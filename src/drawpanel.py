@@ -67,33 +67,27 @@ class Drawpanel(wx.Window):
         s = self.c.grid.ndist
         x = self.c.grid.x
         y = self.c.grid.y
-       
-        #dc.DrawLabel('Hallo Welt', wx.Rect(40,40, 50, 20), alignment= wx.ALIGN_LEFT)
-        #font1 = wx.Font(13, wx.SWISS, wx.NORMAL, wx.NORMAL, False, u'Arial')
-        #dc.SetFont(font1)
-        #dc.DrawTextPoint('Hallo Welt! 123456789', wx.Point(40,40))
         
         for e in self.c.elements:
             self.c.artist.color = BLACK
             self.c.artist.DrawElement(dc, e)
 
         #draw active
-        self.c.artist.color = GREY
-        if self.c.curPattern is not None and self.c.grid.an is not None:
-            if self.c.curPattern.special is 'wire':
-                if self.c.grid.ln is not None and self.c.grid.an is not None:
-                    self.c.curPattern.sample.x = self.c.grid.ln.x
-                    self.c.curPattern.sample.y = self.c.grid.ln.y
-                    self.c.curPattern.sample.x2 = self.c.grid.an.x
-                    self.c.curPattern.sample.y2 = self.c.grid.an.y
+        if self.c.mode == 'INSERT':
+            self.c.artist.color = GREY
+            if self.c.curPattern is not None and self.c.grid.an is not None:
+                if self.c.curPattern.special is 'wire':
+                    if self.c.grid.ln is not None and self.c.grid.an is not None:
+                        self.c.curPattern.sample.x = self.c.grid.ln.x
+                        self.c.curPattern.sample.y = self.c.grid.ln.y
+                        self.c.curPattern.sample.x2 = self.c.grid.an.x
+                        self.c.curPattern.sample.y2 = self.c.grid.an.y
+                        self.c.artist.DrawElement(dc, self.c.curPattern.sample)
+                        
+                else:
+                    self.c.curPattern.sample.x = self.c.grid.an.x #wire to do
+                    self.c.curPattern.sample.y = self.c.grid.an.y
                     self.c.artist.DrawElement(dc, self.c.curPattern.sample)
-                    
-            else:
-                self.c.curPattern.sample.x = self.c.grid.an.x #wire to do
-                self.c.curPattern.sample.y = self.c.grid.an.y
-                self.c.artist.DrawElement(dc, self.c.curPattern.sample)
-
-           
 
     
     

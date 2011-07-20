@@ -28,6 +28,7 @@ ID_TOGGLE_BBOX = wx.NewId()
 ID_REMOVE_SELECTED = wx.NewId()
 ID_REMOVE_LAST = wx.NewId()
 ID_ROTATE = wx.NewId()
+ID_SELECT = wx.NewId()
 
 class CButton(wx.BitmapButton):
     def __init__(self, parent, path, size=(40,40)):
@@ -267,11 +268,13 @@ class Mainwindow(wx.Frame):
         self.CreateStatusBar()
         
         self.toolbar = wx.ToolBar(self, -1, style=wx.TB_VERTICAL)
+        self.toolbar.AddLabelTool(ID_SELECT, 'Select', wx.Bitmap('../files/images/select.png'))
         self.toolbar.AddLabelTool(ID_REMOVE_LAST, 'Back', wx.Bitmap('../files/images/back.png'))
         self.toolbar.AddLabelTool(ID_REMOVE_SELECTED, 'Delete', wx.Bitmap('../files/images/delete.png'))
         self.toolbar.Realize()
         self.Bind(wx.EVT_TOOL, self.controller.OnRemoveLast, id=ID_REMOVE_LAST)
         self.Bind(wx.EVT_TOOL, self.controller.DeleteSelectedElements, id=ID_REMOVE_SELECTED)
+        self.Bind(wx.EVT_TOOL, self.controller.OnSelect, id=ID_SELECT)
         
         self.mainsizer.Add(self.toolbar, 0, wx.EXPAND | wx.ALL, border=0)
         

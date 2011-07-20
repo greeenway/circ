@@ -32,6 +32,7 @@ class Controller:
         self.grid = Grid(x_size=30, y_size=30, nodedistance=13, x=20, y=20)
         self.artist = Artist(self)
         self.curPattern = None
+        self.mode = 'SELECT'
         
         #link
         self.main = main
@@ -75,19 +76,23 @@ class Controller:
         ln = self.grid.ln
         if an == None:
             return
-        
-        if self.curPattern is not None:
-            if self.curPattern.special is None:
-                elem = self.curPattern.CreateElement(an.x, an.y, x2 = 0, y2 = 0)
-                if self.elements:
-                    self.elements[-1].selected = False
-                elem.selected = True
-                self.elements.append(elem)
-                
-            if self.curPattern.special is 'wire':
-                if ln is None:
-                    self.grid.ln = an
-        
+        if self.mode == 'INSERT':
+            if self.curPattern is not None:
+                if self.curPattern.special is None:
+                    elem = self.curPattern.CreateElement(an.x, an.y, x2 = 0, y2 = 0)
+                    #if self.elements:
+                    #    self.elements[-1].selected = False
+                    #elem.selected = True
+                    self.elements.append(elem)
+                    
+                if self.curPattern.special is 'wire':
+                    if ln is None:
+                        self.grid.ln = an
+        elif self.mode == 'SELECT':
+            for e in self.elements:
+                if e.bbox is not None:
+                    if self.IsInBoundingBox(event.GetX(), event.GetY(), e.bbox):
+                        e.selected = not e.selected
         self.UpdateCanvas()
         
     def OnLeftUp(self, event):
@@ -141,9 +146,9 @@ class Controller:
         if keycode == wx.WXK_DELETE:
             print 'deletekey'
             self.DeleteSelectedElements()
-            
-    def OnSearchbarTextChange(self, event):
-        self.main.elementlist.TextChange(self.main.searchbar.GetValue())
+    
+    def OnSelect(self, event=None):
+        self.mode = 'SELECT'
         
     def OnWriteCodeToFile(self, event):
         print self.t.GenerateCode()
@@ -178,37 +183,44 @@ class Controller:
             self.grid.y = w_h/2
     
     def DrawWire(self, event = None):
+        self.mode = 'INSERT'
         self.curPattern = self.main.pages[self.main.activePage].wirePattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
         
     def DrawResistor(self, event= None):
+        self.mode = 'INSERT'
         self.curPattern = self.main.pages[self.main.activePage].resistorPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
     
     def DrawInductor(self, event=None):
+        self.mode = 'INSERT'
         self.curPattern = self.main.pages[self.main.activePage].inductorPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
         
     def DrawVoltSrc(self, event = None):
+        self.mode = 'INSERT'
         self.curPattern = self.main.pages[self.main.activePage].vltsrcPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
         
     
     def DrawCapacitor(self, event = None):
+        self.mode = 'INSERT'
         self.curPattern = self.main.pages[self.main.activePage].capacitorPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
     
     def DrawCurrSrc(self, event = None):
+        self.mode = 'INSERT'
         self.curPattern = self.main.pages[self.main.activePage].cursrcPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
         
     def UpdateCanvas(self):
+        
         self.main.drawpanel.UpdateDrawing()
         
         #maybe optimize this:
