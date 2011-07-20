@@ -28,6 +28,14 @@ class Elementpattern:
         """
         Creates an element, with the current configuration 
         """
+    def UpdateSample(self):
+        pass
+    
+    def Rotate(self):
+        if self.cur_options['Orientation'] is 'V':
+            self.cur_options['Orientation'] = 'H'
+        else:
+            self.cur_options['Orientation'] = 'V'
         
     def GetDrawlist(self, options):
         # append text directives here (to the returned object)
@@ -48,7 +56,9 @@ class Resistorpattern(Elementpattern):
         self.cur_options['Value'] = '100 Ohm'
         self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
         self.name = 'resis'
-
+    
+    def UpdateSample(self):
+        self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
     
     def CreateElement(self, x, y, x2 = 0, y2 = 0):
         ne = Element(x, y, x2, y2)
@@ -69,13 +79,39 @@ class Capacitorpattern(Elementpattern):
         Elementpattern.__init__(self, dpattern)
         self.options.append(['LIST', 'Orientation', 'H','V'])
         self.options.append(['LIST', 'Textorientation', 'l', 'u', 'hd', 'dd'])
-        self.options.append(['TEXT', 'Name', 'R1'])
-        self.options.append(['TEXT', 'Value', '100 Ohm'])
+        self.options.append(['TEXT', 'Name', 'C1'])
+        self.options.append(['TEXT', 'Value', '100 mF'])
         self.cur_options['Orientation'] = 'H'
         self.cur_options['Name'] = 'C'
         self.cur_options['Value'] = '150 muF'
         self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
         self.name = 'capac'
+    
+    def CreateElement(self, x, y, x2 = 0, y2 = 0):
+        ne = Element(x, y, x2, y2)
+        ne.pattern = self
+        ne.x = x
+        ne.y = y
+        ne.x2 = x2
+        ne.y2 = y2
+        d = self.GetDrawlist(self.cur_options)
+        if d[-1][0] == 'bbox':
+            ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
+        ne.options = copy.deepcopy(self.cur_options)
+        return ne
+
+class Inductorpattern(Elementpattern):
+    def __init__(self, dpattern):
+        Elementpattern.__init__(self, dpattern)
+        self.options.append(['LIST', 'Orientation', 'H','V'])
+        self.options.append(['LIST', 'Textorientation', 'l', 'u', 'hd', 'dd'])
+        self.options.append(['TEXT', 'Name', 'L1'])
+        self.options.append(['TEXT', 'Value', '100 mH'])
+        self.cur_options['Orientation'] = 'H'
+        self.cur_options['Name'] = 'L'
+        self.cur_options['Value'] = '150 mH'
+        self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
+        self.name = 'induc'
     
     def CreateElement(self, x, y, x2 = 0, y2 = 0):
         ne = Element(x, y, x2, y2)

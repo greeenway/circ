@@ -42,7 +42,8 @@ class Elementhandler:
                     cur_option = opt[0]
                     d.options[cur_option] = []
                 elif len(cur_option) > 0:
-                    if line[0:4] == 'line' or line[0:4] == 'circ' or line[0:4] == 'rect' or line[0:4] == 'bbox':
+                    if line[0:4] == 'line' or line[0:4] == 'circ' or line[0:4] == 'rect' or line[0:4] == 'bbox' or \
+                            line[0:4] == 'tex1' or line[0:4] == 'tex2' or line[0:4] == 'arc1':
                         params = line[5:-1].rsplit(',')
                         l = [line[0:4]]
                         for p in params:
@@ -84,7 +85,7 @@ class Elementhandler:
 
 if __name__ == '__main__':
     e = Elementhandler()
-    e.Readfile('voltsrc')
+    e.Readfile('resistor')
     e.ShowDrawingpatterns()
     #print e.GetDrawlist('voltsrc', 'H')
     

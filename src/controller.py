@@ -46,7 +46,8 @@ class Controller:
         self.ehandler.Readfile('voltsrc')
         self.ehandler.Readfile('capacitor')
         self.ehandler.Readfile('currsrc')
-
+        self.ehandler.Readfile('inductor')
+        
         #self.toDraw = None
         #self.toDrawOption = None
         
@@ -60,6 +61,7 @@ class Controller:
     def OnRotate(self, event=None):
         if self.curPattern:
             self.curPattern.sample.Rotate()
+            self.curPattern.Rotate()
         
         for e in self.elements:
             if e.selected:
@@ -149,6 +151,7 @@ class Controller:
 
     def OnToggleBoundingBox(self, event):
         self.settings.drawboundingbox = not self.settings.drawboundingbox 
+        self.UpdateCanvas()
     
     def DeleteSelectedElements(self, event=None):
         new = []
@@ -183,7 +186,11 @@ class Controller:
         self.curPattern = self.main.pages[self.main.activePage].resistorPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
-
+    
+    def DrawInductor(self, event=None):
+        self.curPattern = self.main.pages[self.main.activePage].inductorPattern
+        self.main.pages[self.main.activePage].ChangeActive()
+        self.UpdateCanvas() #improve!
         
     def DrawVoltSrc(self, event = None):
         self.curPattern = self.main.pages[self.main.activePage].vltsrcPattern

@@ -45,7 +45,10 @@ class Artist:
             y = y * s + self.c.grid.y 
             x2 = x2 * s + self.c.grid.x
             y2 = y2 * s + self.c.grid.y
-        
+            
+            font1 = wx.Font(13, wx.SWISS, wx.NORMAL, wx.NORMAL, False, u'Arial')
+            dc.SetFont(font1)
+
         thick = 0
         oldcolor = self.color
         
@@ -54,6 +57,8 @@ class Artist:
             dc.DrawLine(x, y, x2, y2)
         
         for d in dlist:
+            
+            
             for i in range(2):
                 if elem.selected:
                     if i is 0:
@@ -62,7 +67,7 @@ class Artist:
                     else:
                         thick = 0
                         self.color = oldcolor
-            
+                
                 if d[0] == 'line':
                     dc.SetPen(wx.Pen(self.color, width=d[5]+thick) )
                     dc.DrawLine(x + d[1] * s, y + d[2]* s, x + d[3] *s, y + d[4]*s)
@@ -72,9 +77,22 @@ class Artist:
                 elif d[0] == 'circ':
                     dc.SetPen(wx.Pen(self.color, width=d[4]+thick) )
                     dc.DrawCircle(x+d[1]*s, y +d[2]*s , d[3]*s)
-                elif d[0] == 'bbox' and elem.showBbox:
+                elif d[0] == 'bbox' and self.c.settings.drawboundingbox:
                     dc.SetPen(wx.Pen(LIGHTBLUE, width=1) )
                     dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , d[3]*s+1, d[4]*s+1)
+                elif d[0] == 'arc1':
+                    dc.SetPen(wx.Pen(self.color, width=d[7]+thick))
+                    dc.DrawArc(x+d[1]*s, y+d[2]*s, x+d[3]*s, y+d[4]*s, x+d[5]*s, y+d[6]*s)
+                elif d[0] == 'tex1':
+                    if 'Name' in elem.options:
+                        dc.SetPen(wx.Pen(self.color, width=1))
+                        dc.DrawLabel(elem.options['Name'], wx.Rect(x + s*d[1]-1, y+s*d[2]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                elif d[0] == 'tex2':
+                    if 'Value' in elem.options:
+                        dc.SetPen(wx.Pen(self.color, width=1))
+                        dc.DrawLabel(elem.options['Value'], wx.Rect(x + s*d[1]-1, y+s*d[2]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
 
                     
     def DrawNodes(self, dc, x, y):

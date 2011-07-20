@@ -45,8 +45,12 @@ class SidePanel(wx.Panel):
         self.elements = []
         self.active = 0
         
-        self.names = []
-        self.options = []
+        #self.names = []
+        #self.options = []
+        self.properties = []
+        
+        self.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
+        self.Bind(wx.EVT_TEXT, self.PropertyChange)
         
         self.prop = wx.FlexGridSizer(4, 2, 3, 10)
         
@@ -66,6 +70,7 @@ class SidePanel(wx.Panel):
                 self.AddOption(o[1], text=True, placeholder = o[2])
         self.prop.Layout()
         
+        
     def AddButton(self, button):
         self.buttons.append(button)
         self.buttonsizer.Add(button, 1, wx.SHAPED | wx.BOTTOM, 1)
@@ -74,12 +79,35 @@ class SidePanel(wx.Panel):
         s = wx.StaticText(self, label=name, style=wx.ALIGN_LEFT)
         if not text:
             c = wx.ComboBox(self, value=options[selected], choices=options)
+            #c.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
+            self.properties.append(['LIST', name, c])
         else:
             c = wx.TextCtrl(self, value = placeholder)
-        self.names.append(s)
-        self.options.append(c)
+            #c.Bind(wx.EVT_TEXT, self.PropertyChange)
+            self.properties.append(['TEXT', name, c])
+            
+        #self.names.append(s)
+        #self.options.append(c)
+        
         self.prop.Add(s, 1, wx.EXPAND |wx.ALL) #formating not perfect : /
         self.prop.Add(c, 1, wx.EXPAND |wx.ALL)
+        
+    def PropertyChange(self, event=None):
+        #print 'property change.'
+        #print event.GetInt()
+        #print event.GetString()
+        print 'called'
+        self.PrintOptions()
+        cur_options = self.controller.curPattern.cur_options
+        for prop in self.properties:
+            cur_options[str(prop[1])] = str(prop[2].GetValue())
+        
+        self.controller.curPattern.UpdateSample()
+        self.controller.UpdateCanvas()
+    
+    def PrintOptions(self):
+        for prop in self.properties:
+            print prop[1] + '['+str(prop[0]) + '] = ' + str(prop[2].GetValue())
     
     def ChangeActive(self):
         print 'change active'
@@ -105,16 +133,19 @@ class PanelRLC(SidePanel):
         
         self.resistorPattern = Resistorpattern(self.controller.ehandler.GetPattern('resistor'))
         self.capacitorPattern = Capacitorpattern(self.controller.ehandler.GetPattern('capacitor'))
-        
+        self.inductorPattern = Inductorpattern(self.controller.ehandler.GetPattern('inductor'))
         
         self.resistorButton = wx.Button(self, -1, 'Resistor')  
         self.capacitorButton = wx.Button(self, -1, 'Capacitor')
+        self.inductorButton = wx.Button(self, -1, 'Inductor')
         
         self.resistorButton.Bind(wx.EVT_BUTTON, self.controller.DrawResistor)
         self.capacitorButton.Bind(wx.EVT_BUTTON, self.controller.DrawCapacitor)
+        self.inductorButton.Bind(wx.EVT_BUTTON, self.controller.DrawInductor)
         
         self.AddButton(self.resistorButton)
         self.AddButton(self.capacitorButton)
+        self.AddButton(self.inductorButton)
         
         self.SetSizer(self.mainsizer)
 
@@ -282,62 +313,7 @@ class Mainwindow(wx.Frame):
         menubar.Append(buildmenu, '&Build')
         menubar.Append(debugmenu, '&Debug')
         self.SetMenuBar(menubar)
-        # ------------------------- / create menue ------------------------------------------
-        
-        # ---------------------- buttons --------------------------------------------- 
-        # self.buttons = []
 
-        # self.wirebutton = wx.Button(propertyPanel, -1, 'wire')  
-        # self.resistorHbutton = wx.Button(propertyPanel, -1, 'R(H)')
-        # self.resistorVbutton = wx.Button(propertyPanel, -1, 'R(V)')
-        # self.vltsrcHbutton = wx.Button(propertyPanel, -1, 'VSrc(H)')
-        # self.vltsrcVbutton = wx.Button(propertyPanel, -1, 'VSrc(V)')
-        # self.currsrcButton = wx.Button(propertyPanel, -1, 'Iq')
-        # self.capacitorButton = wx.Button(propertyPanel, -1, 'C')
-        
-        # event routing
-        # self.wirebutton.Bind(wx.EVT_BUTTON, self.controller.DrawWire)
-        # self.resistorHbutton.Bind(wx.EVT_BUTTON, self.controller.DrawResistorH)
-        # self.resistorVbutton.Bind(wx.EVT_BUTTON, self.controller.DrawResistorV)
-        # self.vltsrcHbutton.Bind(wx.EVT_BUTTON, self.controller.DrawVoltSrcH)
-        # self.vltsrcVbutton.Bind(wx.EVT_BUTTON, self.controller.DrawVoltSrcV)
-        # self.currsrcButton.Bind(wx.EVT_BUTTON, self.controller.DrawCurrSrc)
-        # self.capacitorButton.Bind(wx.EVT_BUTTON, self.controller.DrawCapacitor)
-        
-        # ---------------------- / buttons --------------------------------------------- 
-        
-        # ----------------------- sizers -----------------------------------------------
-        
-        # self.bhsizer = wx.BoxSizer(wx.VERTICAL)  
-        # self.bhsizer.Add(self.preview, 0, wx.EXPAND | wx.BOTTOM, border=0)
-        ###
-
-        ###
-        # self.bhsizer.Add(self.wirebutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
-        # self.bhsizer.Add(self.resistorHbutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
-        # self.bhsizer.Add(self.resistorVbutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
-        # self.bhsizer.Add(self.vltsrcHbutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
-        # self.bhsizer.Add(self.vltsrcVbutton, 0, wx.EXPAND | wx.BOTTOM, border=2)
-        # self.bhsizer.Add(self.capacitorButton, 0, wx.EXPAND | wx.BOTTOM, border=2)
-        # self.bhsizer.Add(self.currsrcButton, 0, wx.EXPAND | wx.BOTTOM, border=2)
-        
-        # self.bhsizer.Add(self.searchbar, 0, wx.EXPAND | wx.BOTTOM, border=2)
-        #self.bhsizer.Add(self.elementlist, 1, wx.EXPAND | wx.LEFT | wx.BOTTOM, border=0)
-        # self.bhsizer.Add(nb, 1, wx.EXPAND | wx.LEFT | wx.BOTTOM, border=0)   
-        
-        #self.vsizer.Add(self.bhsizer, 0, wx.EXPAND )
-        # self.drawingBoxSizer = wx.BoxSizer(wx.HORIZONTAL)
-        # self.drawingBoxSizer.Add(self.drawpanel, 1, wx.EXPAND | wx.ALL, border=0)
-        
-        # propertyPanel.SetSizer(self.bhsizer)
-        # drawingPanel.SetSizer(self.drawingBoxSizer)
-        # self.mainsizer = wx.BoxSizer(wx.HORIZONTAL)
-        # self.mainsizer.Add(splitter, 1, wx.EXPAND | wx.ALL, 0)
-        # self.mainsizer.Add(self.toolbar, 0, wx.EXPAND)
-        # splitter.SplitVertically(propertyPanel, drawingPanel, 150)
-        # self.SetSizer(self.mainsizer)
-        # self.SetAutoLayout(1)
-        # ----------------------- / sizers -----------------------------------------------
         self.controller.toDraw = 'resistor'
         self.controller.toDrawOption = 'H'
         self.Show(True)
@@ -345,9 +321,7 @@ class Mainwindow(wx.Frame):
     def OnShowLog(self, event):
 
         print self.controller.PrintLog()
-        #self.pages[self.activePage].ClearOptions()
-        #self.pages[self.activePage].AddOption('Lukas', ['A', 'B', 'C'])
-        #self.pages[self.activePage].prop.Layout()
+
     
     def OnClose(self, event):
         self.Close()
