@@ -5,6 +5,7 @@
 
 class Rectangle:
     def __init__(self, x, y, w, h):
+        """ a rectangle"""
         self.x = x
         self.y = y
         self.w = w

@@ -30,10 +30,6 @@ ID_REMOVE_LAST = wx.NewId()
 ID_ROTATE = wx.NewId()
 ID_SELECT = wx.NewId()
 
-class CButton(wx.BitmapButton):
-    def __init__(self, parent, path, size=(40,40)):
-         wx.BitmapButton.__init__(self, parent, -1, wx.Bitmap(path),size=size)
-
 #BUG
 # cant select different attributes somehow crashes everything
         
@@ -52,6 +48,7 @@ class SidePanel(wx.Panel):
         
         #self.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
         #self.Bind(wx.EVT_TEXT, self.PropertyChange)
+        
         
         self.prop = wx.FlexGridSizer(4, 2, 3, 10)
         

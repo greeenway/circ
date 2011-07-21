@@ -76,6 +76,7 @@ class Controller:
     def OnLeftClick(self, event):
         an = self.grid.an
         ln = self.grid.ln
+        
         if an == None:
             return
         if self.mode == 'INSERT':
