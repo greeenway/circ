@@ -11,6 +11,7 @@ class Element:
     def __init__(self, x, y, x2 = 0, y2 = 0):
         self.pattern = None
         self.selected = False
+        self.hovered = False
         self.showBbox = False
         self.bbox = None
         self.x = x
@@ -18,6 +19,7 @@ class Element:
         self.x2 = x2
         self.y2 = y2
         self.options = {}
+        self.name = ''
         
     def GetDrawlist(self):
         return self.pattern.GetDrawlist( self.options)

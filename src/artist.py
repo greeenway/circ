@@ -4,7 +4,7 @@
 # 
 import wx
 
-LIGHTBLUE = (0, 0, 255)
+HOVERED = (0, 255, 0)#(255, 250, 170)
 SELECTED = (255, 204, 0)
 
 class Artist:
@@ -53,17 +53,29 @@ class Artist:
         oldcolor = self.color
         
         if dlist is 'wire':
-            dc.SetPen(wx.Pen(self.color, width=1))
-            dc.DrawLine(x, y, x2, y2)
+            if elem.selected or elem.hovered:
+                if elem.selected:
+                    dc.SetPen(wx.Pen(SELECTED, width=2))
+                else:
+                    dc.SetPen(wx.Pen(HOVERED, width=3))
+                dc.DrawLine(x, y, x2, y2)
+                dc.SetPen(wx.Pen((0,0,0), width=1))
+                dc.DrawLine(x, y, x2, y2)
+            else:
+                dc.SetPen(wx.Pen((0,0,0), width=1))
+                dc.DrawLine(x, y, x2, y2)
         
         for d in dlist:
             
             
             for i in range(2):
-                if elem.selected:
+                if elem.selected or elem.hovered:
                     if i is 0:
                         thick = 5
-                        self.color = SELECTED
+                        if elem.selected:
+                            self.color = SELECTED
+                        else:
+                            self.color = HOVERED
                     else:
                         thick = 0
                         self.color = oldcolor
@@ -108,4 +120,16 @@ class Artist:
         if a:
             dc.SetPen(wx.Pen(SELECTED, width=2) )
             dc.DrawCircle( x + a.x * s, y + a.y*s, 2)
+    
+    def DrawSelectionBox(self, dc, rect):
+        dc.SetPen(wx.Pen(HOVERED, width=1) )
+        dc.SetBrush(wx.Brush(wx.Colour(255,255,255), wx.TRANSPARENT))
+        s = self.c.grid.ndist
+        x1 = rect[0] * s + self.c.grid.x
+        y1 = rect[1] * s + self.c.grid.y 
+        x2 = rect[2] * s + self.c.grid.x
+        y2 = rect[3] * s + self.c.grid.y
+        dc.DrawRectangle(x1, y1, (x2-x1), (y2-y1))
+        #print 'drawn'
+        
 

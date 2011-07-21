@@ -71,7 +71,6 @@ class Resistorpattern(Elementpattern):
         if d[-1][0] == 'bbox':
             ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
         ne.options = copy.deepcopy(self.cur_options)
-        print ne.options
         return ne
         
 class Capacitorpattern(Elementpattern):
@@ -194,6 +193,7 @@ class Wirepattern(Elementpattern):
         ne.x2 = x2
         ne.y2 = y2
         self.special = 'wire'
+        ne.name = 'wire'
         d = self.GetDrawlist(self.cur_options)
         return ne
         

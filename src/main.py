@@ -33,7 +33,9 @@ ID_SELECT = wx.NewId()
 class CButton(wx.BitmapButton):
     def __init__(self, parent, path, size=(40,40)):
          wx.BitmapButton.__init__(self, parent, -1, wx.Bitmap(path),size=size)
-   
+
+#BUG
+# cant select different attributes somehow crashes everything
         
 class SidePanel(wx.Panel):
     def __init__(self, parent, controller):
@@ -46,12 +48,10 @@ class SidePanel(wx.Panel):
         self.elements = []
         self.active = 0
         
-        #self.names = []
-        #self.options = []
         self.properties = []
         
-        self.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
-        self.Bind(wx.EVT_TEXT, self.PropertyChange)
+        #self.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
+        #self.Bind(wx.EVT_TEXT, self.PropertyChange)
         
         self.prop = wx.FlexGridSizer(4, 2, 3, 10)
         
@@ -70,6 +70,8 @@ class SidePanel(wx.Panel):
             elif o[0] is 'TEXT':
                 self.AddOption(o[1], text=True, placeholder = o[2])
         self.prop.Layout()
+        self.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
+        self.Bind(wx.EVT_TEXT, self.PropertyChange)
         
         
     def AddButton(self, button):
@@ -86,42 +88,29 @@ class SidePanel(wx.Panel):
             c = wx.TextCtrl(self, value = placeholder)
             #c.Bind(wx.EVT_TEXT, self.PropertyChange)
             self.properties.append(['TEXT', name, c])
-            
-        #self.names.append(s)
-        #self.options.append(c)
         
         self.prop.Add(s, 1, wx.EXPAND |wx.ALL) #formating not perfect : /
         self.prop.Add(c, 1, wx.EXPAND |wx.ALL)
         
     def PropertyChange(self, event=None):
-        #print 'property change.'
-        #print event.GetInt()
-        #print event.GetString()
-        print 'called'
-        self.PrintOptions()
+      
         cur_options = self.controller.curPattern.cur_options
         for prop in self.properties:
             cur_options[str(prop[1])] = str(prop[2].GetValue())
         
         self.controller.curPattern.UpdateSample()
         self.controller.UpdateCanvas()
-    
-    def PrintOptions(self):
-        for prop in self.properties:
-            print prop[1] + '['+str(prop[0]) + '] = ' + str(prop[2].GetValue())
-    
+
     def ChangeActive(self):
-        print 'change active'
         if self.controller.curPattern is not None: 
+            self.Unbind(wx.EVT_COMBOBOX)
+            self.Unbind(wx.EVT_TEXT)
             self.SetOptions(self.controller.curPattern)
             self.controller.UpdateCanvas()
-        
+            
     
     def ClearOptions(self):
         self.prop.Clear(True)
-        self.names = []
-        self.options = []
-
         self.prop.Layout()
             
         
@@ -129,9 +118,7 @@ class PanelRLC(SidePanel):
     def __init__(self, parent, controller):
         SidePanel.__init__(self, parent, controller)
         self.controller = controller
-        
-        #self.elements = []
-        
+
         self.resistorPattern = Resistorpattern(self.controller.ehandler.GetPattern('resistor'))
         self.capacitorPattern = Capacitorpattern(self.controller.ehandler.GetPattern('capacitor'))
         self.inductorPattern = Inductorpattern(self.controller.ehandler.GetPattern('inductor'))
@@ -301,6 +288,7 @@ class Mainwindow(wx.Frame):
         wx.EVT_MENU(self, ID_REMOVE_LAST, self.controller.OnRemoveLast)
         wx.EVT_MENU(self, ID_ROTATE, self.controller.OnRotate)
         
+        self.Bind(wx.EVT_MOUSEWHEEL, self.controller.OnScrollEvent)
         
         #DEBUG
         debugmenu = wx.Menu()
