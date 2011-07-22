@@ -31,19 +31,34 @@ class Elementhandler:
             
             d = Drawingpattern(filename)
             cur_option = ''
+            dscDict = {}
+            #isinstance({}, dict) dict query
             
             for line in lines:
                 #print line
                 if len(line) == 0 or line[0] == '#':
                     continue
+                
+                    
                 if re.search('=', line) and line[-1] == ':':
                     opt = line[:-1]
                     opt = opt.rsplit('=')
                     cur_option = opt[0]
                     d.options[cur_option] = []
+                    dscDict = {}
                 elif len(cur_option) > 0:
+                    if line[0] == '@':
+                        #print line[1:3]
+                        #print line[4:-1].rsplit(',')
+                        z = line[4:-1].rsplit(',')
+                        v = [float(z[0]), -float(z[1])]
+                        dscDict[line[1:3]] = v
+                        continue
+                
                     if line[0:4] == 'line' or line[0:4] == 'circ' or line[0:4] == 'rect' or line[0:4] == 'bbox' or \
                             line[0:4] == 'tex1' or line[0:4] == 'tex2' or line[0:4] == 'arc1':
+                        if not d.options[cur_option] and dscDict:
+                            d.options[cur_option].append(dscDict)
                         params = line[5:-1].rsplit(',')
                         l = [line[0:4]]
                         for p in params:

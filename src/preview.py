@@ -9,7 +9,7 @@ from controller import Controller
 
 GREY = (205, 205, 205)
 BLACK = (0, 0, 0)
-WIDTH = 150
+WIDTH = 200
 HEIGHT = 150
 
 class Preview(wx.Window):

@@ -29,6 +29,7 @@ class Artist:
               
         dlist = elem.GetDrawlist()
         s = self.c.grid.ndist
+        textPos = None
         
         x = elem.x
         y = elem.y
@@ -46,7 +47,7 @@ class Artist:
             x2 = x2 * s + self.c.grid.x
             y2 = y2 * s + self.c.grid.y
             
-            font1 = wx.Font(13, wx.SWISS, wx.NORMAL, wx.NORMAL, False, u'Arial')
+            font1 = wx.Font(10, wx.SWISS, wx.NORMAL, wx.NORMAL, False, u'Arial')
             dc.SetFont(font1)
 
         thick = 0
@@ -65,9 +66,13 @@ class Artist:
                 dc.SetPen(wx.Pen((0,0,0), width=1))
                 dc.DrawLine(x, y, x2, y2)
         
-        for d in dlist:
-            
-            
+        if isinstance(dlist[0], dict):
+            #print 'dict found.'
+            textPos = dlist[0]
+            dlist = dlist[1:]
+        
+        for d in dlist:    
+       
             for i in range(2):
                 if elem.selected or elem.hovered:
                     if i is 0:
@@ -96,17 +101,187 @@ class Artist:
                     dc.SetPen(wx.Pen(self.color, width=d[7]+thick))
                     dc.DrawArc(x+d[1]*s, y+d[2]*s, x+d[3]*s, y+d[4]*s, x+d[5]*s, y+d[6]*s)
                 elif d[0] == 'tex1':
-                    if 'Name' in elem.options:
-                        dc.SetPen(wx.Pen(self.color, width=1))
-                        dc.DrawLabel(elem.options['Name'], wx.Rect(x + s*d[1]-1, y+s*d[2]-1,2, 2), 
-                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                    pass
+                    # if 'Name' in elem.options:
+                        # dc.SetPen(wx.Pen(self.color, width=1))
+                        # dc.DrawLabel(elem.options['Name'], wx.Rect(x + s*d[1]-1, y+s*d[2]-1,2, 2), 
+                                     # alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
                 elif d[0] == 'tex2':
-                    if 'Value' in elem.options:
-                        dc.SetPen(wx.Pen(self.color, width=1))
-                        dc.DrawLabel(elem.options['Value'], wx.Rect(x + s*d[1]-1, y+s*d[2]-1,2, 2), 
+                    pass
+                    # if 'Value' in elem.options:
+                        # dc.SetPen(wx.Pen(self.color, width=1))
+                        # dc.DrawLabel(elem.options['Value'], wx.Rect(x + s*d[1]-1, y+s*d[2]-1,2, 2), 
+                                     # alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+        if textPos:
+            if 'Textorientation' in elem.options and 'Orientation' in elem.options:
+                option = elem.options['Textorientation']
+                name = elem.options['Name']
+                value = elem.options['Value']
+                if elem.options['Orientation'] == 'H':
+                    if option in ['u', 'uu', 'c', 'cc', 'd', 'dd']: #individual positioning
+                        if option == 'u':
+                            if name and value:
+                                dc.DrawLabel(name + '  ' + value, wx.Rect(x + s*textPos['u2'][0]-1, y+s*textPos['u2'][1]-1,2, 2), 
                                      alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif name:
+                                dc.DrawLabel(name, wx.Rect(x + s*textPos['u2'][0]-1, y+s*textPos['u2'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif value:
+                                dc.DrawLabel(value, wx.Rect(x + s*textPos['u2'][0]-1, y+s*textPos['u2'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                        elif option == 'uu':
+                            if name and value:
+                                dc.DrawLabel(name, wx.Rect(x + s*textPos['u1'][0]-1, y+s*textPos['u1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                                dc.DrawLabel(value, wx.Rect(x + s*textPos['u2'][0]-1, y+s*textPos['u2'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif name:
+                                dc.DrawLabel(name, wx.Rect(x + s*textPos['u2'][0]-1, y+s*textPos['u2'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif value:
+                                dc.DrawLabel(value, wx.Rect(x + s*textPos['u2'][0]-1, y+s*textPos['u2'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                        elif option == 'c':
+                            if name and value:
+                                dc.DrawLabel(name + '  ' + value, wx.Rect(x + s*textPos['c1'][0]-1, y+s*textPos['c1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif name:
+                                dc.DrawLabel(name, wx.Rect(x + s*textPos['c1'][0]-1, y+s*textPos['c1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif value:
+                                dc.DrawLabel(value, wx.Rect(x + s*textPos['c1'][0]-1, y+s*textPos['c1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                        elif option == 'cc': #transistor bullshit
+                            pass
+                        elif option == 'd':
+                            if name and value:
+                                dc.DrawLabel(name + '  ' + value, wx.Rect(x + s*textPos['d1'][0]-1, y+s*textPos['d1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif name:
+                                dc.DrawLabel(name, wx.Rect(x + s*textPos['d1'][0]-1, y+s*textPos['d1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif value:
+                                dc.DrawLabel(value, wx.Rect(x + s*textPos['d1'][0]-1, y+s*textPos['d1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                        
+                        elif option == 'dd':
+                            if name and value:
+                                dc.DrawLabel(name, wx.Rect(x + s*textPos['d1'][0]-1, y+s*textPos['d1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                                dc.DrawLabel(value, wx.Rect(x + s*textPos['d2'][0]-1, y+s*textPos['d2'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif name:
+                                dc.DrawLabel(name, wx.Rect(x + s*textPos['d1'][0]-1, y+s*textPos['d1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                            elif value:
+                                dc.DrawLabel(value, wx.Rect(x + s*textPos['d1'][0]-1, y+s*textPos['d1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                    else:
+                        if option == 'l':
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['l1'][0]-1, y+s*textPos['l1'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['l2'][0]-1, y+s*textPos['l2'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                        elif option == 'r':
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['r1'][0]-1, y+s*textPos['r1'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['r2'][0]-1, y+s*textPos['r2'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                        elif option == 'hu':
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['l1'][0]-1, y+s*textPos['l1'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['r1'][0]-1, y+s*textPos['r1'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                        elif option == 'hd':
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['l2'][0]-1, y+s*textPos['l2'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['r2'][0]-1, y+s*textPos['r2'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                        elif option == 'hl': #transistor bullshit
+                            print 'not implemented'
+                        elif option == 'hr': #transistor bullshit
+                            print 'not implemented'
 
+                        if option in ['uc', 'ud', 'cd', 'lc', 'cl', 'rc', 'cr']:
+                            text = name
+                            for i in range(2):
+                                if i > 0:
+                                    text = value
+                                
+                                if option[i] == 'u':
+                                    dc.DrawLabel(text, wx.Rect(x + s*textPos['u2'][0]-1, y+s*textPos['u2'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                                elif option[i] == 'c':
+                                    dc.DrawLabel(text, wx.Rect(x + s*textPos['c1'][0]-1, y+s*textPos['c1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                                elif option[i] == 'd':
+                                    dc.DrawLabel(text, wx.Rect(x + s*textPos['d1'][0]-1, y+s*textPos['d1'][1]-1,2, 2), 
+                                     alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+                                elif option[i] == 'r':
+                                    if text == name:
+                                        dc.DrawLabel(text, wx.Rect(x + s*textPos['r1'][0]-1, y+s*textPos['r1'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT )
+                                    else:
+                                        dc.DrawLabel(text, wx.Rect(x + s*textPos['r2'][0]-1, y+s*textPos['r2'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                                elif option[i] == 'l':
+                                    if text == name:
+                                        dc.DrawLabel(text, wx.Rect(x + s*textPos['l1'][0]-1, y+s*textPos['l1'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT )
+                                    else:
+                                        dc.DrawLabel(text, wx.Rect(x + s*textPos['l2'][0]-1, y+s*textPos['l2'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                if elem.options['Orientation'] == 'V':
+                    if option == 'l':
+                        if name and value:
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['l1'][0]-1, y+s*textPos['l1'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['l2'][0]-1, y+s*textPos['l2'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                        elif name:
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['lc'][0]-1, y+s*textPos['lc'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                        elif value:
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['lc'][0]-1, y+s*textPos['lc'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                    elif option == 'r':
+                        if name and value:
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['r1'][0]-1, y+s*textPos['r1'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['r2'][0]-1, y+s*textPos['r2'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                        elif name:
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['rc'][0]-1, y+s*textPos['rc'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                        elif value:
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['rc'][0]-1, y+s*textPos['rc'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                    elif option == 'lr':
+                        dc.DrawLabel(name, wx.Rect(x + s*textPos['lc'][0]-1, y+s*textPos['lc'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                        dc.DrawLabel(value, wx.Rect(x + s*textPos['rc'][0]-1, y+s*textPos['rc'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                    else:
+                        print option
+                        print 'option not implemented'
                     
+                    #todo
+                    if option == 'hl':
+                        pass
+                    if option == 'u':
+                        pass
+                    if option == 'd':
+                        pass
+                    if option == 'hr':
+                        pass
+  
+                    
+                
+                
+                
+                    
+         
+         
     def DrawNodes(self, dc, x, y):
         dc.SetPen(wx.Pen("grey", width=1) )
         dc.SetBrush(wx.Brush(wx.Colour(255,255,255), wx.TRANSPARENT))

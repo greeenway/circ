@@ -22,6 +22,7 @@ class Elementpattern:
         self.special = None
         self.name = ''
         self.sample = None
+        self.olists = {}
         
     
     def CreateElement(self):
@@ -29,6 +30,9 @@ class Elementpattern:
         Creates an element, with the current configuration 
         """
     def UpdateSample(self):
+        pass
+     
+    def ChangeOrientation(self, orientation):
         pass
     
     def Rotate(self):
@@ -48,18 +52,37 @@ class Elementpattern:
 class Resistorpattern(Elementpattern):
     def __init__(self, dpattern):
         Elementpattern.__init__(self, dpattern)
+        self.olists['H'] = ['ud', 'u', 'uu', 'c', 'd', 'dd', 
+                            'l', 'uc', 'ud', 'cd', 'r', 'lc', 'cl', 'rc', 'cr', 'hu', 'hd']
+        self.olists['V'] = ['l', 'r', 'lr']
         self.options.append(['LIST', 'Orientation', 'H','V'])
-        self.options.append(['LIST', 'Textorientation', 'standard', 'u', 'cd', 
-                             'dd', 'l', 'r'])
+        l = ['LIST', 'Textorientation']
+        l.extend(self.olists['H'])
+        print l
+        self.options.append(l)
         self.options.append(['TEXT', 'Name', 'R1'])
-        self.options.append(['TEXT', 'Value', '100 Ohm'])
+        self.options.append(['TEXT', 'Value', '100k'])
         
         
         self.cur_options['Orientation'] = 'H'
+        self.cur_options['Textorientation'] = 'l'
         self.cur_options['Name'] = 'R'
-        self.cur_options['Value'] = '100 Ohm'
+        self.cur_options['Value'] = '100k'
         self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
         self.name = 'resis'
+    
+    def ChangeOrientation(self, orientation):
+        newlist = []
+        for i, list in enumerate(self.options):
+            if list[1] == 'Textorientation':
+                newlist = list
+                break
+        newlist = newlist[0:2]
+        newlist.extend(self.olists[orientation])
+        self.options.remove(list)
+        self.options.insert(i, newlist)
+        
+                
     
     def UpdateSample(self):
         self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)

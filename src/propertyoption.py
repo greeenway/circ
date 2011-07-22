@@ -43,12 +43,16 @@ class Propertyoption:
         else:
             self.input.SetValue(value)
             self.value = value
+            
     
     def OnHandleEvent(self, event=None):
         #print 'name = ' + str(self.name)
         #print 'input = ' + self.input.GetValue()
         self.value = self.input.GetValue()
         self.c.SetOption(self.name, self.input.GetValue())
+        if self.name == 'Orientation':
+            self.c.curPattern.ChangeOrientation(str(self.input.GetValue()))
+            self.c.main.pages[self.c.main.activePage].ChangeActive()
         self.c.UpdateCanvas()
         
         
