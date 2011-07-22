@@ -15,7 +15,7 @@ from drawpanel import Drawpanel
 from controller import Controller
 from texwizard import Texwizard
 from preview import Preview
-from elementlist import Elementlist
+from propertyoption import Propertyoption
 
 from elementpattern import *
 
@@ -45,6 +45,7 @@ class SidePanel(wx.Panel):
         self.active = 0
         
         self.properties = []
+        self.firstPattern = None
         
         #self.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
         #self.Bind(wx.EVT_TEXT, self.PropertyChange)
@@ -59,66 +60,41 @@ class SidePanel(wx.Panel):
         self.mainsizer.Add(self.buttonsizer, 5, wx.SHAPED |wx.ALL, 5)
         self.preview.OnSize()
 
-    def SetOptions(self, pattern):
-        self.ClearOptions()
-        for o in pattern.options:
-            if o[0] is 'LIST':
-                self.AddOption(o[1], o[2:], selected = 0, text=False)
-            elif o[0] is 'TEXT':
-                self.AddOption(o[1], text=True, placeholder = o[2])
-        self.prop.Layout()
-        self.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
-        self.Bind(wx.EVT_TEXT, self.PropertyChange)
-        
-        
     def AddButton(self, button):
         self.buttons.append(button)
         self.buttonsizer.Add(button, 1, wx.SHAPED | wx.BOTTOM, 1)
-    
-    def AddOption(self, name, options=[], selected = 0, text=False, placeholder = ''):
-        s = wx.StaticText(self, label=name, style=wx.ALIGN_LEFT)
-        if not text:
-            c = wx.ComboBox(self, value=options[selected], choices=options)
-            #c.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
-            self.properties.append(['LIST', name, c])
-        else:
-            c = wx.TextCtrl(self, value = placeholder)
-            #c.Bind(wx.EVT_TEXT, self.PropertyChange)
-            self.properties.append(['TEXT', name, c])
-        
-        self.prop.Add(s, 1, wx.EXPAND |wx.ALL) #formating not perfect : /
-        self.prop.Add(c, 1, wx.EXPAND |wx.ALL)
-        
-    def PropertyChange(self, event=None):
-      
-        cur_options = self.controller.curPattern.cur_options
-        for prop in self.properties:
-            cur_options[str(prop[1])] = str(prop[2].GetValue())
-        
-        self.controller.curPattern.UpdateSample()
-        self.controller.UpdateCanvas()
+
 
     def ChangeActive(self):
         if self.controller.curPattern is not None: 
-            self.Unbind(wx.EVT_COMBOBOX)
-            self.Unbind(wx.EVT_TEXT)
-            self.SetOptions(self.controller.curPattern)
-            self.controller.UpdateCanvas()
+            self.prop.Clear(True)
+            for p in self.controller.curPattern.options:
+                if p[0] is 'LIST':
+                    #self.AddOption(o[1], o[2:], selected = 0, text=False)
+                    self.properties.append(
+                        Propertyoption(self, self.prop, self.controller,
+                                       name=p[1], type='LIST', list=p[2:])
+                    )
+                elif p[0] is 'TEXT':
+                    #self.AddOption(o[1], text=True, placeholder = o[2])
+                    self.properties.append(
+                        Propertyoption(self, self.prop, self.controller,
+                                       name=p[1], type='TEXT')
+                    )
             
-    
-    def ClearOptions(self):
-        self.prop.Clear(True)
-        self.prop.Layout()
+            self.prop.Layout()
             
         
 class PanelRLC(SidePanel):
     def __init__(self, parent, controller):
         SidePanel.__init__(self, parent, controller)
         self.controller = controller
-
+    
         self.resistorPattern = Resistorpattern(self.controller.ehandler.GetPattern('resistor'))
         self.capacitorPattern = Capacitorpattern(self.controller.ehandler.GetPattern('capacitor'))
         self.inductorPattern = Inductorpattern(self.controller.ehandler.GetPattern('inductor'))
+            
+        self.firstPattern = self.resistorPattern
         
         self.resistorButton = wx.Button(self, -1, 'Resistor')  
         self.capacitorButton = wx.Button(self, -1, 'Capacitor')
@@ -141,7 +117,7 @@ class PanelSources(SidePanel):
         
         self.vltsrcPattern = Voltagesourcepattern(self.controller.ehandler.GetPattern('voltsrc'))
         self.cursrcPattern = Currentsourcepattern(self.controller.ehandler.GetPattern('currsrc'))
-        
+        self.firstPattern = self.vltsrcPattern
         #self.cur
   
         
@@ -163,7 +139,7 @@ class PanelWires(SidePanel):
         SidePanel.__init__(self, parent, controller)
         
         self.wirePattern = Wirepattern()
-        
+        self.firstPattern = self.wirePattern
         self.curPattern = self.wirePattern
         
         self.wireButton = wx.Button(self, -1, 'Wire')
@@ -307,7 +283,6 @@ class Mainwindow(wx.Frame):
         self.Show(True)
     
     def OnShowLog(self, event):
-
         print self.controller.PrintLog()
 
     
@@ -315,8 +290,11 @@ class Mainwindow(wx.Frame):
         self.Close()
     
     def OnNbChange(self, event):
-        print 'notebook change. selection: ' + str(event.GetSelection())
+        #print 'notebook change. selection: ' + str(event.GetSelection())
         self.activePage = event.GetSelection()
+        self.controller.curPattern = self.pages[self.activePage].firstPattern
+        self.pages[self.activePage].ChangeActive()
+        self.controller.UpdateCanvas()
         
         
 

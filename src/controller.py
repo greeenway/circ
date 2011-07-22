@@ -8,10 +8,7 @@ from elementhandler import Elementhandler
 from settings import Settings
 from artist import Artist
 
-from element import Element
 from grid import Grid
-from node import Node
-from geometry import Rectangle
             
 import wx
 
@@ -77,7 +74,7 @@ class Controller:
         an = self.grid.an
         ln = self.grid.ln
         
-        if an == None:
+        if an is None:
             return
         if self.mode == 'INSERT':
             if self.curPattern is not None:
@@ -165,7 +162,7 @@ class Controller:
         an = self.grid.an
         ln = self.grid.ln
         
-        if an == None:
+        if an is None:
             return
         
         
@@ -367,7 +364,12 @@ class Controller:
         self.curPattern = self.main.pages[self.main.activePage].cursrcPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
-        
+
+    def SetOption(self, name, value):
+        if self.curPattern is not None:
+            self.curPattern.cur_options[name] = value
+            self.curPattern.sample = self.curPattern.CreateElement(0, 0, x2 = 0, y2 = 0)
+    
     def UpdateCanvas(self):
         
         self.main.drawpanel.UpdateDrawing()
