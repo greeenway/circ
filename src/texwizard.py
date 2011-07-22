@@ -17,62 +17,63 @@ class Texwizard:
     def GenerateCode(self):
         code = ''
         ymax = self.c.grid.y_size - 1
+            
         
         for e in self.c.elements:
             code += "\\" 
             
-            #TODO FIX GENERATION CODE...
-            if e.pattern.name == 'wire':
-                code += 'wire'
-                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}{'
-                code += str(e.x2) + '}{' + str(ymax - e.y2) + '}'
- 
-            if e.pattern.name == 'resis':
-                code += 'resis'
-                code += r'{'
-                if e.options['Orientation'] == 'H':
-                    code += str(e.x)
-                if e.options['Orientation'] == 'V':
-                    code += str(e.x)
-                code += r'}'
-                if e.options['Orientation'] == 'H':
-                    code += '{' + str(ymax - e.y) + '}'
-                if e.options['Orientation'] == 'V':
-                    code += '{' + str(ymax - e.y) + '}'
-                
-                code += r'{' + e.options['Orientation'] + r'}'
-                code += '{}{}'
-                
-            if e.pattern.name == 'capac':
-                code += 'capac'
-                code += r'{'
-                if e.option == 'H':
-                    code += str(e.x)
-                if e.option == 'V':
-                    code += str(e.x)
-                code += r'}'
-                if e.option == 'H':
-                    code += '{' + str(ymax - e.y) + '}'
-                if e.option == 'V':
-                    code += '{' + str(ymax - e.y) + '}'
-                code += r'{' + e.option + r'}'
-                code += '{}{}'
-              
-            if e.pattern.name== 'voltsrc':
-                code += r'voltsrc'
-                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
-                if e.option == 'H':
-                    code += '{H}{}{}'
-                else:
-                    code += '{V}{}{}'
-            
-            if e.pattern.name == 'currsrc':
-                code += r'currsrc'
-                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
-                if e.option == 'H':
-                    code += '{H}{}{}'
-                else:
-                    code += '{V}{}{}'
+##            #TODO FIX GENERATION CODE...
+##            if e.pattern.name == 'wire':
+##                code += 'wire'
+##                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}{'
+##                code += str(e.x2) + '}{' + str(ymax - e.y2) + '}'
+## 
+##            if e.pattern.name == 'resis':
+##                code += 'resis'
+##                code += r'{'
+##                if e.options['Orientation'] == 'H':
+##                    code += str(e.x)
+##                if e.options['Orientation'] == 'V':
+##                    code += str(e.x)
+##                code += r'}'
+##                if e.options['Orientation'] == 'H':
+##                    code += '{' + str(ymax - e.y) + '}'
+##                if e.options['Orientation'] == 'V':
+##                    code += '{' + str(ymax - e.y) + '}'
+##                
+##                code += r'{' + e.options['Orientation'] + r'}'
+##                code += '{}{}'
+##                
+##            if e.pattern.name == 'capac':
+##                code += 'capac'
+##                code += r'{'
+##                if e.option == 'H':
+##                    code += str(e.x)
+##                if e.option == 'V':
+##                    code += str(e.x)
+##                code += r'}'
+##                if e.option == 'H':
+##                    code += '{' + str(ymax - e.y) + '}'
+##                if e.option == 'V':
+##                    code += '{' + str(ymax - e.y) + '}'
+##                code += r'{' + e.option + r'}'
+##                code += '{}{}'
+##              
+##            if e.pattern.name== 'voltsrc':
+##                code += r'voltsrc'
+##                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
+##                if e.option == 'H':
+##                    code += '{H}{}{}'
+##                else:
+##                    code += '{V}{}{}'
+##            
+##            if e.pattern.name == 'currsrc':
+##                code += r'currsrc'
+##                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
+##                if e.option == 'H':
+##                    code += '{H}{}{}'
+##                else:
+##                    code += '{V}{}{}'
                 
  
             code += '\n'
@@ -87,7 +88,9 @@ class Texwizard:
         code = r'\documentclass{article}' + '\n'
         code += r'\usepackage{circdia}' + '\n'
         code += r'\begin{document}' + '\n'
-        code += r'\begin{circuitdiagram}[draft]{20}{20}' + '\n'
+        code += r'\begin{circuitdiagram}[draft]{'
+        code += str(self.c.grid.x_size) + '}{'
+        code += str(self.c.grid.y_size) + '}\n'
         code += self.GenerateCode()
         code += r'\end{circuitdiagram}' + '\n'
         code += r'\end{document}' + '\n'

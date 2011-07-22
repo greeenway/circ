@@ -7,7 +7,7 @@ from texwizard import Texwizard
 from elementhandler import Elementhandler
 from settings import Settings
 from artist import Artist
-
+from settingsframe import Settingsframe
 from grid import Grid
             
 import wx
@@ -66,6 +66,14 @@ class Controller:
         for e in self.elements:
             if e.selected:
                 e.Rotate()
+        
+        page = self.main.pages[self.main.activePage]
+        cur = page.GetProperty('Orientation')
+        if cur == 'V':
+            page.ChangeProperty('Orientation', 'H')
+        else:
+            page.ChangeProperty('Orientation', 'V')
+        
         self.UpdateCanvas()
         
         
@@ -377,9 +385,15 @@ class Controller:
         #maybe optimize this:
         self.main.pages[self.main.activePage].preview.UpdateDrawing()
         
+    def OnSettings(self, event=None):
+        s = Settingsframe(self.main, self)
         
         
         
         
         
         
+
+
+
+

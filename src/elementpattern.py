@@ -49,8 +49,12 @@ class Resistorpattern(Elementpattern):
     def __init__(self, dpattern):
         Elementpattern.__init__(self, dpattern)
         self.options.append(['LIST', 'Orientation', 'H','V'])
+        self.options.append(['LIST', 'Textorientation', 'standard', 'u', 'cd', 
+                             'dd', 'l', 'r'])
         self.options.append(['TEXT', 'Name', 'R1'])
         self.options.append(['TEXT', 'Value', '100 Ohm'])
+        
+        
         self.cur_options['Orientation'] = 'H'
         self.cur_options['Name'] = 'R'
         self.cur_options['Value'] = '100 Ohm'

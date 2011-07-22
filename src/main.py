@@ -5,10 +5,10 @@
 
 #TODO
 # filled rects todo
-# improve codegeneration code
+# fix codegeneration code
 # add text to elements.
 # add red status bar on errors
-# GET GUI WORKING -> custom button panel
+
 
 import wx
 from drawpanel import Drawpanel
@@ -29,9 +29,8 @@ ID_REMOVE_SELECTED = wx.NewId()
 ID_REMOVE_LAST = wx.NewId()
 ID_ROTATE = wx.NewId()
 ID_SELECT = wx.NewId()
+ID_SETTINGS = wx.NewId()
 
-#BUG
-# cant select different attributes somehow crashes everything
         
 class SidePanel(wx.Panel):
     def __init__(self, parent, controller):
@@ -40,24 +39,27 @@ class SidePanel(wx.Panel):
         self.buttons = []
         self.mainsizer = wx.BoxSizer(wx.VERTICAL)
         self.preview = Preview(self, self.controller)
-
+        
         self.elements = []
-        self.active = 0
         
         self.properties = []
         self.firstPattern = None
-        
-        #self.Bind(wx.EVT_COMBOBOX, self.PropertyChange)
-        #self.Bind(wx.EVT_TEXT, self.PropertyChange)
-        
+
         
         self.prop = wx.FlexGridSizer(4, 2, 3, 10)
-        
-        self.mainsizer.Add(self.preview,0 , wx.EXPAND |wx.RIGHT, 1)
+        self.prop.AddGrowableCol(1)
+        self.mainsizer.Add(self.preview,0 ,
+            wx.SHAPED | wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL,
+            1)
         self.buttonsizer = wx.BoxSizer(wx.VERTICAL)
-        self.mainsizer.Add(self.prop, 3, wx.EXPAND |wx.ALL, 5)
+        self.mainsizer.Add(self.prop, 3, 
+            wx.EXPAND | wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL\
+            |wx.TOP | wx.LEFT |wx.RIGHT,
+            border=10)
         
-        self.mainsizer.Add(self.buttonsizer, 5, wx.SHAPED |wx.ALL, 5)
+        self.mainsizer.Add(self.buttonsizer, 5,
+            wx.SHAPED | wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL,
+            5)
         self.preview.OnSize()
 
     def AddButton(self, button):
@@ -66,23 +68,42 @@ class SidePanel(wx.Panel):
 
 
     def ChangeActive(self):
+        """Loads properties into the sidepanel"""
         if self.controller.curPattern is not None: 
-            self.prop.Clear(True)
+            self.ClearOptions()
             for p in self.controller.curPattern.options:
                 if p[0] is 'LIST':
-                    #self.AddOption(o[1], o[2:], selected = 0, text=False)
                     self.properties.append(
                         Propertyoption(self, self.prop, self.controller,
                                        name=p[1], type='LIST', list=p[2:])
                     )
                 elif p[0] is 'TEXT':
-                    #self.AddOption(o[1], text=True, placeholder = o[2])
                     self.properties.append(
                         Propertyoption(self, self.prop, self.controller,
-                                       name=p[1], type='TEXT')
+                                       name=p[1], type='TEXT',
+                                       defaultvalue=p[2])
                     )
             
+            #sucks a bit performance wise... (but works! =)
+            for key, value in self.controller.curPattern.cur_options.iteritems():
+                self.ChangeProperty(key,value)
+            
             self.prop.Layout()
+    
+    def ClearOptions(self):
+        self.prop.Clear(True)
+        self.properties = []
+
+    def ChangeProperty(self, name, value):
+        for p in self.properties:
+            if p.name == name:
+                p.ChangeProperty(name,value)
+    
+    def GetProperty(self, name):
+        for p in self.properties:
+            if p.name == name:
+                return p.value
+    
             
         
 class PanelRLC(SidePanel):
@@ -252,6 +273,7 @@ class Mainwindow(wx.Frame):
         editmenu.Append(ID_REMOVE_SELECTED, 'Remove &selected Elements', 'Remove all selected elements.')
         editmenu.Append(ID_REMOVE_LAST, 'Remove &last Element\tCtrl+Z', 'Remove the last created object.')
         editmenu.Append(ID_ROTATE, 'Rotate selected Elements\tCtrl+R', 'Rotate all selected elements.')
+        editmenu.Append(ID_SETTINGS, '&Settings', 'Change Settings')
         
         # event routing
         wx.EVT_MENU(self, wx.ID_EXIT, self.OnClose)
@@ -260,6 +282,7 @@ class Mainwindow(wx.Frame):
         wx.EVT_MENU(self, ID_REMOVE_SELECTED, self.controller.DeleteSelectedElements)
         wx.EVT_MENU(self, ID_REMOVE_LAST, self.controller.OnRemoveLast)
         wx.EVT_MENU(self, ID_ROTATE, self.controller.OnRotate)
+        wx.EVT_MENU(self, ID_SETTINGS, self.controller.OnSettings)
         
         self.Bind(wx.EVT_MOUSEWHEEL, self.controller.OnScrollEvent)
         

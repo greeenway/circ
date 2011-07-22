@@ -27,7 +27,7 @@ class Grid:
         self.ndist = nodedistance
         self.an = None
         self.ln = None
-        
+        self.nodes = []
         for i in range(0,self.x_size):
             for j in range(0, self.y_size): 
                 self.nodes.append(Node(i, j))
