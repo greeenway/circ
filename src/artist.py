@@ -72,7 +72,7 @@ class Artist:
             dlist = dlist[1:]
         
         for d in dlist:    
-       
+            dc.SetBrush(wx.Brush(self.color, wx.TRANSPARENT ))
             for i in range(2):
                 if elem.selected or elem.hovered:
                     if i is 0:
@@ -92,26 +92,19 @@ class Artist:
                     dc.SetPen(wx.Pen(self.color, width=d[5]+thick) )
                     dc.DrawRectangle(x+d[1]*s, y +d[2]*s  , d[3]*s+1*d[5], d[4]*s+1*d[5]) 
                 elif d[0] == 'circ':
+                    if d[5] == 1:
+                        dc.SetBrush(wx.Brush(self.color, wx.SOLID ))
+                    else:
+                        dc.SetBrush(wx.Brush(self.color, wx.TRANSPARENT ))
                     dc.SetPen(wx.Pen(self.color, width=d[4]+thick) )
                     dc.DrawCircle(x+d[1]*s, y +d[2]*s , d[3]*s)
                 elif d[0] == 'bbox' and self.c.settings.drawboundingbox:
-                    dc.SetPen(wx.Pen(LIGHTBLUE, width=1) )
+                    dc.SetPen(wx.Pen(HOVERED, width=1) )
                     dc.DrawRectangle(x+d[1]*s, y + d[2]*s  , d[3]*s+1, d[4]*s+1)
                 elif d[0] == 'arc1':
                     dc.SetPen(wx.Pen(self.color, width=d[7]+thick))
                     dc.DrawArc(x+d[1]*s, y+d[2]*s, x+d[3]*s, y+d[4]*s, x+d[5]*s, y+d[6]*s)
-                elif d[0] == 'tex1':
-                    pass
-                    # if 'Name' in elem.options:
-                        # dc.SetPen(wx.Pen(self.color, width=1))
-                        # dc.DrawLabel(elem.options['Name'], wx.Rect(x + s*d[1]-1, y+s*d[2]-1,2, 2), 
-                                     # alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
-                elif d[0] == 'tex2':
-                    pass
-                    # if 'Value' in elem.options:
-                        # dc.SetPen(wx.Pen(self.color, width=1))
-                        # dc.DrawLabel(elem.options['Value'], wx.Rect(x + s*d[1]-1, y+s*d[2]-1,2, 2), 
-                                     # alignment=wx.ALIGN_CENTER|wx.ALIGN_CENTER)
+
         if textPos:
             if 'Textorientation' in elem.options and 'Orientation' in elem.options:
                 option = elem.options['Textorientation']

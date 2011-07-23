@@ -32,6 +32,8 @@ class Texwizard:
             
             if name == 'wire':
                 curline += c(x) + c(ym-y) + c(x2) + c(ym-y2)
+            elif name == 'junct':
+                curline += c(x) + c(ym-y)
             elif name in ['resis', 'capac', 'induc', 'voltsrc', 'currsrc']:
                 curline += c(x) + c(ym-y)
                 curline += c(opt['Orientation'] + opt['Textorientation'])

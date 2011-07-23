@@ -252,8 +252,29 @@ class Wirepattern(Elementpattern):
         ne.name = 'wire'
         d = self.GetDrawlist(self.cur_options)
         return ne
-        
-        
+
+class Junctpattern(Elementpattern):
+    def __init__(self, dpattern):
+        Elementpattern.__init__(self, dpattern)
+
+        self.options.append(['LIST', 'Orientation', 'S'])
+        self.cur_options['Orientation'] = 'S'
+ 
+        self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
+        self.name = 'junct'
+    
+    def CreateElement(self, x, y, x2=0, y2=0):
+        ne = Element(x, y, x2, y2)
+        ne.pattern = self
+        ne.x = x
+        ne.y = y
+        ne.x2 = x2
+        ne.y2 = y2
+        d = self.GetDrawlist(self.cur_options)
+        if d[-1][0] == 'bbox':
+            ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
+        ne.options = copy.deepcopy(self.cur_options)
+        return ne
         
         
         

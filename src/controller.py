@@ -47,6 +47,7 @@ class Controller:
         self.ehandler.Readfile('capacitor')
         self.ehandler.Readfile('currsrc')
         self.ehandler.Readfile('inductor')
+        self.ehandler.Readfile('junct')
         
         #self.toDraw = None
         #self.toDrawOption = None
@@ -373,6 +374,12 @@ class Controller:
     def DrawCurrSrc(self, event = None):
         self.mode = 'INSERT'
         self.curPattern = self.main.pages[self.main.activePage].cursrcPattern
+        self.main.pages[self.main.activePage].ChangeActive()
+        self.UpdateCanvas() #improve!
+    
+    def DrawJunct(self, event = None):
+        self.mode = 'INSERT'
+        self.curPattern = self.main.pages[self.main.activePage].junctPattern
         self.main.pages[self.main.activePage].ChangeActive()
         self.UpdateCanvas() #improve!
 

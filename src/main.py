@@ -160,12 +160,16 @@ class PanelWires(SidePanel):
         SidePanel.__init__(self, parent, controller)
         
         self.wirePattern = Wirepattern()
+        self.junctPattern = Junctpattern(self.controller.ehandler.GetPattern('junct'))
         self.firstPattern = self.wirePattern
         self.curPattern = self.wirePattern
         
         self.wireButton = wx.Button(self, -1, 'Wire')
+        self.junctButton = wx.Button(self, -1, 'Junct')
         self.wireButton.Bind(wx.EVT_BUTTON, self.controller.DrawWire)
+        self.junctButton.Bind(wx.EVT_BUTTON, self.controller.DrawJunct)
         self.AddButton(self.wireButton)
+        self.AddButton(self.junctButton)
         
         self.SetSizer(self.mainsizer)
 
