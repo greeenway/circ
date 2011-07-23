@@ -71,8 +71,11 @@ class Controller:
         cur = page.GetProperty('Orientation')
         if cur == 'V':
             page.ChangeProperty('Orientation', 'H')
+            self.curPattern.ChangeOrientation('H')
         else:
             page.ChangeProperty('Orientation', 'V')
+            self.curPattern.ChangeOrientation('V')
+        page.ChangeActive()
         
         self.UpdateCanvas()
         

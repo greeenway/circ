@@ -31,9 +31,6 @@ class Elementpattern:
         """
     def UpdateSample(self):
         pass
-     
-    def ChangeOrientation(self, orientation):
-        pass
     
     def Rotate(self):
         if self.cur_options['Orientation'] is 'V':
@@ -59,6 +56,10 @@ class Elementpattern:
         newlist.extend(self.olists[orientation])
         self.options.remove(list)
         self.options.insert(i, newlist)
+        if self.cur_options['Textorientation']:
+            for o in self.options:
+                if o[1] == 'Textorientation':
+                    self.cur_options['Textorientation'] = o[2]
 
 class Resistorpattern(Elementpattern):
     def __init__(self, dpattern):
