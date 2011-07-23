@@ -24,7 +24,7 @@ class Propertyoption:
 
         else:
             self.input = wx.ComboBox(self.parent, value=list[0],
-                                     choices=list)
+                                     choices=list, style=wx.CB_READONLY)
             self.input.Bind(wx.EVT_COMBOBOX, self.OnHandleEvent)
         
         self.sizer.Add(self.label, 1, wx.EXPAND | wx.ALL)

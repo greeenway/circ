@@ -17,7 +17,8 @@ class Preview(wx.Window):
     Preview renders a preview of the Elements
     """
     def __init__(self, parent, controller):
-        wx.Window.__init__(self, parent, style=wx.NO_FULL_REPAINT_ON_RESIZE, size=wx.Size(WIDTH,HEIGHT))
+        wx.Window.__init__(self, parent, style=wx.NO_FULL_REPAINT_ON_RESIZE | wx.BORDER_RAISED,
+                           size=wx.Size(WIDTH,HEIGHT))
         self.SetDoubleBuffered(True)
         
         self.c = controller

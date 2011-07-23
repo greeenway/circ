@@ -49,22 +49,22 @@ class SidePanel(wx.Panel):
         self.prop = wx.FlexGridSizer(4, 2, 3, 10)
         self.prop.AddGrowableCol(1)
         self.mainsizer.Add(self.preview,0 ,
-            wx.SHAPED | wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL,
-            1)
+            wx.SHAPED | wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL | wx.TOP,
+            10)
         self.buttonsizer = wx.BoxSizer(wx.VERTICAL)
         self.mainsizer.Add(self.prop, 3, 
             wx.EXPAND | wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL\
             |wx.TOP | wx.LEFT |wx.RIGHT,
             border=10)
         
-        self.mainsizer.Add(self.buttonsizer, 5,
+        self.mainsizer.Add(self.buttonsizer, 4,
             wx.SHAPED | wx.ALIGN_CENTER_VERTICAL | wx.ALIGN_CENTER_HORIZONTAL,
-            5)
+            25)
         self.preview.OnSize()
 
     def AddButton(self, button):
         self.buttons.append(button)
-        self.buttonsizer.Add(button, 1, wx.SHAPED | wx.BOTTOM, 1)
+        self.buttonsizer.Add(button, 1, wx.SHAPED | wx.BOTTOM, 5)
 
 
     def ChangeActive(self):
@@ -150,8 +150,6 @@ class PanelSources(SidePanel):
         
         self.AddButton(self.voltsrcButton)
         self.AddButton(self.currsrcButton)
-        
-        
         
         self.SetSizer(self.mainsizer)
         
@@ -321,6 +319,7 @@ class Mainwindow(wx.Frame):
         self.activePage = event.GetSelection()
         self.controller.curPattern = self.pages[self.activePage].firstPattern
         self.pages[self.activePage].ChangeActive()
+        #self.mainsizer.Layout()
         self.controller.UpdateCanvas()
         
         

@@ -54,7 +54,10 @@ class Artist:
         oldcolor = self.color
         
         if dlist is 'wire':
-            if elem.selected or elem.hovered:
+            if preview:
+                dc.SetPen(wx.Pen((0,0,0), width=1))
+                dc.DrawLine(-4*s+px, py, 4*s+px, py)
+            elif elem.selected or elem.hovered:
                 if elem.selected:
                     dc.SetPen(wx.Pen(SELECTED, width=2))
                 else:
