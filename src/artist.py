@@ -197,10 +197,17 @@ class Artist:
                                          alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
                             dc.DrawLabel(value, wx.Rect(x + s*textPos['r2'][0]-1, y+s*textPos['r2'][1]-1,2, 2), 
                                          alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
-                        elif option == 'hl': #transistor bullshit
-                            print 'not implemented'
-                        elif option == 'hr': #transistor bullshit
-                            print 'not implemented'
+                        elif option == 'hl': 
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['l1'][0]-1, y+s*textPos['l1'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['l2'][0]-1, y+s*textPos['l2'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                            
+                        elif option == 'hr': 
+                            dc.DrawLabel(name, wx.Rect(x + s*textPos['r1'][0]-1, y+s*textPos['r1'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                            dc.DrawLabel(value, wx.Rect(x + s*textPos['r2'][0]-1, y+s*textPos['r2'][1]-1,2, 2), 
+                                         alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
 
                         if option in ['uc', 'ud', 'cd', 'lc', 'cl', 'rc', 'cr']:
                             text = name
@@ -261,6 +268,16 @@ class Artist:
                                             alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
                         dc.DrawLabel(value, wx.Rect(x + s*textPos['rc'][0]-1, y+s*textPos['rc'][1]-1,2, 2), 
                                             alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                    elif option == 'u':
+                        dc.DrawLabel(name, wx.Rect(x + s*textPos['l1'][0]-1, y+s*textPos['l1'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                        dc.DrawLabel(value, wx.Rect(x + s*textPos['r1'][0]-1, y+s*textPos['r1'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
+                    elif option == 'd': #exists?
+                        dc.DrawLabel(name, wx.Rect(x + s*textPos['l2'][0]-1, y+s*textPos['l2'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_RIGHT)
+                        dc.DrawLabel(value, wx.Rect(x + s*textPos['r2'][0]-1, y+s*textPos['r2'][1]-1,2, 2), 
+                                            alignment=wx.ALIGN_CENTER_VERTICAL|wx.ALIGN_LEFT)
                     else:
                         print option
                         print 'option not implemented'
@@ -268,11 +285,11 @@ class Artist:
                     #todo
                     if option == 'hl':
                         pass
+                    if option == 'hr':
+                        pass
                     if option == 'u':
                         pass
                     if option == 'd':
-                        pass
-                    if option == 'hr':
                         pass
   
                     

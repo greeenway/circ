@@ -12,88 +12,52 @@ class Texwizard:
     """
     def __init__(self, controller):
         self.c = controller
-        
 
     def GenerateCode(self):
-        code = ''
-        ymax = self.c.grid.y_size - 1
-            
+        lines = []
+        curline = ''
+        ym = self.c.grid.y_size - 1 
         
         for e in self.c.elements:
-            code += "\\" 
+            name = e.pattern.name
+            x = e.x
+            y = e.y
+            x2 = e.x2
+            y2 = e.y2
+            opt = e.options
+            c = lambda t: '{' + str(t) +'}'
             
-##            #TODO FIX GENERATION CODE...
-##            if e.pattern.name == 'wire':
-##                code += 'wire'
-##                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}{'
-##                code += str(e.x2) + '}{' + str(ymax - e.y2) + '}'
-## 
-##            if e.pattern.name == 'resis':
-##                code += 'resis'
-##                code += r'{'
-##                if e.options['Orientation'] == 'H':
-##                    code += str(e.x)
-##                if e.options['Orientation'] == 'V':
-##                    code += str(e.x)
-##                code += r'}'
-##                if e.options['Orientation'] == 'H':
-##                    code += '{' + str(ymax - e.y) + '}'
-##                if e.options['Orientation'] == 'V':
-##                    code += '{' + str(ymax - e.y) + '}'
-##                
-##                code += r'{' + e.options['Orientation'] + r'}'
-##                code += '{}{}'
-##                
-##            if e.pattern.name == 'capac':
-##                code += 'capac'
-##                code += r'{'
-##                if e.option == 'H':
-##                    code += str(e.x)
-##                if e.option == 'V':
-##                    code += str(e.x)
-##                code += r'}'
-##                if e.option == 'H':
-##                    code += '{' + str(ymax - e.y) + '}'
-##                if e.option == 'V':
-##                    code += '{' + str(ymax - e.y) + '}'
-##                code += r'{' + e.option + r'}'
-##                code += '{}{}'
-##              
-##            if e.pattern.name== 'voltsrc':
-##                code += r'voltsrc'
-##                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
-##                if e.option == 'H':
-##                    code += '{H}{}{}'
-##                else:
-##                    code += '{V}{}{}'
-##            
-##            if e.pattern.name == 'currsrc':
-##                code += r'currsrc'
-##                code += '{' + str(e.x) + '}{' + str(ymax - e.y) + '}'
-##                if e.option == 'H':
-##                    code += '{H}{}{}'
-##                else:
-##                    code += '{V}{}{}'
-                
- 
-            code += '\n'
+            curline = '\\'
+            curline += name
             
-            
-        #code += self.ending
+            if name == 'wire':
+                curline += c(x) + c(ym-y) + c(x2) + c(ym-y2)
+            elif name in ['resis', 'capac', 'induc', 'voltsrc', 'currsrc']:
+                curline += c(x) + c(ym-y)
+                curline += c(opt['Orientation'] + opt['Textorientation'])
+                curline += c(opt['Name'])
+                curline += c(opt['Value'])
+
+            lines.append(curline)
+    
+        code = ''
+        for line in lines:
+            code += line
+            code += '%\n'
         return code
         
     def PrintToFile(self, filename):
         f = open(filename, 'w')
         
-        code = r'\documentclass{article}' + '\n'
-        code += r'\usepackage{circdia}' + '\n'
-        code += r'\begin{document}' + '\n'
+        code = r'\documentclass{article}' + '%\n'
+        code += r'\usepackage{circdia}' + '%\n'
+        code += r'\begin{document}' + '%\n'
         code += r'\begin{circuitdiagram}[draft]{'
         code += str(self.c.grid.x_size) + '}{'
-        code += str(self.c.grid.y_size) + '}\n'
+        code += str(self.c.grid.y_size) + '}%\n'
         code += self.GenerateCode()
-        code += r'\end{circuitdiagram}' + '\n'
-        code += r'\end{document}' + '\n'
+        code += r'\end{circuitdiagram}' + '%\n'
+        code += r'\end{document}' + '%\n'
         f.write(code)
         f.close()
         
