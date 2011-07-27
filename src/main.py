@@ -252,8 +252,9 @@ class Mainwindow(wx.Frame):
         
         self.toolbar = wx.ToolBar(self, -1, style=wx.TB_VERTICAL)
         self.toolbar.AddLabelTool(ID_SELECT, 'Select', wx.Bitmap('../files/images/select.png'))
-        self.toolbar.AddLabelTool(ID_REMOVE_LAST, 'Back', wx.Bitmap('../files/images/back.png'))
-        self.toolbar.AddLabelTool(ID_REMOVE_SELECTED, 'Delete', wx.Bitmap('../files/images/delete.png'))
+        self.toolbar.AddLabelTool(ID_REMOVE_LAST, 'Back', wx.ArtProvider.GetBitmap(wx.ART_UNDO, wx.ART_TOOLBAR, (32,32)))#wx.Bitmap('../files/images/back.png'))
+        self.toolbar.AddLabelTool(ID_REMOVE_SELECTED, 'Delete',wx.ArtProvider.GetBitmap(wx.ART_DELETE, wx.ART_TOOLBAR, (32,32)))
+        #wx.ART_DELETE
         self.toolbar.Realize()
         self.Bind(wx.EVT_TOOL, self.controller.OnRemoveLast, id=ID_REMOVE_LAST)
         self.Bind(wx.EVT_TOOL, self.controller.DeleteSelectedElements, id=ID_REMOVE_SELECTED)

@@ -47,11 +47,11 @@ class Settingsframe(wx.Frame):
         self.c.grid.changeNodes(event.GetPosition(), 
                                 self.c.grid.y_size, self.c.grid.ndist)
         self.c.UpdateSize()
-        self.c.UpdateCanvas()
+        self.c.update_drawpanel()
     
     
     def OnYScroll(self, event):
         self.c.grid.changeNodes(self.c.grid.x_size,
                                 event.GetPosition(), self.c.grid.ndist)
         self.c.UpdateSize()
-        self.c.UpdateCanvas()
+        self.c.update_drawpanel()

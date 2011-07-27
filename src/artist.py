@@ -296,14 +296,27 @@ class Artist:
          
          
     def DrawNodes(self, dc, x, y):
-        dc.SetPen(wx.Pen("grey", width=1) )
+        #rename?
+        dc.SetPen(wx.Pen((220,220,240), width=1) )
         dc.SetBrush(wx.Brush(wx.Colour(255,255,255), wx.TRANSPARENT))
         s = self.c.grid.ndist
-        dc.SetPen(wx.Pen("black", width=1) )
-        for n in  self.c.grid.nodes:
-            #dc.DrawCircle( x + n.x * s, y + n.y*s, 1)
-            dc.DrawPoint( x + n.x * s, y + n.y*s)
-        #dc.SetPen(wx.Pen("black", width=2) )
+        w, h = dc.GetSize()
+        #dc.SetPen(wx.Pen("black", width=1) )
+        #for n in  self.c.grid.nodes:
+        #    #dc.DrawCircle( x + n.x * s, y + n.y*s, 1)
+        #    dc.DrawPoint( x + n.x * s, y + n.y*s)
+        ##dc.SetPen(wx.Pen("black", width=2) )
+        w-x
+        for i in range(x%s, w, s):
+            dc.DrawLine(i, 0, i, h) #draw lines
+        for i in range(y%s, h, s):
+            dc.DrawLine(0, i, w, i)
+        dc.SetPen(wx.Pen((200,200,240), width=2) ) 
+        dc.DrawRectangle(x, y, (self.c.grid.x_size-1) * s,
+                         (self.c.grid.y_size-1) * s  )
+                         
+
+        
         a = self.c.grid.an
         if a:
             dc.SetPen(wx.Pen(SELECTED, width=2) )

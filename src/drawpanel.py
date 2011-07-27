@@ -21,7 +21,7 @@ class Drawpanel(wx.Window):
     Drawpanel receives from the controller (elementhandler)
     """
     def __init__(self, parent, controller):
-        wx.Window.__init__(self, parent, style=wx.NO_FULL_REPAINT_ON_RESIZE)
+        wx.Window.__init__(self, parent, style=wx.NO_FULL_REPAINT_ON_RESIZE|wx.BORDER_RAISED)
         self.SetDoubleBuffered(True)
         
         self.c = controller

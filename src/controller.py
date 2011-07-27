@@ -9,6 +9,7 @@ from settings import Settings
 from artist import Artist
 from settingsframe import Settingsframe
 from grid import Grid
+from elementpattern import *
             
 import wx
 
@@ -31,6 +32,7 @@ class Controller:
         self.curPattern = None
         self.mode = 'SELECT'
         self.lastSize = None
+        self.patterns = {}
         self.selectionBox = [4, 5, 10, 12]
         
         #link
@@ -49,8 +51,33 @@ class Controller:
         self.ehandler.Readfile('inductor')
         self.ehandler.Readfile('junct')
         
-        #self.toDraw = None
-        #self.toDrawOption = None
+        self.init_patterns()
+        
+    def init_patterns(self):
+        getP = self.ehandler.GetPattern
+        self.patterns['Resistor'] = Resistorpattern(getP('resistor'))
+        self.patterns['Capacitor'] = Capacitorpattern(getP('capacitor'))
+        self.patterns['Inductor'] = Inductorpattern(getP('inductor'))
+        self.patterns['CurrentSource'] = Currentsourcepattern(getP('currsrc'))
+        self.patterns['VoltageSource'] = Voltagesourcepattern(getP('voltsrc'))
+        self.patterns['Wire'] = Wirepattern()
+        self.curPattern = self.patterns['Resistor']
+    
+    def change_patterns(self, newname):
+        if newname in self.patterns:
+            self.curPattern = self.patterns[newname]
+            self.update_preview()
+            self.update_drawpanel()
+    
+    def update_drawings(self):
+        self.update_preview()
+        self.update_drawpanel()
+    
+    def update_preview(self):
+        self.main.configpanel.update_preview()
+    
+    def update_drawpanel(self):
+        self.main.drawpanel.UpdateDrawing()
         
     def PrintLog(self):
         res = ''
@@ -79,21 +106,25 @@ class Controller:
         page.ChangeActive()
         
         self.UpdateCanvas()
+        self.update_drawings()
         
         
     
     def OnLeftClick(self, event):
         an = self.grid.an
         ln = self.grid.ln
-        
+        print 'LEFTCLICK'
         if an is None:
+            print 'NONE'
             return
         if self.mode == 'INSERT':
+            print 'INSERT'
             if self.curPattern is not None:
                 if self.curPattern.special is None:
+                    print self.curPattern.name
                     elem = self.curPattern.CreateElement(an.x, an.y, x2 = 0, y2 = 0)
                     self.elements.append(elem)
-                    
+                    print len(self.elements)
                 if self.curPattern.special is 'wire':
                     if ln is None:
                         self.grid.ln = an
@@ -105,6 +136,7 @@ class Controller:
             found = self.SelectWires(event.GetX(), event.GetY())
             if found:
                 self.UpdateCanvas()
+                self.update_drawings()
                 return
             
             for e in self.elements:
@@ -113,6 +145,7 @@ class Controller:
                         e.selected = not e.selected
                        
                         self.UpdateCanvas()
+                        self.update_drawings()
                         return
         
         
@@ -121,6 +154,7 @@ class Controller:
         self.mode = 'SELECTBOX'
         self.selectionBox = [self.grid.an.x, self.grid.an.y, self.grid.an.x+1, self.grid.an.y+1]
         self.UpdateCanvas()
+        self.update_drawings()
 
     
     
@@ -197,6 +231,7 @@ class Controller:
             self.mode = 'SELECT'
             self.selectionBox = None
             self.UpdateCanvas()
+            self.update_drawings()
             return
             
         if self.curPattern is not None:
@@ -212,6 +247,7 @@ class Controller:
                     self.elements.append(elem)
                     self.grid.ln = None
                     self.UpdateCanvas()
+                    self.update_drawings()
                 
                 
         
@@ -224,6 +260,7 @@ class Controller:
                     
                     e.selected = not e.selected
                     self.UpdateCanvas()
+                    self.update_drawings()
          
         
 
@@ -241,12 +278,14 @@ class Controller:
     def OnMouseOver(self, event):
         if self.grid.findActiveNode(event.GetX(), event.GetY()):
             self.UpdateCanvas()
+            self.update_drawings()
         for e in self.elements:
             e.hovered = False
         if self.mode == 'SELECT':
             found = self.SelectWires(event.GetX(), event.GetY(), 'hover')
             if found:
                 self.UpdateCanvas()
+                self.update_drawings()
                 return
             
             for e in self.elements:
@@ -255,6 +294,7 @@ class Controller:
                         if not e.selected:
                             e.hovered = True
                             self.UpdateCanvas()
+                            self.update_drawings()
                             return
                             
         if self.mode == 'SELECTBOX':
@@ -275,6 +315,7 @@ class Controller:
                         if e.x > x1 and e.y > y1 and e.x2 < x2 and e.y2 < y2:
                             e.hovered = True 
                 self.UpdateCanvas()
+                self.update_drawings()
         
     def OnAbout(self, event):
         dlg = wx.MessageDialog(self.main, 'CIRC \n a GUI frontend for circdia.sty\t\n' '2011-\t', 'About',wx.OK | wx.ICON_INFORMATION)
@@ -295,11 +336,12 @@ class Controller:
         else:
             self.grid.ndist -= 1
         self.UpdateSize()
-        self.UpdateCanvas()
+        self.update_drawings()
         
     
     def OnSelect(self, event=None):
         self.mode = 'SELECT'
+        self.curPattern = None
         
     def OnWriteCodeToFile(self, event):
         print self.t.GenerateCode()
@@ -307,7 +349,7 @@ class Controller:
 
     def OnToggleBoundingBox(self, event):
         self.settings.drawboundingbox = not self.settings.drawboundingbox 
-        self.UpdateCanvas()
+        self.update_drawings()
     
     def DeleteSelectedElements(self, event=None):
         new = []
@@ -315,12 +357,13 @@ class Controller:
             if not e.selected:
                 new.append(e)
         self.elements = new
-        self.UpdateCanvas()
+        self.update_drawings()
     
     def OnRemoveLast(self, event=None):
         if len(self.elements) > 0:
             self.elements.pop()
-        self.UpdateCanvas()
+        self.update_drawings()
+        print 'remove last'
     
     def UpdateSize(self, event = None):   
         if event:
@@ -389,11 +432,11 @@ class Controller:
             self.curPattern.sample = self.curPattern.CreateElement(0, 0, x2 = 0, y2 = 0)
     
     def UpdateCanvas(self):
-        
-        self.main.drawpanel.UpdateDrawing()
+        pass
+        #self.main.drawpanel.UpdateDrawing()
         
         #maybe optimize this:
-        self.main.pages[self.main.activePage].preview.UpdateDrawing()
+        #self.main.pages[self.main.activePage].preview.UpdateDrawing()
         
     def OnSettings(self, event=None):
         s = Settingsframe(self.main, self)
