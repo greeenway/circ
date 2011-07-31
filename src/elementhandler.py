@@ -22,6 +22,7 @@ class Elementhandler:
         self.ext = '.sym'
         wire = Drawingpattern('wire')
         wire.options['wire'] = True
+        
     
     def Readfile(self, filename):
         try:

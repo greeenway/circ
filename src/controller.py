@@ -7,10 +7,15 @@ from texwizard import Texwizard
 from elementhandler import Elementhandler
 from settings import Settings
 from artist import Artist
+from artist import HOVERED
+from artist import SELECTED
+from artist import INSERT #move colors to single config file.
 from settingsframe import Settingsframe
 from grid import Grid
 from elementpattern import *
-            
+
+import copy
+
 import wx
 
 class Controller:
@@ -18,25 +23,30 @@ class Controller:
     The Controller class is the applications's 'workhorse'.
     All Events are routed to this class and needed informations is
     stored here. Contains lots of event handlers and code to change
+
     what is effictivly drawn to the Drawpanel.
     """
     def __init__(self, main):
+        
+        #link
+        self.main = main
+        
         self.elements = []
         #helper classes
         
         self.ehandler = Elementhandler()
         self.settings = Settings()
         self.t = Texwizard(self)
-        self.grid = Grid(x_size=30, y_size=30, nodedistance=13, x=20, y=20)
+        self.grid = Grid(x_size=30, y_size=30, nodedistance=15, x=20, y=20)
         self.artist = Artist(self)
         self.curPattern = None
         self.mode = 'SELECT'
+        
         self.lastSize = None
         self.patterns = {}
         self.selectionBox = [4, 5, 10, 12]
         
-        #link
-        self.main = main
+        
         
         self.log = []
         
@@ -60,8 +70,48 @@ class Controller:
         self.patterns['Inductor'] = Inductorpattern(getP('inductor'))
         self.patterns['CurrentSource'] = Currentsourcepattern(getP('currsrc'))
         self.patterns['VoltageSource'] = Voltagesourcepattern(getP('voltsrc'))
+        self.patterns['Junction'] = Junctpattern(getP('junct'))
         self.patterns['Wire'] = Wirepattern()
-        self.curPattern = self.patterns['Resistor']
+        self.curPattern = None
+    
+    def on_searchbar_change(self, event):
+        """
+        interactive searching of the element tree,
+        crashes on non ascii chars...
+        """
+        term = str(self.main.configpanel.searchbar.GetValue())
+        tree =  self.main.configpanel.tree
+        nodes = tree.nodeHash
+        keywords = nodes.keys()
+        results = {}
+    
+        for k in keywords:
+            if k.lower().rfind(term.lower()) >= 0:
+                s1 = set(term.lower())
+                s2 = set(k.lower())
+                matches = str(len(s1 & s2))
+                results[matches] = k
+        
+        if results:
+            name = results[max(results.keys())]
+            tree.CollapseAll()
+            tree.SelectItem(nodes[name])
+            tree.Expand(nodes[name])
+
+                    
+    
+    def change_mode(self, newmode):
+        self.mode = newmode
+        sb = self.main.statusbar
+        sb.SetStatusText('mode: ' + str(newmode), 1)
+        if newmode == 'SELECTBOX':
+            sb.SetBackgroundColour(HOVERED)
+        elif newmode == 'SELECT':
+            sb.SetBackgroundColour(SELECTED)
+        elif newmode == 'INSERT':
+            sb.SetBackgroundColour(INSERT)
+        else:
+            sb.SetBackgroundColour(self.main.sbColor)
     
     def change_patterns(self, newname):
         if newname in self.patterns:
@@ -95,17 +145,15 @@ class Controller:
             if e.selected:
                 e.Rotate()
         
-        page = self.main.pages[self.main.activePage]
-        cur = page.GetProperty('Orientation')
+        prop = self.main.configpanel.propExplorer
+        cur = prop.GetProperty('Orientation')
         if cur == 'V':
-            page.ChangeProperty('Orientation', 'H')
+            prop.ChangeProperty('Orientation', 'H')
             self.curPattern.ChangeOrientation('H')
         else:
-            page.ChangeProperty('Orientation', 'V')
+            prop.ChangeProperty('Orientation', 'V')
             self.curPattern.ChangeOrientation('V')
-        page.ChangeActive()
-        
-        self.UpdateCanvas()
+        prop.ChangeActive()
         self.update_drawings()
         
         
@@ -113,29 +161,23 @@ class Controller:
     def OnLeftClick(self, event):
         an = self.grid.an
         ln = self.grid.ln
-        print 'LEFTCLICK'
         if an is None:
-            print 'NONE'
             return
         if self.mode == 'INSERT':
-            print 'INSERT'
             if self.curPattern is not None:
                 if self.curPattern.special is None:
-                    print self.curPattern.name
+                    #print self.curPattern.name
                     elem = self.curPattern.CreateElement(an.x, an.y, x2 = 0, y2 = 0)
                     self.elements.append(elem)
-                    print len(self.elements)
+                    
                 if self.curPattern.special is 'wire':
                     if ln is None:
                         self.grid.ln = an
                 return
                  
         elif self.mode == 'SELECT':
-            #wires = [elem for elem in self.elements if elem.name == 'wire']
-            #print len(wires)
             found = self.SelectWires(event.GetX(), event.GetY())
             if found:
-                self.UpdateCanvas()
                 self.update_drawings()
                 return
             
@@ -143,17 +185,17 @@ class Controller:
                 if e.bbox is not None:
                     if self.IsInBoundingBox(event.GetX(), event.GetY(), e.bbox):
                         e.selected = not e.selected
-                       
-                        self.UpdateCanvas()
+                        if e.selected:
+                            self.change_patterns(e.name)
+                            #TODO option to change option of selected.
                         self.update_drawings()
                         return
         
         
         
         #start
-        self.mode = 'SELECTBOX'
+        self.change_mode('SELECTBOX')
         self.selectionBox = [self.grid.an.x, self.grid.an.y, self.grid.an.x+1, self.grid.an.y+1]
-        self.UpdateCanvas()
         self.update_drawings()
 
     
@@ -228,9 +270,8 @@ class Controller:
                         e.selected = True 
             
             
-            self.mode = 'SELECT'
+            self.change_mode('SELECT')
             self.selectionBox = None
-            self.UpdateCanvas()
             self.update_drawings()
             return
             
@@ -246,23 +287,20 @@ class Controller:
                     #elem.selected = True
                     self.elements.append(elem)
                     self.grid.ln = None
-                    self.UpdateCanvas()
                     self.update_drawings()
                 
                 
         
     def OnRightClick(self, event):
         if self.mode == 'SELECTBOX':
-            self.mode = 'SELECT'
+            self.change_mode('SELECT')
         for e in self.elements:
             if e.bbox is not None:
                 if self.IsInBoundingBox(event.GetX(), event.GetY(), e.bbox):
                     
                     e.selected = not e.selected
-                    self.UpdateCanvas()
                     self.update_drawings()
          
-        
 
     def IsInBoundingBox(self, x, y, bbox):
         b = bbox
@@ -277,14 +315,12 @@ class Controller:
         
     def OnMouseOver(self, event):
         if self.grid.findActiveNode(event.GetX(), event.GetY()):
-            self.UpdateCanvas()
             self.update_drawings()
         for e in self.elements:
             e.hovered = False
         if self.mode == 'SELECT':
             found = self.SelectWires(event.GetX(), event.GetY(), 'hover')
             if found:
-                self.UpdateCanvas()
                 self.update_drawings()
                 return
             
@@ -293,7 +329,6 @@ class Controller:
                     if self.IsInBoundingBox(event.GetX(), event.GetY(), e.bbox):
                         if not e.selected:
                             e.hovered = True
-                            self.UpdateCanvas()
                             self.update_drawings()
                             return
                             
@@ -314,7 +349,6 @@ class Controller:
                     if e.name is 'wire':
                         if e.x > x1 and e.y > y1 and e.x2 < x2 and e.y2 < y2:
                             e.hovered = True 
-                self.UpdateCanvas()
                 self.update_drawings()
         
     def OnAbout(self, event):
@@ -340,7 +374,7 @@ class Controller:
         
     
     def OnSelect(self, event=None):
-        self.mode = 'SELECT'
+        self.change_mode('SELECT')
         self.curPattern = None
         
     def OnWriteCodeToFile(self, event):
@@ -363,7 +397,6 @@ class Controller:
         if len(self.elements) > 0:
             self.elements.pop()
         self.update_drawings()
-        print 'remove last'
     
     def UpdateSize(self, event = None):   
         if event:
@@ -382,61 +415,12 @@ class Controller:
             self.grid.x = w_b/2
         if w_h/2 > 0:
             self.grid.y = w_h/2
-    
-    def DrawWire(self, event = None):
-        self.mode = 'INSERT'
-        self.curPattern = self.main.pages[self.main.activePage].wirePattern
-        self.main.pages[self.main.activePage].ChangeActive()
-        self.UpdateCanvas() #improve!
-        
-    def DrawResistor(self, event= None):
-        self.mode = 'INSERT'
-        self.curPattern = self.main.pages[self.main.activePage].resistorPattern
-        self.main.pages[self.main.activePage].ChangeActive()
-        self.UpdateCanvas() #improve!
-    
-    def DrawInductor(self, event=None):
-        self.mode = 'INSERT'
-        self.curPattern = self.main.pages[self.main.activePage].inductorPattern
-        self.main.pages[self.main.activePage].ChangeActive()
-        self.UpdateCanvas() #improve!
-        
-    def DrawVoltSrc(self, event = None):
-        self.mode = 'INSERT'
-        self.curPattern = self.main.pages[self.main.activePage].vltsrcPattern
-        self.main.pages[self.main.activePage].ChangeActive()
-        self.UpdateCanvas() #improve!
-        
-    
-    def DrawCapacitor(self, event = None):
-        self.mode = 'INSERT'
-        self.curPattern = self.main.pages[self.main.activePage].capacitorPattern
-        self.main.pages[self.main.activePage].ChangeActive()
-        self.UpdateCanvas() #improve!
-    
-    def DrawCurrSrc(self, event = None):
-        self.mode = 'INSERT'
-        self.curPattern = self.main.pages[self.main.activePage].cursrcPattern
-        self.main.pages[self.main.activePage].ChangeActive()
-        self.UpdateCanvas() #improve!
-    
-    def DrawJunct(self, event = None):
-        self.mode = 'INSERT'
-        self.curPattern = self.main.pages[self.main.activePage].junctPattern
-        self.main.pages[self.main.activePage].ChangeActive()
-        self.UpdateCanvas() #improve!
 
     def SetOption(self, name, value):
         if self.curPattern is not None:
             self.curPattern.cur_options[name] = value
             self.curPattern.sample = self.curPattern.CreateElement(0, 0, x2 = 0, y2 = 0)
     
-    def UpdateCanvas(self):
-        pass
-        #self.main.drawpanel.UpdateDrawing()
-        
-        #maybe optimize this:
-        #self.main.pages[self.main.activePage].preview.UpdateDrawing()
         
     def OnSettings(self, event=None):
         s = Settingsframe(self.main, self)

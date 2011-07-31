@@ -2,6 +2,6 @@
 #line x1 y1 x2 y2 strength
 #circ x y r strength filled
 S=Standard:
-circ(0, 0, 0.3, 1, 1)
+circ(0, 0, 0.2, 1, 1)
 bbox(-0.5, -0.5, 1, 1)
 

@@ -9,7 +9,7 @@ from geometry import Rectangle
 import copy
 
 class Elementpattern:
-    def __init__(self, dpattern):
+    def __init__(self, dpattern=None):
         if dpattern is not None:
             self.name = dpattern.name
             self.doptions = dpattern.options #hash
@@ -24,13 +24,26 @@ class Elementpattern:
         self.sample = None
         self.olists = {}
         
-    
-    def CreateElement(self):
-        """
-        Creates an element, with the current configuration 
-        """
-    def UpdateSample(self):
-        pass
+    def CreateElement(self, x, y, x2 = 0, y2 = 0):
+        ne = Element(x, y, x2, y2)
+        ne.x = x
+        ne.y = y
+        ne.x2 = x2
+        ne.y2 = y2
+        return ne
+        
+    def CreateElementWithBbox(self, ne):
+        """used to create elements (wirepattern is different) """
+        ne.pattern = self
+        d = self.GetDrawlist(self.cur_options)
+        if d[-1][0] == 'bbox':
+            ne.bbox = Rectangle(ne.x+d[-1][1], ne.y+ d[-1][2], d[-1][3], d[-1][4])
+        ne.options = copy.deepcopy(self.cur_options)
+        return ne
+        
+        
+    #def UpdateSample(self):
+    #    pass
     
     def Rotate(self):
         if self.cur_options['Orientation'] is 'V':
@@ -39,14 +52,13 @@ class Elementpattern:
             self.cur_options['Orientation'] = 'V'
         
     def GetDrawlist(self, options):
-        # append text directives here (to the returned object)
         if self.special is not None:
             if self.special is 'wire':
                 return 'wire'
         
         return self.doptions[options['Orientation']]
     
-    def ChangeOrientation(self, orientation): #make this global for all patterns
+    def ChangeOrientation(self, orientation):
         newlist = []
         for i, list in enumerate(self.options):
             if list[1] == 'Textorientation':
@@ -67,10 +79,11 @@ class Resistorpattern(Elementpattern):
         self.olists['H'] = ['ud', 'u', 'uu', 'c', 'd', 'dd', 
                             'l', 'uc', 'ud', 'cd', 'r', 'lc', 'cl', 'rc', 'cr', 'hu', 'hd']
         self.olists['V'] = ['l', 'r', 'lr']
+        
         self.options.append(['LIST', 'Orientation', 'H','V'])
-        l = ['LIST', 'Textorientation']
-        l.extend(self.olists['H'])
-        self.options.append(l)
+        self.options.append(['LIST', 'Textorientation'])
+        self.options[1].extend(self.olists['H'])
+        
         self.options.append(['TEXT', 'Name', 'R1'])
         self.options.append(['TEXT', 'Value', '100k'])
         
@@ -79,26 +92,17 @@ class Resistorpattern(Elementpattern):
         self.cur_options['Textorientation'] = 'ud'
         self.cur_options['Name'] = 'R'
         self.cur_options['Value'] = '100k'
-        self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
+        self.sample = self.CreateElement(0, 0)
         self.name = 'resis'
-
                 
     
-    def UpdateSample(self):
-        self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
+    #def UpdateSample(self):
+    #    self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
     
     def CreateElement(self, x, y, x2 = 0, y2 = 0):
-        ne = Element(x, y, x2, y2)
-        ne.pattern = self
-        ne.x = x
-        ne.y = y
-        ne.x2 = x2
-        ne.y2 = y2
-        d = self.GetDrawlist(self.cur_options)
-        if d[-1][0] == 'bbox':
-            ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
-        ne.options = copy.deepcopy(self.cur_options)
-        return ne
+        ne = Elementpattern.CreateElement(self, x, y, x2, y2)
+        return Elementpattern.CreateElementWithBbox(self, ne)
+
         
 class Capacitorpattern(Elementpattern):
     def __init__(self, dpattern):
@@ -107,9 +111,8 @@ class Capacitorpattern(Elementpattern):
                             'l', 'uc', 'ud', 'cd', 'r', 'lc', 'cl', 'rc', 'cr', 'hu', 'hd']
         self.olists['V'] = ['r', 'l', 'u', 'd']
         self.options.append(['LIST', 'Orientation', 'H','V'])
-        l = ['LIST', 'Textorientation']
-        l.extend(self.olists['H'])
-        self.options.append(l)
+        self.options.append(['LIST', 'Textorientation'])
+        self.options[1].extend(self.olists['H'])
         
         self.options.append(['TEXT', 'Name', 'C1'])
         self.options.append(['TEXT', 'Value', '33n'])
@@ -122,17 +125,8 @@ class Capacitorpattern(Elementpattern):
         self.name = 'capac'
     
     def CreateElement(self, x, y, x2 = 0, y2 = 0):
-        ne = Element(x, y, x2, y2)
-        ne.pattern = self
-        ne.x = x
-        ne.y = y
-        ne.x2 = x2
-        ne.y2 = y2
-        d = self.GetDrawlist(self.cur_options)
-        if d[-1][0] == 'bbox':
-            ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
-        ne.options = copy.deepcopy(self.cur_options)
-        return ne
+        ne = Elementpattern.CreateElement(self, x, y, x2, y2)
+        return Elementpattern.CreateElementWithBbox(self, ne)
 
 class Inductorpattern(Elementpattern):
     def __init__(self, dpattern):
@@ -141,9 +135,8 @@ class Inductorpattern(Elementpattern):
                             'l', 'ud', 'r','hu', 'hd']
         self.olists['V'] = ['l', 'r', 'lr']
         self.options.append(['LIST', 'Orientation', 'H','V'])
-        l = ['LIST', 'Textorientation']
-        l.extend(self.olists['H'])
-        self.options.append(l)
+        self.options.append(['LIST', 'Textorientation'])
+        self.options[1].extend(self.olists['H'])
         
         self.options.append(['TEXT', 'Name', 'L1'])
         self.options.append(['TEXT', 'Value', '100 mH'])
@@ -155,17 +148,8 @@ class Inductorpattern(Elementpattern):
         self.name = 'induc'
     
     def CreateElement(self, x, y, x2 = 0, y2 = 0):
-        ne = Element(x, y, x2, y2)
-        ne.pattern = self
-        ne.x = x
-        ne.y = y
-        ne.x2 = x2
-        ne.y2 = y2
-        d = self.GetDrawlist(self.cur_options)
-        if d[-1][0] == 'bbox':
-            ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
-        ne.options = copy.deepcopy(self.cur_options)
-        return ne
+        ne = Elementpattern.CreateElement(self, x, y, x2, y2)
+        return Elementpattern.CreateElementWithBbox(self, ne)
         
 class Voltagesourcepattern(Elementpattern):
     def __init__(self, dpattern):
@@ -174,9 +158,8 @@ class Voltagesourcepattern(Elementpattern):
                             'l', 'uc', 'ud', 'cd', 'r', 'lc', 'cl', 'rc', 'cr', 'hu', 'hd']
         self.olists['V'] = ['l', 'r', 'lr']
         self.options.append(['LIST', 'Orientation', 'H','V'])
-        l = ['LIST', 'Textorientation']
-        l.extend(self.olists['H'])
-        self.options.append(l)
+        self.options.append(['LIST', 'Textorientation'])
+        self.options[1].extend(self.olists['H'])
         
         self.options.append(['TEXT', 'Name', 'Uq'])
         self.options.append(['TEXT', 'Value', '5 V'])
@@ -188,17 +171,8 @@ class Voltagesourcepattern(Elementpattern):
         self.name = 'voltsrc'
     
     def CreateElement(self, x, y, x2 = 0, y2 = 0):
-        ne = Element(x, y, x2, y2)
-        ne.pattern = self
-        ne.x = x
-        ne.y = y
-        ne.x2 = x2
-        ne.y2 = y2
-        d = self.GetDrawlist(self.cur_options)
-        if d[-1][0] == 'bbox':
-            ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
-        ne.options = copy.deepcopy(self.cur_options)
-        return ne
+        ne = Elementpattern.CreateElement(self, x, y, x2, y2)
+        return Elementpattern.CreateElementWithBbox(self, ne)
         
 class Currentsourcepattern(Elementpattern):
     def __init__(self, dpattern):
@@ -206,10 +180,9 @@ class Currentsourcepattern(Elementpattern):
         self.olists['H'] = ['ud', 'u', 'uu', 'c', 'd', 'dd', 
                             'l', 'uc', 'ud', 'cd', 'r', 'lc', 'cl', 'rc', 'cr', 'hu', 'hd']
         self.olists['V'] = ['l', 'r', 'lr']
-        self.options.append(['LIST', 'Orientation', 'H','V'])
-        l = ['LIST', 'Textorientation']
-        l.extend(self.olists['H'])
-        self.options.append(l)
+        self.options.append(['LIST', 'Orientation', 'H', 'V'])
+        self.options.append(['LIST', 'Textorientation'])
+        self.options[1].extend(self.olists['H'])
         
         self.options.append(['TEXT', 'Name', 'Iq'])
         self.options.append(['TEXT', 'Value', '2 A'])
@@ -221,23 +194,12 @@ class Currentsourcepattern(Elementpattern):
         self.name = 'currsrc'
     
     def CreateElement(self, x, y, x2 = 0, y2 = 0):
-        ne = Element(x, y, x2, y2)
-        ne.pattern = self
-        ne.x = x
-        ne.y = y
-        ne.x2 = x2
-        ne.y2 = y2
-        d = self.GetDrawlist(self.cur_options)
-        if d[-1][0] == 'bbox':
-            ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
-        ne.options = copy.deepcopy(self.cur_options)
-        return ne
+        ne = Elementpattern.CreateElement(self, x, y, x2, y2)
+        return Elementpattern.CreateElementWithBbox(self, ne)
         
 class Wirepattern(Elementpattern):
     def __init__(self):
         Elementpattern.__init__(self, None)
-        #self.options.append(['LIST', 'Orientation', 'H','V'])
-        #self.cur_options['Value'] = '2 A'
         self.sample = self.CreateElement(0, 0, 10, 0)
         self.name = 'wire'
     
@@ -257,24 +219,15 @@ class Junctpattern(Elementpattern):
     def __init__(self, dpattern):
         Elementpattern.__init__(self, dpattern)
 
-        self.options.append(['LIST', 'Orientation', 'S'])
+        #self.options.append(['LIST', 'Orientation', 'S']) #remove?
         self.cur_options['Orientation'] = 'S'
  
         self.sample = self.CreateElement(0, 0, x2 = 0, y2 = 0)
         self.name = 'junct'
     
-    def CreateElement(self, x, y, x2=0, y2=0):
-        ne = Element(x, y, x2, y2)
-        ne.pattern = self
-        ne.x = x
-        ne.y = y
-        ne.x2 = x2
-        ne.y2 = y2
-        d = self.GetDrawlist(self.cur_options)
-        if d[-1][0] == 'bbox':
-            ne.bbox = Rectangle(x+d[-1][1], y+ d[-1][2], d[-1][3], d[-1][4])
-        ne.options = copy.deepcopy(self.cur_options)
-        return ne
+    def CreateElement(self, x, y, x2 = 0, y2 = 0):
+        ne = Elementpattern.CreateElement(self, x, y, x2, y2)
+        return Elementpattern.CreateElementWithBbox(self, ne)
         
         
         

@@ -6,6 +6,7 @@ import wx
 
 HOVERED = (0, 255, 0)#(255, 250, 170)
 SELECTED = (255, 204, 0)
+INSERT = (58, 113, 255)
 
 class Artist:
     """

@@ -46,13 +46,13 @@ class Propertyoption:
             
     
     def OnHandleEvent(self, event=None):
-
         self.value = self.input.GetValue()
         self.c.SetOption(self.name, self.input.GetValue())
         if self.name == 'Orientation':
+            
             self.c.curPattern.ChangeOrientation(str(self.input.GetValue()))
             self.c.main.configpanel.update_properties()
-        self.c.UpdateCanvas()
+            
         
         
         
